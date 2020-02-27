@@ -1,0 +1,49 @@
+- name: Install airhorn
+  hosts: courgettes-debian
+  vars:
+    destination: '/home/{{ansible_user}}/gits/airhorn'
+    nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
+    default_port: "8000"
+    deploy_port: "8001"
+  tasks:
+    - name: Pull git
+      git:
+        repo: 'https://github.com/ymaktepi/airhorn.club.git'
+        dest: '{{ destination }}'
+    - name: Copy config file
+      shell: |
+          cp docker-compose-example.yml docker-compose
+          # sed s/{{default_port}}/{{deploy_port}}/g docker-compose-example.yml > docker-compose.yml
+      args: 
+        chdir: '{{ destination }}'
+    # Not using the docker_compose module because it requires the python package installed on the host
+    - name: Change ports in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: '{{default_port}}'
+        replace: '{{deploy_port}}'
+    - name: Launch container
+      shell: |
+          docker-compose -f docker-compose.yml up -d
+      args: 
+        chdir: '{{ destination }}'
+    - name: Create proxy to aihorn.courgettes.club
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh airhorn.courgettes.club http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'nichuguen@gmail.com'
+          chdir: '{{ nginx_proxy_location }}'
+    - name: Create proxy to airhorn.wav.courgettes.club
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh airhorn.wav.courgettes.club http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'nichuguen@gmail.com'
+          chdir: '{{ nginx_proxy_location }}'

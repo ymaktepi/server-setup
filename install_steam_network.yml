@@ -1,0 +1,38 @@
+- name: Install SteamNetwork
+  hosts: courgettes-debian
+  vars:
+    destination: '/home/{{ansible_user}}/gits/steam-network'
+    nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
+    default_port: "8008"
+    deploy_port: "8002"
+  tasks:
+    - name: Pull git
+      git:
+        repo: 'https://github.com/ymaktepi/WEM-Project.git'
+        dest: '{{ destination }}'
+        # we modify config therefore have to force pull
+        force: yes
+    - name: Change ports in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: '{{default_port}}'
+        replace: '{{deploy_port}}'
+    # Not using the docker_compose module because it requires the python package installed on the host
+    - name: Launch container
+      shell: |
+        cp application/.env-example application/.env
+        python setup.py sdist
+        cp dist/*.tar.gz application/
+        docker-compose up -d
+      args: 
+        chdir: '{{ destination }}'
+    - name: Create proxy to ctf.courgettes.club
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh ctf.courgettes.club http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'nichuguen@gmail.com'
+          chdir: '{{ nginx_proxy_location }}'

@@ -1,0 +1,8 @@
+- sshd_config
+    - disable empty password
+    - disable passwords
+- start nginx
+- install TS (copy docker-stuff)
+- install airhorn
+- install ctftime
+- install steam

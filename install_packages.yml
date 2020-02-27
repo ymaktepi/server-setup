@@ -1,0 +1,21 @@
+- name: Install packages
+  become: true
+  become_method: sudo
+  hosts: courgettes-debian
+  tasks:
+    - name: Install packages
+      apt:
+        pkg:
+        - git
+        - docker
+        - docker-compose
+        - nginx
+        - certbot
+        - python-pip
+          #    - ufw
+    - name: start nginx
+      service:
+          name: nginx
+          state: started
+    - name: install pexpect
+      shell: python -m pip install pexpect --user

@@ -20,7 +20,13 @@
     # Not using the docker_compose module because it requires the python package installed on the host
     - name: Launch container
       shell: |
+        set -e
         cp application/.env-example application/.env
+        cd save
+        gunzip ctftime_docs_1493991150.p.gz
+        cd ../index
+        tar -zxvf archive.tar.gz
+        cd ..
         python setup.py sdist
         cp dist/*.tar.gz application/
         docker-compose up -d

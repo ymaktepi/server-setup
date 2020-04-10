@@ -1,5 +1,5 @@
 - sshd_config (manually done now but hey)
     - disable empty password
     - disable passwords
+    - ...
 - install TS (copy docker-stuff)
-- install steam

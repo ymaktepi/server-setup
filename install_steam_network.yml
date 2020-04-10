@@ -3,34 +3,65 @@
   vars:
     destination: '/home/{{ansible_user}}/gits/steam-network'
     nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
-    default_port: "8008"
-    deploy_port: "8002"
+    default_port: "8000"
+    deploy_port: "8007"
+    STEAM_API_KEY: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      38653063313435626533653738633833666366643739616664613763646130313030653461663531
+      6462373033393864643939383634656165663361383731660a373164363236323264383562303937
+      35643661343261633530613130383566386134326537653537333434633534336234666365363230
+      3336316333646332340a393863636531633231326662306639626537323933323639366131376539
+      61333666653931336331373863363737393834333962376239393731346230643938616135633065
+      6461633530626464393832616466396433356532313335613862
   tasks:
     - name: Pull git
       git:
-        repo: 'https://github.com/ymaktepi/WEM-Project.git'
+        repo: 'https://github.com/ymaktepi/SteamNetwork.git'
         dest: '{{ destination }}'
         # we modify config therefore have to force pull
         force: yes
+    - name: Prepare configs
+      shell: |
+        cp docker-compose-example.yml docker-compose.yml
+        cp application/.env-example application/.env
+      args:
+        chdir: '{{ destination }}'
     - name: Change ports in config
       replace:
         path: '{{destination}}/docker-compose.yml'
         regexp: '{{default_port}}'
         replace: '{{deploy_port}}'
-    # Not using the docker_compose module because it requires the python package installed on the host
+    - name: Change error in dockerfile
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: 'redis/alpine'
+        replace: 'redis:alpine'
+    - name: Change DEFAULT state
+      replace:
+        path: '{{destination}}/application/.env'
+        regexp: 'DEBUG=True'
+        replace: 'DEBUG=False'
+    - name: Change TESTING
+      replace:
+        path: '{{destination}}/application/.env'
+        regexp: 'TESTING=True'
+        replace: 'TESTING=False'
+    - name: Change API_KEY
+      replace:
+        path: '{{destination}}/application/.env'
+        regexp: 'ThisIsNotARealKey'
+        replace: '{{STEAM_API_KEY}}'
     - name: Launch container
       shell: |
-        cp application/.env-example application/.env
-        python setup.py sdist
-        cp dist/*.tar.gz application/
-        docker-compose up -d
-      args: 
+        docker-compose -f docker-compose.yml down
+        docker-compose -f docker-compose.yml up -d
+      args:
         chdir: '{{ destination }}'
-    - name: Create proxy to ctf.courgettes.club
+    - name: Create proxy to steam.courgettes.club
       become: true
       become_method: sudo
       expect:
-          command: ./generate.sh ctf.courgettes.club http://localhost:{{ deploy_port }}
+          command: ./generate.sh steam.courgettes.club http://localhost:{{ deploy_port }}
           responses:
               Press enter to continue.: ''
               Select the appropriate number \[1-2\] then \[enter\]: 1

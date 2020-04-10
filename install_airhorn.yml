@@ -13,8 +13,7 @@
     - name: Copy config file
       shell: |
           cp docker-compose-example.yml docker-compose
-          # sed s/{{default_port}}/{{deploy_port}}/g docker-compose-example.yml > docker-compose.yml
-      args: 
+      args:
         chdir: '{{ destination }}'
     # Not using the docker_compose module because it requires the python package installed on the host
     - name: Change ports in config
@@ -24,6 +23,7 @@
         replace: '{{deploy_port}}'
     - name: Launch container
       shell: |
+          docker-compose -f docker-compose.yml down
           docker-compose -f docker-compose.yml up -d
       args: 
         chdir: '{{ destination }}'

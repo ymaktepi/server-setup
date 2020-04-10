@@ -29,8 +29,9 @@
         cd ..
         python setup.py sdist
         cp dist/*.tar.gz application/
+        docker-compose down
         docker-compose up -d
-      args: 
+      args:
         chdir: '{{ destination }}'
     - name: Create proxy to ctf.courgettes.club
       become: true

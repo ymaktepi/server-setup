@@ -1,2 +1,2 @@
 [courgettes-debian]
-ts.courgettes.club ansible_user=debian
+courgettes.club ansible_user=debian

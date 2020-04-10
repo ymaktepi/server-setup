@@ -1,0 +1,57 @@
+- name: Install courgettes
+  hosts: courgettes-debian
+  vars:
+    destination: '/home/{{ansible_user}}/gits/courgettes'
+    nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
+    default_port: "8000"
+    deploy_port: "8006"
+    GITHUB_ANSIBLE_TOKEN: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      61346334373533656337636266336663383133336564653462366235376461386466373461376236
+      6638333366383037653830373335343234643030666539330a303765376531366330393966303034
+      37313962366136373066313265396665623135303361373633633364303262663336666264313234
+      3136323666666263640a353832303833353562343466653638336338396362383261306336666234
+      61663637383633626266346530623932663030656563343862383863306334306661323366633335
+      3663333765383735613337333431633035333262353234613130
+  tasks:
+    - name: Pull git
+      git:
+        repo: 'https://ymaktepi:{{GITHUB_ANSIBLE_TOKEN}}@github.com/ymaktepi/CourgetteSite.git'
+        dest: '{{ destination }}'
+    - name: Copy config file
+      shell: |
+          cp docker-compose-example.yml docker-compose.yml
+      args:
+        chdir: '{{ destination }}'
+    # Not using the docker_compose module because it requires the python package installed on the host
+    - name: Change ports in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: '{{default_port}}'
+        replace: '{{deploy_port}}'
+    - name: Launch container
+      shell: |
+          docker-compose -f docker-compose.yml down
+          docker-compose -f docker-compose.yml up -d
+      args: 
+        chdir: '{{ destination }}'
+    - name: Create proxy to courgettes.club
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh courgettes.club http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'nichuguen@gmail.com'
+          chdir: '{{ nginx_proxy_location }}'
+    - name: Create proxy to www.courgettes.club
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh www.courgettes.club http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'nichuguen@gmail.com'
+          chdir: '{{ nginx_proxy_location }}'

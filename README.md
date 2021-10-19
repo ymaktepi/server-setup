@@ -10,4 +10,5 @@
   - `ansible-playbook -i inventory --ask-vault-pass install_budget_manager.yml`
   - `ansible-playbook -i inventory --ask-vault-pass install_ctf.yml`
   - `ansible-playbook -i inventory --ask-vault-pass install_steam_network.yml`
+    # todo: epicgamejam 2021
 

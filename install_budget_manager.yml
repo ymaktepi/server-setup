@@ -61,7 +61,7 @@
       replace:
         path: '{{destination}}/docker-compose.yml'
         regexp: 'budget-manager'
-        replace: 'docker.pkg.github.com/ymaktepi/budget-manager/budget-manager:0.0.5'
+        replace: 'docker.pkg.github.com/ymaktepi/budget-manager/budget-manager:0.0.20'
     - name: Remove build in config
       replace:
         path: '{{destination}}/docker-compose.yml'

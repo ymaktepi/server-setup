@@ -11,11 +11,20 @@
         - docker-compose
         - nginx
         - certbot
-        - python-pip
-          #    - ufw
+        - python3-pip
+        update_cache: true
     - name: start nginx
       service:
           name: nginx
           state: started
     - name: install pexpect
-      shell: python -m pip install pexpect --user
+      shell: python3 -m pip install pexpect --user
+    - name: Ensure group "docker" exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+    - name: adding user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes

@@ -1,2 +1,2 @@
 [courgettes-debian]
-courgettes.club ansible_user=debian
+cloud.courgettes.club ansible_user=debian

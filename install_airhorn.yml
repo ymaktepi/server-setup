@@ -12,7 +12,7 @@
         dest: '{{ destination }}'
     - name: Copy config file
       shell: |
-          cp docker-compose-example.yml docker-compose
+          cp docker-compose-example.yml docker-compose.yml
       args:
         chdir: '{{ destination }}'
     # Not using the docker_compose module because it requires the python package installed on the host

@@ -30,9 +30,8 @@
     # Not using the docker_compose module because it requires the python package installed on the host
     - name: Launch container
       shell: |
-        set -e
-        docker-compose down
-        docker-compose up -d
+          docker-compose -f docker-compose.yml down
+          docker-compose -f docker-compose.yml up -d
       args:
         chdir: '{{ destination }}'
 
@@ -41,6 +40,17 @@
       become_method: sudo
       expect:
           command: ./generate.sh piratefache.ch http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'michael@caraccio.ch'
+          chdir: '{{ nginx_proxy_location }}'
+          
+    - name: Create proxy to www.piratefache.ch
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh www.piratefache.ch http://localhost:{{ deploy_port }}
           responses:
               Press enter to continue.: ''
               Select the appropriate number \[1-2\] then \[enter\]: 1

@@ -20,6 +20,7 @@
       git:
         repo: 'https://{{githubuser}}:{{GITHUB_ANSIBLE_TOKEN}}@github.com/{{githubuser}}/{{githubrepo}}.git'
         dest: '{{ destination }}'
+        force: 'yes'
       
     - name: Change ports in config
       replace:

@@ -1,0 +1,37 @@
+- name: Install piratefache
+  hosts: piratefache-debian
+  vars:
+    destination: '/home/{{ansible_user}}/gits/piratefache'
+    nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
+    default_port: "2368"
+    deploy_port: "8004"
+  tasks:
+    - name: Pull git
+      git:
+        repo: 'https://github.com/MichaelCaraccio/piratefache.ch-docker.git'
+        dest: '{{ destination }}'
+        # we modify config therefore have to force pull
+        force: yes
+    - name: Change ports in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: '{{default_port}}'
+        replace: '{{deploy_port}}'
+    # Not using the docker_compose module because it requires the python package installed on the host
+    - name: Launch container
+      shell: |
+        set -e
+        docker-compose down
+        docker-compose up -d
+      args:
+        chdir: '{{ destination }}'
+    - name: Create proxy to piratefache.ch
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh piratefache.ch http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'michael@caraccio.ch'
+          chdir: '{{ nginx_proxy_location }}'

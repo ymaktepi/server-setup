@@ -33,13 +33,13 @@
       args:
         chdir: '{{ destination }}'
     
-    - name: Copy route.yaml file
-      become: true
-      become_method: sudo
-      shell: |
-          cp routes.yaml {{ghost_directory}}/config/routes.yaml
-      args:
-        chdir: '{{ destination }}'
+    #- name: Copy route.yaml file
+    #  become: true
+    #  become_method: sudo
+    #  shell: |
+    #      cp routes.yaml {{ghost_directory}}/config/routes.yaml
+    #  args:
+    #    chdir: '{{ destination }}'
         
     #- name: Change ports in config
     #  replace:

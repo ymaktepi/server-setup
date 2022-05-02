@@ -1,22 +1,32 @@
 - name: Install piratefache
-  hosts: piratefache-debian
+  hosts: courgettes-debian
   vars:
     destination: '/home/{{ansible_user}}/gits/piratefache'
     nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
     default_port: "2368"
     deploy_port: "8004"
+    githubuser: "MichaelCaraccio"
+    githubrepo: "piratefache.ch-docker"
+    GITHUB_ANSIBLE_TOKEN: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          37663166663865636565356639383134326231373437613662653038646636653337343139336631
+          3661643635623331663033663230383932326562386261380a626334633130623236636563313838
+          36386530306538393933663837633235313338323437663263373531386631376130343532613262
+          3232663662643434380a386239656632323037643666613066633937346537663762656466383366
+          39316366336338313734633062636464323764653736626563666161323963363664646435363263
+          6461336161336335323832613661376238633562373764383430
   tasks:
     - name: Pull git
       git:
-        repo: 'https://github.com/MichaelCaraccio/piratefache.ch-docker.git'
+        repo: 'https://{{githubuser}}:{{GITHUB_ANSIBLE_TOKEN}}@github.com/{{githubuser}}/{{githubrepo}}.git'
         dest: '{{ destination }}'
-        # we modify config therefore have to force pull
-        force: yes
+      
     - name: Change ports in config
       replace:
         path: '{{destination}}/docker-compose.yml'
         regexp: '{{default_port}}'
         replace: '{{deploy_port}}'
+
     # Not using the docker_compose module because it requires the python package installed on the host
     - name: Launch container
       shell: |
@@ -25,6 +35,7 @@
         docker-compose up -d
       args:
         chdir: '{{ destination }}'
+
     - name: Create proxy to piratefache.ch
       become: true
       become_method: sudo

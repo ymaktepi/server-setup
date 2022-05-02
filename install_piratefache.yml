@@ -2,8 +2,9 @@
   hosts: courgettes-debian
   vars:
     destination: '/home/{{ansible_user}}/gits/piratefache'
+    ghost_directory: '/home/debian/piratefache/piratefache.ch'
     nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
-    default_port: "2368"
+    #default_port: "8004"
     deploy_port: "8004"
     githubuser: "MichaelCaraccio"
     githubrepo: "piratefache.ch-docker"
@@ -22,11 +23,29 @@
         dest: '{{ destination }}'
         force: 'yes'
       
-    - name: Change ports in config
-      replace:
-        path: '{{destination}}/docker-compose.yml'
-        regexp: '{{default_port}}'
-        replace: '{{deploy_port}}'
+    - name: Copy config.production.json file
+      become: true
+      become_method: sudo
+      shell: |
+          mkdir {{ghost_directory}}
+          mkdir {{ghost_directory}}/config
+          cp -f config.production.json {{ghost_directory}}/config/config.production.json
+      args:
+        chdir: '{{ destination }}'
+    
+    - name: Copy route.yaml file
+      become: true
+      become_method: sudo
+      shell: |
+          cp routes.yaml {{ghost_directory}}/config/routes.yaml
+      args:
+        chdir: '{{ destination }}'
+        
+    #- name: Change ports in config
+    #  replace:
+    #    path: '{{destination}}/docker-compose.yml'
+    #    regexp: '{{default_port}}'
+    #    replace: '{{deploy_port}}'
 
     # Not using the docker_compose module because it requires the python package installed on the host
     - name: Launch container

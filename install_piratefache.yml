@@ -4,7 +4,6 @@
     destination: '/home/{{ansible_user}}/gits/piratefache'
     ghost_directory: '/home/debian/piratefache/piratefache.ch'
     nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
-    #default_port: "8004"
     deploy_port: "8004"
     githubuser: "MichaelCaraccio"
     githubrepo: "piratefache.ch-docker"
@@ -33,19 +32,13 @@
       args:
         chdir: '{{ destination }}'
     
-    #- name: Copy route.yaml file
-    #  become: true
-    #  become_method: sudo
-    #  shell: |
-    #      cp routes.yaml {{ghost_directory}}/config/routes.yaml
-    #  args:
-    #    chdir: '{{ destination }}'
-        
-    #- name: Change ports in config
-    #  replace:
-    #    path: '{{destination}}/docker-compose.yml'
-    #    regexp: '{{default_port}}'
-    #    replace: '{{deploy_port}}'
+    - name: Copy route.yaml file
+      become: true
+      become_method: sudo
+      shell: |
+          cp routes.yaml {{ghost_directory}}/config/routes.yaml
+      args:
+        chdir: '{{ destination }}'
 
     # Not using the docker_compose module because it requires the python package installed on the host
     - name: Launch container
@@ -60,17 +53,6 @@
       become_method: sudo
       expect:
           command: ./generate.sh piratefache.ch http://localhost:{{ deploy_port }}
-          responses:
-              Press enter to continue.: ''
-              Select the appropriate number \[1-2\] then \[enter\]: 1
-              email address: 'michael@caraccio.ch'
-          chdir: '{{ nginx_proxy_location }}'
-          
-    - name: Create proxy to www.piratefache.ch
-      become: true
-      become_method: sudo
-      expect:
-          command: ./generate.sh www.piratefache.ch http://localhost:{{ deploy_port }}
           responses:
               Press enter to continue.: ''
               Select the appropriate number \[1-2\] then \[enter\]: 1

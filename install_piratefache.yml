@@ -58,3 +58,15 @@
               Select the appropriate number \[1-2\] then \[enter\]: 1
               email address: 'michael@caraccio.ch'
           chdir: '{{ nginx_proxy_location }}'
+          
+    - name: Create proxy to www.piratefache.ch
+      become: true
+      become_method: sudo
+      expect:
+          command: ./generate.sh www.piratefache.ch http://localhost:{{ deploy_port }}
+          responses:
+              Press enter to continue.: ''
+              Select the appropriate number \[1-2\] then \[enter\]: 1
+              email address: 'michael@caraccio.ch'
+          chdir: '{{ nginx_proxy_location }}'
+

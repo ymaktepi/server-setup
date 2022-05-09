@@ -12,4 +12,5 @@
    - `ansible-playbook -i inventory --ask-vault-pass install_ctf.yml`
    - `ansible-playbook -i inventory --ask-vault-pass install_steam_network.yml`
    - `ansible-playbook -i inventory install_epic_game_jam.yml`
+   - `ansible-playbook -i inventory --ask-vault-pass install_piratefache.yml`
 

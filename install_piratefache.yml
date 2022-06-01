@@ -41,9 +41,10 @@
         chdir: '{{ destination }}'
 
     # Not using the docker_compose module because it requires the python package installed on the host
-    - name: Launch container
+    - name: Launch container and update container
       shell: |
           docker-compose -f docker-compose.yml down
+          docker-compose pull
           docker-compose -f docker-compose.yml up -d
       args:
         chdir: '{{ destination }}'

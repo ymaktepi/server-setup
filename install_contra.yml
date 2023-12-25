@@ -1,0 +1,88 @@
+- name: Install courgettes
+  hosts: courgettes-debian
+  vars:
+    destination: '/home/{{ansible_user}}/gits/contra'
+    nginx_proxy_location: '/home/{{ansible_user}}/gits/nginx-proxy-generator'
+    deploy_port: "8008"
+    deploy_domain: "contra.courgettes.club"
+    deploy_protocol: "https"
+    GITHUB_ANSIBLE_TOKEN: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      64666164376435373631353734353364306365313232663231333933326339346530613833396162
+      6466366135396366363935323364363565333538656363650a613534343430313632613236306333
+      36663130363330356464663265303862393539663262376364363136303963616638636362623436
+      3166316165613530650a366635386164646561643664353263633636386635663239376438386230
+      30366635313563366634613364336163333330656438663465363866313437373764393235646537
+      3033333436656539363132623835323339363937303432313237
+    CONTRA_URL: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      61616133316539326538313935656564323061623163636332636636393637633163363462656633
+      6633623366393562316232346237653863303061303838660a623830616336376134653766303366
+      35616238346361396435396237386633356262623138306637353035303335313962373931333561
+      3632303966636232620a613030343030393362373637653030353437326636303436333538396637
+      36323736326362313536373531663764636234343566363539346435363463623837363163653166
+      61626534323166353234316466663464366163656535313933373538383532303961303030366336
+      38626334663232356565366466373961333762666131666435653234643632333732353231393132
+      63343661303031363063663832646438383334656532363361643530336336396265333962376564
+      65386438343165303436346666633961363461653035363366333835643933653561393937636137
+      6361666566653337303961313039323666353535303361636366
+    CONTRA_PASS: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      63633236376530666538333262636665383537383734653932646532643033663733356138343931
+      6364633638363334383362373434613634653633336236610a613639653566336261356539323633
+      63666264326136313338656464363365646261323634346131363062386363313234346135363162
+      3762646264663938360a363339313163613338653930323164376535343633306662663163333663
+      31613737316634643665376538623363643038346234343039353564396437343030
+  tasks:
+    - name: Pull git
+      git:
+        repo: 'https://ymaktepi:{{GITHUB_ANSIBLE_TOKEN}}@github.com/ymaktepi/contra.git'
+        version: main
+        dest: '{{ destination }}'
+    - name: Copy config file
+      shell: |
+        cp docker-compose-example.yaml docker-compose.yml
+      args:
+        chdir: '{{ destination }}'
+    # Not using the docker_compose module because it requires the python package installed on the host
+    - name: Change ports in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: 'SET_PORTS'
+        replace: '{{deploy_port}}'
+    - name: Change url in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: 'SET_URL'
+        replace: '{{CONTRA_URL}}'
+    - name: Change password in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: 'SET_PASSWORD'
+        replace: '{{CONTRA_PASS}}'
+    - name: Change domain in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: 'SET_DOMAIN'
+        replace: '{{deploy_domain}}'
+    - name: Change protocol in config
+      replace:
+        path: '{{destination}}/docker-compose.yml'
+        regexp: 'SET_PROTOCOL'
+        replace: '{{deploy_protocol}}'
+    - name: Launch container
+      shell: |
+        docker compose -f docker-compose.yml down
+        docker compose -f docker-compose.yml up -d --build
+      args:
+        chdir: '{{ destination }}'
+    - name: Create proxy to contra.courgettes.club
+      become: true
+      become_method: sudo
+      expect:
+        command: ./generate.sh contra.courgettes.club http://localhost:{{ deploy_port }}
+        responses:
+          Press enter to continue.: ''
+          Select the appropriate number \[1-2\] then \[enter\]: 1
+          email address: 'nichuguen@gmail.com'
+        chdir: '{{ nginx_proxy_location }}'

@@ -1,3 +1,9 @@
+# Ansible vault
+
+0. Install ansible
+1. Create secret:
+   2. `ansible vault encrypt_string --ask-vault-pass`
+3. Paste secret inside variables declaration
 
 # Server setup
 
@@ -13,4 +19,5 @@
    - `ansible-playbook -i inventory --ask-vault-pass install_steam_network.yml`
    - `ansible-playbook -i inventory install_epic_game_jam.yml`
    - `ansible-playbook -i inventory --ask-vault-pass install_piratefache.yml`
+   - `ansible-playbook -i inventory --ask-vault-pass install_contra.yml`
 

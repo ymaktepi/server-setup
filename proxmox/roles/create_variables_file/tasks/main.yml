@@ -1,0 +1,8 @@
+# This will assemble several files into one variable file
+# The expectation is the original files will be found in a sub-folder of one called variable_files
+# The variable file will then be created in a sub-folder within the group_vars folder
+- name: Create Variables File
+  assemble:
+    src: '{{project_path}}variable_files/{{variable_name}}/'
+    dest: '{{project_path}}group_vars/{{group_name}}/{{variable_name}}'
+  delegate_to: localhost

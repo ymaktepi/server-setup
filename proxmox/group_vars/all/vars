@@ -1,0 +1,12 @@
+ansible_key_file: '/Users/ymaktepi/.ssh/id_ecdsa.pub'
+project_path: '/Users/ymaktepi/dev/perso/server-setup/proxmox/'
+image_path: '/mnt/pve/isos/images/0/'
+cts_storage: 'isos'
+domain_name: '.nico'
+timezone: 'Europe/Bern'
+locale: 'en_US.UTF-8'
+group_name: pvenodes
+variable_files:
+ - images
+ - vms
+ - cts_images

@@ -1,0 +1,10 @@
+  - name: vmtest1
+    vmid: 301
+    # todo: use var
+    node: proxmox
+    image_file: debian-12-generic-amd64.qcow2
+    cores: 1
+    memory: 1024
+    vlan: 4
+    ipv4mode: dhcp
+    state: new

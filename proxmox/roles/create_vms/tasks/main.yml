@@ -1,0 +1,86 @@
+# Create VMs
+- name: Create VMs
+  proxmox_kvm:
+    api_user: '{{api_user}}'
+    api_token_id: '{{api_token_name}}'
+    api_token_secret: '{{api_token}}'
+    api_host: '{{api_host}}'
+    node: '{{item.node}}'
+    name: '{{item.name}}'
+    vmid: '{{item.vmid}}'
+    vga: serial0
+    net: '{"net0":"virtio,bridge={{linux_bridge}},tag={{item.vlan}},firewall=1"}'
+    #net: '{"net0":"virtio,bridge={{linux_bridge}}"}'
+    serial: '{"serial0":"socket"}'
+    scsihw: virtio-scsi-single
+    scsi:
+      scsi0: '{{drive_storage}}:0,import-from={{image_storage}}:0/{{item.image_file}},format={{drive_format}},iothread=1'
+    ide:
+      ide2: '{{drive_storage}}:cloudinit'
+    ostype: 'l26'
+    onboot: 'no'
+    cpu: 'host'
+    cores: '{{item.cores}}'
+    sockets: 1
+    memory: '{{item.memory}}'
+    balloon: 0
+    boot: order=scsi0
+    ipconfig:
+      ipconfig0: 'ip=dhcp'
+    cicustom: 'user={{snippets_storage}}:snippets/{{item.vmid}}-user.yml'
+    agent: 'enabled=1'
+    timeout: 700
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  #no_log: yes
+
+# Update network settings
+# A custom file would have been preferred to update the network settings but the problem is it includes a MAC address
+# So all VMs will be configured to use DHCP by default, those that need a static IP will be updated
+- name: Update network settings
+  proxmox_kvm:
+    api_user: '{{api_user}}'
+    api_token_id: '{{api_token_name}}'
+    api_token_secret: '{{api_token}}'
+    api_host: '{{api_host}}'
+    node: '{{item.node}}'
+    vmid: '{{item.vmid}}'
+    ipconfig:
+      ipconfig0: 'ip={{item.ipv4_address}},gw={{item.ipv4_gateway}}'
+    timeout: 60
+    update: true
+  loop: '{{computers}}'
+  when: (item.state == "new") and
+    (item.ipv4mode == 'static')
+  #no_log: yes
+
+# Resize the disk
+# The Cloud-Init disk is only 2GB
+- name: Resize disk
+  community.general.proxmox_disk:
+    api_user: '{{api_user}}'
+    api_token_id: '{{api_token_name}}'
+    api_token_secret: '{{api_token}}'
+    api_host: '{{api_host}}'
+    vmid: '{{item.vmid}}'
+    disk: 'scsi0'
+    size: '32G'
+    state: 'resized'
+    timeout: 60
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  no_log: yes
+
+# Start VMs
+- name: Start VMs
+  proxmox_kvm:
+    api_user: '{{api_user}}'
+    api_token_id: '{{api_token_name}}'
+    api_token_secret: '{{api_token}}'
+    api_host: '{{api_host}}'
+    node: '{{item.node}}'
+    vmid: '{{item.vmid}}'
+    state: 'started'
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  no_log: yes

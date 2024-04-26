@@ -1,0 +1,5 @@
+[pvenodes]
+proxmox.nico ansible_user=ansible proxmox_node_name=proxmox
+
+[truenas]
+truenas.nico ansible_user=root

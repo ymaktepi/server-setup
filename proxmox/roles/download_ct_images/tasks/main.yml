@@ -1,0 +1,6 @@
+- name: Download container images
+  ansible.builtin.shell: pveam download {{cts_storage}} {{item.proxmox_image_name}}
+  loop: '{{cts_images}}'
+  when: 'item.state == "present"'
+  become: yes
+  become_user: root

@@ -1,0 +1,11 @@
+  - name: uptime_kuma
+    ctid: 406
+    node: proxmox
+    image_name: debian-12-standard_12.2-1_amd64.tar.zst
+    cores: 1
+    memory: 512
+    vlan: 1
+    ipv4mode: static
+    ipv4_address: 10.10.0.253/23
+    ipv4_gateway: 10.10.0.1
+    state: started

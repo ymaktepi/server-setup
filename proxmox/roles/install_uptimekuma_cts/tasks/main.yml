@@ -1,0 +1,22 @@
+- name: Create /opt/uptimekuma directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/uptimekuma
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose
+  copy:
+    src: docker-compose.yml
+    dest: '/opt/uptimekuma/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up`
+  community.docker.docker_compose:
+    project_src: /opt/uptimekuma
+    build: false
+
+- name: Import Backup
+  ansible.builtin.debug:
+    msg: Use the Backup File to import notifications.

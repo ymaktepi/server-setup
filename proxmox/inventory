@@ -13,3 +13,6 @@ truenas.nico ansible_user=root
 
 [networkcheckers:vars]
 ansible_user=root
+
+[uptimekuma]
+10.10.0.253 ansible_user=root

@@ -1,0 +1,7 @@
+- hosts: uptimekuma
+  gather_facts: false
+
+  roles:
+    - role: update_cts
+    - role: install_docker_debian
+    - role: install_uptimekuma_cts

@@ -1,5 +1,21 @@
+- name: Check if Docker is installed
+  ansible.builtin.package:
+    name: "docker-ce"
+    state: present
+  check_mode: true
+  register: package_check
+  ignore_errors: true
+
 - name: Install Docker
+  when: package_check is failed
   ansible.builtin.shell: |
     cd ~ 
     curl -fsSL https://get.docker.com -o get-docker.sh 
     sh get-docker.sh
+
+- name: Install docker packages
+  apt:
+    name:
+      - python3-docker
+      - python3-compose
+    state: latest

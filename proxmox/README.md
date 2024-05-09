@@ -82,3 +82,15 @@ ansible-playbook build_vms.yml
 ```bash
 ansible-playbook build_cts.yml
 ```
+
+Also used to delete/start/stop cts. To do so, change the state in the variable_files/cts.
+
+### Update Containers: `update_*_cts.yml`
+
+```bash
+ansible-playbook update_uptimekuma_cts.yml
+## you then need to import the backup json file to have all the uptime checkers up.
+```
+```bash
+ansible-playbook update_networkcheckers_cts.yml
+```

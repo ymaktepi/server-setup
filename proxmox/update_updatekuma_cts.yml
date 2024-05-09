@@ -1,0 +1,13 @@
+- hosts: networkcheckers
+  gather_facts: false
+
+  roles:
+    - update_cts
+    - install_network_checkers_cts
+
+- hosts: updatekuma
+  gather_facts: false
+
+  roles:
+    - role: update_cts
+    - role: install_docker_cts

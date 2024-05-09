@@ -1,7 +1,0 @@
-cts_images:
-  - name: Debian12-CT-Image
-    proxmox_image_name: 'debian-12-standard_12.2-1_amd64.tar.zst'
-    state: present
-#  - name: NextCloud-Debian12-CT-Image
-#    proxmox_image_name: 'debian-12-turnkey-nextcloud_18.0-1_amd64.tar.gz'
-#    state: present

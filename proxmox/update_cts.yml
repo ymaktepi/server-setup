@@ -1,6 +1,0 @@
-- hosts: networkcheckers
-  gather_facts: false
-
-  roles:
-    - role: update_cts
-      ct_type: networkcheckers

@@ -1,0 +1,6 @@
+- hosts: networkcheckers
+  gather_facts: false
+
+  roles:
+    - update_cts
+    - install_network_checkers_cts

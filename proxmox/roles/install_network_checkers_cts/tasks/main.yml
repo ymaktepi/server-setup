@@ -1,0 +1,65 @@
+- name: Install networkcheckers packages
+  apt:
+    name:
+      - python3-pip
+      - python3.11-venv
+      - supervisor
+      - nginx
+    state: latest
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/fastapi/run
+    state: directory
+    mode: '0755'
+
+- name: Install gunicorn and fastapi dependencies
+  ansible.builtin.shell: |
+    systemctl enable supervisor
+    systemctl start supervisor
+    cd /opt/fastapi
+    rm -rf venv
+    python3 -m venv venv
+    source venv/bin/activate
+    venv/bin/pip install fastapi requests uvicorn gunicorn
+- name: Create fastapi main
+  copy:
+    src: main.py
+    dest: '/opt/fastapi/main.py'
+    owner: root
+    group: root
+    mode: 0644
+- name: Create gunicorn conf
+  template:
+    src: gunicorn_start
+    dest: '/opt/fastapi/gunicorn_start'
+    owner: root
+    group: root
+    mode: 0777
+- name: Create supervisor conf
+  copy:
+    src: supervisor-fast-api.conf
+    dest: '/etc/supervisor/conf.d/fastapi-app.conf'
+    owner: root
+    group: root
+    mode: 0644
+- name: Restart supervisor
+  ansible.builtin.shell: |
+    supervisorctl reread
+    supervisorctl update
+
+- name: Create nginx conf
+  template:
+    src: fastapi-nginx.conf
+    dest: '/etc/nginx/sites-available/fastapi-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Restart nginx
+  ansible.builtin.shell: |
+    rm -rf /etc/nginx/sites-enabled/fastapi-nginx.conf
+    ln -s /etc/nginx/sites-available/fastapi-nginx.conf /etc/nginx/sites-enabled/fastapi-nginx.conf
+    nginx -t
+    systemctl restart nginx
+    pkill gunicorn

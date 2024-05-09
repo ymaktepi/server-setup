@@ -2,6 +2,7 @@ ansible_key_file: '/Users/ymaktepi/.ssh/id_ecdsa.pub'
 project_path: '/Users/ymaktepi/dev/perso/server-setup/proxmox/'
 image_path: '/mnt/pve/isos/images/0/'
 cts_storage: 'isos'
+disk_storage: 'm2-noraid'
 domain_name: '.nico'
 timezone: 'Europe/Bern'
 locale: 'en_US.UTF-8'
@@ -10,3 +11,4 @@ variable_files:
  - images
  - vms
  - cts_images
+ - cts

@@ -21,11 +21,14 @@
     - download_ct_images
     # Create cloud-init files
     #- create_user_files
-#
-#- hosts: pvenodes[0]
-#  become: false
-#  gather_facts: false
-#
-#  roles:
-#    # Create VMs
-#    - create_vms
+
+- hosts: pvenodes[0]
+  become: false
+  gather_facts: false
+
+  roles:
+    # Create CTs
+    - create_cts
+    - start_cts
+    - stop_cts
+    - delete_cts

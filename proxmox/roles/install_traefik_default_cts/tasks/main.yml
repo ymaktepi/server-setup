@@ -1,0 +1,48 @@
+- name: Create /opt/traefik directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/traefik
+    state: directory
+    mode: '0755'
+
+- name: Create /opt/traefik/data directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/traefik/data
+    state: directory
+    mode: '0755'
+
+- name: ensure acme.json file exists
+  copy:
+    content: ""
+    dest: /opt/traefik/data/acme.json
+    force: false
+    owner: root
+    mode: 0600
+
+- name: Create Docker Compose
+  template:
+    src: docker-compose.yml
+    dest: '/opt/traefik/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create Config
+  template:
+    src: config.yml
+    dest: '/opt/traefik/data/config.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create Traefik
+  template:
+    src: traefik.yml
+    dest: '/opt/traefik/data/traefik.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up`
+  community.docker.docker_compose:
+    project_src: /opt/traefik
+    build: false

@@ -1,0 +1,55 @@
+http:
+  #region routers
+  routers:
+    uptime:
+      entryPoints:
+        - "https"
+      rule: "Host(`uptime.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: uptime
+    proxmox:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: proxmox
+
+  #endregion
+  #region services
+  services:
+    uptime:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.0.253:3001"
+        passHostHeader: true
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.100:8006"
+        passHostHeader: true
+  #endregion
+  middlewares:
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+        #replacement: '/'
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https

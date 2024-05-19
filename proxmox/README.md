@@ -36,6 +36,13 @@ ansible pvenodes -m ping
 - In Datacenter -> Permissions, hit "Add->User Permissions", select '/' and the `ansible` user, map it to admin.
 - Create an API Token in the UI, for the `ansible` user. Uncheck privilege separation.
 
+> Note: how to add zfs support for isos folder  
+> `zfs create hdd-8tb-raid/isos`  
+> `zfs set compression=zstd hdd-8tb-raid/isos`  
+> `zfs set relatime=on hdd-8tb-raid/isos`  
+> `pvesm add dir isos --content iso --is_mountpoint  yes --shared 0 --path "/hdd-8tb-raid/isos/"`
+> you may want to add other types than just iso above
+
 Open the vault:
 
 ```bash

@@ -1,0 +1,25 @@
+- name: traefik_default
+  ctid: 407
+  node: proxmox
+  image_name: debian-12-standard_12.2-1_amd64.tar.zst
+  cores: 1
+  cpus: 1
+  memory: 512
+  vlan: 1
+  ipv4mode: static
+  ipv4_address: 10.10.0.250/23
+  ipv4_gateway: 10.10.0.1
+  state: started
+
+- name: traefik_dmz
+  ctid: 408
+  node: proxmox
+  image_name: debian-12-standard_12.2-1_amd64.tar.zst
+  cores: 1
+  cpus: 1
+  memory: 512
+  vlan: 5
+  ipv4mode: static
+  ipv4_address: 10.10.5.250/23
+  ipv4_gateway: 10.10.5.1
+  state: absent

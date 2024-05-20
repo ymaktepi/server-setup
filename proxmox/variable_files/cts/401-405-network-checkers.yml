@@ -10,6 +10,7 @@
     ipv4_address: 10.10.0.254/23
     ipv4_gateway: 10.10.0.1
     state: started
+
   - name: network_testing_entertainment
     ctid: 402
     node: proxmox
@@ -22,6 +23,7 @@
     ipv4_address: 10.10.2.254/24
     ipv4_gateway: 10.10.2.1
     state: started
+
   - name: network_testing_guest
     ctid: 403
     node: proxmox
@@ -34,6 +36,7 @@
     ipv4_address: 10.10.3.254/24
     ipv4_gateway: 10.10.3.1
     state: started
+
   - name: network_testing_crusted
     ctid: 404
     node: proxmox

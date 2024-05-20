@@ -14,7 +14,7 @@
     ostype: "debian"
     disk: '{{disk_storage}}:4'
     ostemplate: '{{cts_storage}}:vztmpl/{{item.image_name}}'
-    cpus: 1
+    cpus: '{{item.cpus}}'
     cores: '{{item.cores}}'
     memory: '{{item.memory}}'
     netif: '{"net0":"name=eth0,gw={{item.ipv4_gateway}},ip={{item.ipv4_address}},bridge={{linux_bridge}},tag={{item.vlan}}"}'

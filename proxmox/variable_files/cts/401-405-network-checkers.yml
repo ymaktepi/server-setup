@@ -3,6 +3,7 @@
     node: proxmox
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
+    cpus: 1
     memory: 512
     vlan: 1
     ipv4mode: static
@@ -14,6 +15,7 @@
     node: proxmox
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
+    cpus: 1
     memory: 512
     vlan: 2
     ipv4mode: static
@@ -25,6 +27,7 @@
     node: proxmox
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
+    cpus: 1
     memory: 512
     vlan: 3
     ipv4mode: static
@@ -36,6 +39,7 @@
     node: proxmox
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
+    cpus: 1
     memory: 512
     vlan: 4
     ipv4mode: static
@@ -47,6 +51,7 @@
     node: proxmox
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
+    cpus: 1
     memory: 512
     vlan: 5
     ipv4mode: static

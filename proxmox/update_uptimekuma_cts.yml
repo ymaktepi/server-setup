@@ -2,6 +2,9 @@
   gather_facts: false
 
   roles:
-    - role: update_cts
-    - role: install_docker_debian
+    - update_cts
+    - install_docker_debian
+    - role: install_nginx
+      courgettes_subdomain: "uptime"
     - role: install_uptimekuma_cts
+      courgettes_subdomain: "uptime"

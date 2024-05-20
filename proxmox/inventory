@@ -5,11 +5,11 @@ proxmox.nico ansible_user=ansible proxmox_node_name=proxmox
 truenas.nico ansible_user=root
 
 [networkcheckers]
-10.10.0.254 network_type=default        reachable_urls="http://10.10.2.254;http://10.10.3.254;http://10.10.4.254;http://10.10.5.254" unreachable_urls=""
-10.10.2.254 network_type=entertainment  reachable_urls="http://10.10.3.254"                                                          unreachable_urls="http://10.10.0.254;http://10.10.4.254;http://10.10.5.254"
-10.10.3.254 network_type=guest          reachable_urls="http://10.10.2.254"                                                          unreachable_urls="http://10.10.0.254;http://10.10.4.254;http://10.10.5.254"
-10.10.4.254 network_type=crusted        reachable_urls=""                                                                            unreachable_urls="http://10.10.0.254;http://10.10.2.254;http://10.10.3.254;http://10.10.5.254"
-10.10.5.254 network_type=dmz            reachable_urls=""                                                                            unreachable_urls="http://10.10.0.254;http://10.10.2.254;http://10.10.3.254;http://10.10.4.254"
+10.10.0.254 network_type=default        reachable_urls="https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" unreachable_urls=""
+10.10.2.254 network_type=entertainment  reachable_urls="https://10.10.3.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
+10.10.3.254 network_type=guest          reachable_urls="https://10.10.2.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
+10.10.4.254 network_type=crusted        reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.5.254"
+10.10.5.254 network_type=dmz            reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.4.254"
 
 [networkcheckers:vars]
 ansible_user=root

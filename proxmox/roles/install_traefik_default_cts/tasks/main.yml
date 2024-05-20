@@ -46,3 +46,4 @@
   community.docker.docker_compose:
     project_src: /opt/traefik
     build: false
+    recreate: always

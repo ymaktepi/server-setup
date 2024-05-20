@@ -56,10 +56,17 @@
     group: root
     mode: 0777
 
-- name: Restart nginx
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/fastapi-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/fastapi-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted
+
+- name: Restart gunicorn
   ansible.builtin.shell: |
-    rm -rf /etc/nginx/sites-enabled/fastapi-nginx.conf
-    ln -s /etc/nginx/sites-available/fastapi-nginx.conf /etc/nginx/sites-enabled/fastapi-nginx.conf
-    nginx -t
-    systemctl restart nginx
     pkill gunicorn

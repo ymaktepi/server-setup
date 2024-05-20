@@ -3,4 +3,6 @@
 
   roles:
     - update_cts
+    - role: install_nginx
+      courgettes_subdomain: "nc-{{network_type}}"
     - install_network_checkers_cts

@@ -71,7 +71,7 @@ http:
     uptime:
       loadBalancer:
         servers:
-          - url: "http://10.10.0.253:3001"
+          - url: "https://10.10.0.253"
         passHostHeader: true
     nwCheckerDefault:
       loadBalancer:

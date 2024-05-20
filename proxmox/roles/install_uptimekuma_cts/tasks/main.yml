@@ -17,6 +17,30 @@
     project_src: /opt/uptimekuma
     build: false
 
+
+- name: Create nginx conf
+  template:
+    src: uptime-kuma-nginx.conf
+    dest: '/etc/nginx/sites-available/uptime-kuma-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/uptime-kuma-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/uptime-kuma-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted
+
 - name: Import Backup
   ansible.builtin.debug:
     msg: Use the Backup File to import notifications.
+
+- name: Telegram notification
+  ansible.builtin.debug:
+    msg: Setup telegram notification

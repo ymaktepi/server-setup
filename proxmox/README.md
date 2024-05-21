@@ -127,3 +127,9 @@ Host jumphost
     HostName <jumphost-hostname>
     User jumper
 ```
+
+### Add ssh key to host
+Put pub key in `files` folder then:
+```bash
+ansible-playbook add-ssh-key-to-host.yml -e '{"ssh_copy_hosts": "traefik_default:networkcheckers:uptimekuma", "ssh_copy_user": "root", "ssh_copy_filename": "key-name.pub"}'
+```

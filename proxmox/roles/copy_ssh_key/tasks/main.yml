@@ -1,0 +1,4 @@
+- name: add Ansible ssh key
+  authorized_key:
+    user: "{{ssh_copy_user}}"
+    key: "{{ lookup('file', playbook_dir + '/files/' + ssh_copy_filename) }}"

@@ -76,27 +76,27 @@ http:
     nwCheckerDefault:
       loadBalancer:
         servers:
-          - url: "http://10.10.0.254"
+          - url: "https://10.10.0.254"
         passHostHeader: true
     nwCheckerEntertainment:
       loadBalancer:
         servers:
-          - url: "http://10.10.2.254"
+          - url: "https://10.10.2.254"
         passHostHeader: true
     nwCheckerGuest:
       loadBalancer:
         servers:
-          - url: "http://10.10.3.254"
+          - url: "https://10.10.3.254"
         passHostHeader: true
     nwCheckerCrusted:
       loadBalancer:
         servers:
-          - url: "http://10.10.4.254"
+          - url: "https://10.10.4.254"
         passHostHeader: true
     nwCheckerDMZ:
       loadBalancer:
         servers:
-          - url: "http://10.10.5.254"
+          - url: "https://10.10.5.254"
         passHostHeader: true
     proxmox:
       loadBalancer:

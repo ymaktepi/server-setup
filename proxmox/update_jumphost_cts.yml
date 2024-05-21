@@ -1,0 +1,6 @@
+- hosts: jumphost
+  gather_facts: false
+
+  roles:
+    - update_cts
+    - install_jumphost_cts

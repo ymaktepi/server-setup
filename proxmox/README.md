@@ -84,6 +84,7 @@ ansible-playbook dumb_container.yml
 ```bash
 ansible-playbook build_vms.yml
 ```
+
 ### Build Containers: `build_cts.yml`
 
 ```bash
@@ -98,6 +99,31 @@ Also used to delete/start/stop cts. To do so, change the state in the variable_f
 ansible-playbook update_uptimekuma_cts.yml
 ## you then need to import the backup json file to have all the uptime checkers up.
 ```
+
 ```bash
 ansible-playbook update_networkcheckers_cts.yml
+```
+
+```bash
+ansible-playbook update_traefik_default_cts.yml
+```
+
+```bash
+ansible-playbook update_jumphost_cts.yml
+```
+
+## Jumphost config
+
+To grant access to other users, a jumphost service is put in place. It can _only_ be used as a jump proxy to reach
+other VMs. You can either do `ssh -J jumper@jumphost user@targethost`, or use the following config:
+
+```conf
+Host targethost
+    ProxyJump jumphost
+    HostName <target-hostname>
+    User <target-user>
+
+Host jumphost
+    HostName <jumphost-hostname>
+    User jumper
 ```

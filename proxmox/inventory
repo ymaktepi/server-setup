@@ -19,3 +19,6 @@ ansible_user=root
 
 [traefik_default]
 10.10.0.250 ansible_user=root
+
+[jumphost]
+10.10.5.252 ansible_user=root

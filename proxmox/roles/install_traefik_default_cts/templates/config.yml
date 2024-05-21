@@ -1,6 +1,24 @@
 http:
   #region routers
   routers:
+    paperless:
+      entryPoints:
+        - "https"
+      rule: "Host(`paperless.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: paperless
+    synology:
+      entryPoints:
+        - "https"
+      rule: "Host(`synology.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: synology
     uptime:
       entryPoints:
         - "https"
@@ -68,6 +86,17 @@ http:
   #endregion
   #region services
   services:
+    paperless:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.0.11"
+        passHostHeader: true
+    synology:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.252:5001"
+          - url: "https://10.10.0.251:5001"
+        passHostHeader: true
     uptime:
       loadBalancer:
         servers:

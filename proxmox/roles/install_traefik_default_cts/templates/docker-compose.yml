@@ -24,7 +24,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=http"
       - "traefik.http.routers.traefik.rule=Host(`traefik.local.courgettes.cloud`)"
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$HqqjK14T$$ofvk.RnLaaafOgM1WbbFV1"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:{{traefik_basic_auth}}"
       - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"

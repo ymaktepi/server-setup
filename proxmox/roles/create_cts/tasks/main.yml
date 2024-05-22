@@ -12,13 +12,14 @@
     node: '{{item.node}}'
     vmid: '{{item.ctid}}'
     ostype: "debian"
-    disk: '{{disk_storage}}:4'
+    disk: '{{disk_storage}}:{{item.disk | default(4)}}'
+    mounts: '{{ item.mounts | default(omit) }}'
     ostemplate: '{{cts_storage}}:vztmpl/{{item.image_name}}'
     cpus: '{{item.cpus}}'
     cores: '{{item.cores}}'
     memory: '{{item.memory}}'
     netif: '{"net0":"name=eth0,gw={{item.ipv4_gateway}},ip={{item.ipv4_address}},bridge={{linux_bridge}},tag={{item.vlan}}"}'
-    hostname: "{{ item.name | replace('_', '-') }}{{domain_name}}"
+    hostname: "{{ item.name | replace('_', '-') }}{{item.domain_name | default(default_domain_name)}}"
     timezone: host
     onboot: true
     state: present

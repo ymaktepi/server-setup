@@ -1,7 +1,7 @@
 #cloud-config
 hostname: {{item.name}}
 manage_etc_hosts: true
-fqdn: {{item.name}}{{domain_name}}
+fqdn: {{item.name}}{{item.domain_name | default(default_domain_name)}}
 user: {{ansible_user}}
 ssh_authorized_keys:
 - {{ lookup("file", "{{ansible_key_file}}") }}

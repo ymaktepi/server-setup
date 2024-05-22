@@ -1,0 +1,15 @@
+- hosts: pocket
+  gather_facts: false
+
+  roles:
+    - update_cts
+    - install_docker_debian
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Add ssh keys
+      ansible.builtin.debug:
+        msg: >
+          Add key to jumphost and to pocketbox after adding his key to the main files folder:
+          ansible-playbook add-ssh-key-to-host.yml -e '{"ssh_copy_hosts": "jumphost:pocket", "ssh_copy_user": "root", "ssh_copy_filename": "pocket.pub"}'

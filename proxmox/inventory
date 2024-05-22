@@ -1,8 +1,5 @@
 [pvenodes]
-proxmox.nico ansible_user=ansible proxmox_node_name=proxmox
-
-[truenas]
-truenas.nico ansible_user=root
+10.10.0.100 ansible_user=ansible proxmox_node_name=proxmox
 
 [networkcheckers]
 10.10.0.254 network_type=default        reachable_urls="https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" unreachable_urls=""
@@ -22,3 +19,6 @@ ansible_user=root
 
 [jumphost]
 10.10.5.252 ansible_user=root
+
+[pocket]
+10.10.5.100 ansible_user=root

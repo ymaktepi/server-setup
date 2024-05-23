@@ -11,5 +11,5 @@
     ipv4_address: 10.10.5.10/23
     ipv4_gateway: 10.10.5.1
     # optional, allows you to add some mounted disk in raid
-    mounts: '{"mp0":"{{mounted_disk_storage}}:8,mp=/mnt/mounted-raid/"}'
+    mounts: '{"mp0":"{{mounted_disk_storage}}:8,mp=/mnt/mounted-raid/,backup=1"}'
     state: absent

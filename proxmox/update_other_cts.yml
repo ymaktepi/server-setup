@@ -1,9 +1,17 @@
 - hosts: pocket
   gather_facts: false
-
   roles:
     - update_cts
     - install_docker_debian
+
+- hosts: pi
+  gather_facts: false
+  become: true
+  become_method: sudo
+  roles:
+    - role: install_nginx
+      courgettes_subdomain: "paperless"
+    - install_paperless
 
 - hosts: localhost
   gather_facts: false

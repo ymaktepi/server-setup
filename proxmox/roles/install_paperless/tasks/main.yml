@@ -1,0 +1,90 @@
+- name: Create nginx conf
+  template:
+    src: paperless-nginx.conf
+    dest: '/etc/nginx/sites-available/paperless-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/paperless-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/paperless-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted
+
+- name: Create /opt/paperless
+  ansible.builtin.file:
+    path: /opt/paperless
+    state: directory
+    mode: '0755'
+
+- name: Create /mnt/scans
+  ansible.builtin.file:
+    path: /mnt/scans
+    state: directory
+    mode: '0777'
+
+- name: Create /mnt/paperless-exports
+  ansible.builtin.file:
+    path: /mnt/paperless-exports
+    state: directory
+    mode: '0777'
+
+- name: Create /mnt/paperless-media
+  ansible.builtin.file:
+    path: /mnt/paperless-media
+    state: directory
+    mode: '0777'
+
+- name: Create Docker Compose
+  copy:
+    src: docker-compose.yaml
+    dest: '/opt/paperless/docker-compose.yml'
+    mode: 0644
+
+- name: Mount scans
+  ansible.posix.mount:
+    path: /mnt/scans
+    src: //nas-1.nico/scans
+    fstype: cifs
+    opts: "user=paperless-pi,password={{paperless_pi_smb_password}},vers=2.0,file_mode=0777,dir_mode=0777"
+    state: present
+
+- name: Mount scans
+  ansible.posix.mount:
+    path: /mnt/paperless-exports
+    src: //nas-1.nico/paperless-exports
+    fstype: cifs
+    opts: "user=paperless-pi,password={{paperless_pi_smb_password}},vers=2.0,file_mode=0777,dir_mode=0777"
+    state: present
+
+- name: Mount scans
+  ansible.posix.mount:
+    path: /mnt/paperless-media
+    src: //nas-1.nico/paperless-media
+    fstype: cifs
+    opts: "user=paperless-pi,password={{paperless_pi_smb_password}},vers=2.0,file_mode=0777,dir_mode=0777"
+    state: present
+
+- name: Create Docker Compose
+  copy:
+    src: docker-compose.env
+    dest: '/opt/paperless/docker-compose.env'
+    mode: 0644
+
+- name: Run `docker-compose up`
+  community.docker.docker_compose:
+    project_src: /opt/paperless
+    build: false
+
+- name: Create a weekly export crontab
+  ansible.builtin.cron:
+    name: "weekly exports"
+    minute: "20"
+    hour: "4"
+    job: "docker-compose -f /opt/paperless/docker-compose.yaml exec -T webserver document_exporter /usr/src/paperless/export --zip"

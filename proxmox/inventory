@@ -20,5 +20,8 @@ ansible_user=root
 [jumphost]
 10.10.5.252 ansible_user=root
 
+[pi]
+10.10.0.11 ansible_user=ymaktepi
+
 [pocket]
 10.10.5.100 ansible_user=root

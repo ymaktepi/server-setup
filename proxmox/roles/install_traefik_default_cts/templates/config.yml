@@ -89,7 +89,7 @@ http:
     paperless:
       loadBalancer:
         servers:
-          - url: "http://10.10.0.11"
+          - url: "https://10.10.0.11"
         passHostHeader: true
     synology:
       loadBalancer:

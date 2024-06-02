@@ -25,3 +25,6 @@ ansible_user=root
 
 [pocket]
 10.10.5.100 ansible_user=root
+
+[cara]
+10.10.5.101 ansible_user=root

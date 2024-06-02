@@ -1,4 +1,6 @@
-- hosts: pocket
+- hosts:
+   - pocket
+   - cara
   gather_facts: false
   roles:
     - update_cts
@@ -21,3 +23,5 @@
         msg: >
           Add key to jumphost and to pocketbox after adding his key to the main files folder:
           ansible-playbook add-ssh-key-to-host.yml -e '{"ssh_copy_hosts": "jumphost:pocket", "ssh_copy_user": "root", "ssh_copy_filename": "pocket.pub"}'
+          Add key to jumphost and to carabox after adding his key to the main files folder:
+          ansible-playbook add-ssh-key-to-host.yml -e '{"ssh_copy_hosts": "jumphost:cara", "ssh_copy_user": "root", "ssh_copy_filename": "cara.pub"}'

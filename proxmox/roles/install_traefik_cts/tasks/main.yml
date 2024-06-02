@@ -20,7 +20,7 @@
 
 - name: Create Docker Compose
   template:
-    src: docker-compose.yml
+    src: "{{docker_compose_file}}"
     dest: '/opt/traefik/docker-compose.yml'
     owner: root
     group: root
@@ -28,7 +28,7 @@
 
 - name: Create Config
   template:
-    src: config.yml
+    src: "{{config_file}}"
     dest: '/opt/traefik/data/config.yml'
     owner: root
     group: root
@@ -36,7 +36,7 @@
 
 - name: Create Traefik
   template:
-    src: traefik.yml
+    src: "{{traefik_file}}"
     dest: '/opt/traefik/data/traefik.yml'
     owner: root
     group: root

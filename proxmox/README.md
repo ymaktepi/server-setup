@@ -105,7 +105,7 @@ ansible-playbook update_networkcheckers_cts.yml
 ```
 
 ```bash
-ansible-playbook update_traefik_default_cts.yml
+ansible-playbook update_traefik_cts.yml
 ```
 
 ```bash

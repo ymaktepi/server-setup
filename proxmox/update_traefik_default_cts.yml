@@ -1,7 +1,0 @@
-- hosts: traefik_default
-  gather_facts: false
-
-  roles:
-    - role: update_cts
-    - role: install_docker_debian
-    - role: install_traefik_default_cts

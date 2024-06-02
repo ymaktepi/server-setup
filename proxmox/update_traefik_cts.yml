@@ -1,0 +1,10 @@
+- hosts: traefik_default
+  gather_facts: false
+
+  roles:
+    - role: update_cts
+    - role: install_docker_debian
+    - role: install_traefik_cts
+      config_file: default-config.yml
+      docker_compose_file: default-docker-compose.yml
+      traefik_file: default-traefik.yml

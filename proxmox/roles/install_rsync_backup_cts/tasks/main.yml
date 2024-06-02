@@ -1,0 +1,38 @@
+- name: Create /mnt/mounted-raid/rsync
+  ansible.builtin.file:
+    path: /mnt/mounted-raid/rsync
+    state: directory
+    mode: '0777'
+
+- name: Create /mnt/mounted-raid/rsync/files
+  ansible.builtin.file:
+    path: /mnt/mounted-raid/rsync/files
+    state: directory
+    mode: '0777'
+
+- name: Install rsync packages
+  apt:
+    name:
+      - rsync
+    state: latest
+
+- name: Create rsync conf
+  template:
+    src: rsyncd.conf
+    dest: '/etc/rsyncd.conf'
+
+- name: Create rsyncd secrets
+  template:
+    src: rsyncd.secrets
+    dest: '/etc/rsyncd.secrets'
+    mode: 0600
+
+- name: restart rsync
+  service: name=rsync state=restarted enabled=true
+
+# this user will be connecting via SSH to use rsync and back shit up
+- name: Add the user 'user1' with a bash shell
+  ansible.builtin.user:
+    name: user1
+    shell: /bin/bash
+    password: "{{rsync_user_password | password_hash}}"

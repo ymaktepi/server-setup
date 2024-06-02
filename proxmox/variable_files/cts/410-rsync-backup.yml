@@ -1,4 +1,4 @@
-  - name: samba_shares
+  - name: rsync_backup
     domain_name: .nico
     ctid: 410
     node: proxmox
@@ -6,10 +6,10 @@
     cores: 1
     cpus: 1
     memory: 512
-    vlan: 5
+    vlan: 1
     ipv4mode: static
     ipv4_address: 10.10.0.249/23
     ipv4_gateway: 10.10.0.1
     # optional, allows you to add some mounted disk in raid
     mounts: '{"mp0":"{{mounted_disk_storage}}:200,mp=/mnt/mounted-raid/,backup=0"}'
-    state: new
+    state: started

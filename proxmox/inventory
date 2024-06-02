@@ -14,6 +14,9 @@ ansible_user=root
 [uptimekuma]
 10.10.0.253 ansible_user=root
 
+[rsync_backup]
+10.10.0.249 ansible_user=root
+
 [traefik_default]
 10.10.0.250 ansible_user=root
 

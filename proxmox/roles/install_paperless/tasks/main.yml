@@ -87,4 +87,4 @@
     name: "weekly exports"
     minute: "20"
     hour: "4"
-    job: "docker-compose -f /opt/paperless/docker-compose.yaml exec -T webserver document_exporter /usr/src/paperless/export --zip"
+    job: "docker-compose -f /opt/paperless/docker-compose.yml exec -T webserver document_exporter /usr/src/paperless/export --zip"

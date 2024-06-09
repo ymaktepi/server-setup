@@ -1,0 +1,41 @@
+http:
+  #region routers
+  routers:
+    #paperless:
+    #  entryPoints:
+    #    - "https"
+    #  rule: "Host(`paperless.local.courgettes.cloud`)"
+    #  middlewares:
+    #    - default-headers
+    #    - https-redirectscheme
+    #  tls: {}
+    #  service: paperless
+
+  #endregion
+  #region services
+  services:
+    #paperless:
+    #  loadBalancer:
+    #    servers:
+    #      - url: "https://10.10.0.11"
+    #    passHostHeader: true
+  #endregion
+  middlewares:
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+        #replacement: '/'
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https

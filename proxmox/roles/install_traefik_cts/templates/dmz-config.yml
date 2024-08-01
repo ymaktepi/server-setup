@@ -1,24 +1,26 @@
 http:
   #region routers
   routers:
-    #paperless:
-    #  entryPoints:
-    #    - "https"
-    #  rule: "Host(`paperless.local.courgettes.cloud`)"
-    #  middlewares:
-    #    - default-headers
-    #    - https-redirectscheme
-    #  tls: {}
-    #  service: paperless
+    test:
+      entryPoints:
+        - "https"
+      rule: "Host(`test.courgettes.club`) || Host(`www.test.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - www-to-non-www-redirection
+      tls:
+        certresolver: letsencrypt
+      service: test
 
   #endregion
   #region services
   services:
-    #paperless:
-    #  loadBalancer:
-    #    servers:
-    #      - url: "https://10.10.0.11"
-    #    passHostHeader: true
+    test:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.5.249"
+        passHostHeader: true
   #endregion
   middlewares:
     # Redirect www URLs to their non-www equivalent

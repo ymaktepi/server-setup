@@ -1,0 +1,17 @@
+version: '2.1'
+services:
+
+  ### Application Code Container
+
+  airhorn_application:
+    container_name: airhorn_app
+    #you can comment out the next line
+    restart: always
+    build: .
+    image: airhorn/airhorn_app
+    volumes:
+      - ./app:/usr/share/nginx/html
+    ports:
+      # change the local-port
+      # [local-ip]:[local-port]:[container-port]
+      - "127.0.0.1:8001:80"

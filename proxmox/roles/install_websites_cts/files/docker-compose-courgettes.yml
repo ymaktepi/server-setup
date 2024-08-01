@@ -1,0 +1,15 @@
+version: '2.1'
+services:
+
+  ### Application Code Container
+
+  courgettes_application:
+    container_name: courgettes_app
+    #you can comment out the next line
+    restart: always
+    build: .
+    image: courgettes/site
+    volumes:
+      - ./app:/usr/share/nginx/html
+    ports:
+      - "127.0.0.1:8000:80"

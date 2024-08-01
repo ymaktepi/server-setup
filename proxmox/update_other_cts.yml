@@ -1,6 +1,7 @@
 - hosts:
    - pocket
    - cara
+   - websites
   gather_facts: false
   roles:
     - update_cts
@@ -14,6 +15,13 @@
     - role: install_nginx
       courgettes_subdomain: "paperless"
     - install_paperless
+
+- hosts: websites
+  gather_facts: false
+  roles:
+    - role: install_nginx
+      courgettes_subdomain: "websites"
+    - install_websites_cts
 
 - hosts: localhost
   gather_facts: false

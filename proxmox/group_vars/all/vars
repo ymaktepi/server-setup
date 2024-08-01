@@ -9,6 +9,7 @@ timezone: 'Europe/Bern'
 locale: 'en_US.UTF-8'
 group_name: pvenodes
 root_domain: local.courgettes.cloud
+github_username: ymaktepi
 variable_files:
  - images
  - vms

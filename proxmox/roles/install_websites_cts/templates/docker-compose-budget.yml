@@ -1,0 +1,9 @@
+version: '3'
+services:
+  app:
+    image: ghcr.io/ymaktepi/budget-manager/budget-manager:0.0.20
+
+    ports:
+      - "127.0.0.1:8005:80"
+    volumes:
+      - "./credentials_example.js:/usr/share/nginx/html/credentials.js"

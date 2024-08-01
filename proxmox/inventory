@@ -34,3 +34,6 @@ ansible_user=root
 
 [cara]
 10.10.5.101 ansible_user=root
+
+[websites]
+10.10.5.249 ansible_user=root

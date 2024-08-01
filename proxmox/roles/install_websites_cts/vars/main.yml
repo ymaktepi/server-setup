@@ -2,15 +2,15 @@ website_hosts:
   - name: CourgetteSite
     port: 8000
     host: courgettes.club
+  - name: CourgetteSite
+    port: 8000
+    host: test.courgettes.club
   - name: EGJ
     port: 8333
     host: egj2021.courgettes.club
   - name: Airhorn
     port: 8001
     host: airhorn.courgettes.club
-  - name: Airhorn.WAV
-    port: 8001
-    host: airhorn.wav.courgettes.club
   - name: Budget Manager
     port: 8005
     host: budget.courgettes.club

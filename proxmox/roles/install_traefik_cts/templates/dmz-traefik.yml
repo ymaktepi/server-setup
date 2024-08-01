@@ -21,6 +21,12 @@ providers:
     filename: /config.yml
     watch: true
 certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: courgettesmaster@courgettes.club
+      storage: acme-letsencrypt.json
+      httpchallenge:
+        entrypoint: http
   cloudflare:
     acme:
       email: courgettesmaster@courgettes.club

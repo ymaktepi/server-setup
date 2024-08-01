@@ -19,6 +19,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data/traefik.yml:/traefik.yml:ro
       - ./data/acme.json:/acme.json
+      - ./data/acme-letsencrypt.json:/acme-letsencrypt.json
       - ./data/config.yml:/config.yml:ro
     labels:
       - "traefik.enable=true"

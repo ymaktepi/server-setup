@@ -18,6 +18,14 @@
     owner: root
     mode: 0600
 
+- name: ensure acme-letsencrypt.json file exists
+  copy:
+    content: ""
+    dest: /opt/traefik/data/acme-letsencrypt.json
+    force: false
+    owner: root
+    mode: 0600
+
 - name: Create Docker Compose
   template:
     src: "{{docker_compose_file}}"

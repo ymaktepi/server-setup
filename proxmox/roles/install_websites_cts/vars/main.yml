@@ -10,7 +10,7 @@ website_hosts:
     host: egj2021.courgettes.club
   - name: Airhorn
     port: 8001
-    host: airhorn.courgettes.club
+    host: airhorn.wav.courgettes.club
   - name: Budget Manager
     port: 8005
     host: budget.courgettes.club

@@ -1,6 +1,38 @@
 http:
   #region routers
   routers:
+    airhorn:
+      entryPoints:
+        - "https"
+      rule: "Host(`airhorn.courgettes.club`) || Host(`airhorn.wav.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - wav-to-airhorn-redirection
+      tls:
+        certresolver: letsencrypt
+      service: websites-nico
+    egj:
+      entryPoints:
+        - "https"
+      rule: "Host(`egj2021.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certresolver: letsencrypt
+      service: websites-nico
+    courgettes:
+      entryPoints:
+        - "https"
+      rule: "Host(`courgettes.club`) || Host(`www.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - www-to-non-www-redirection
+      tls:
+        certresolver: letsencrypt
+      service: websites-nico
     test:
       entryPoints:
         - "https"
@@ -11,12 +43,12 @@ http:
         - www-to-non-www-redirection
       tls:
         certresolver: letsencrypt
-      service: test
+      service: websites-nico
 
   #endregion
   #region services
   services:
-    test:
+    websites-nico:
       loadBalancer:
         servers:
           - url: "https://10.10.5.249"
@@ -34,6 +66,12 @@ http:
         regex: "^https?://www\\.(.+)"
         # How to modify the URL to have the new target URL
         replacement: "https://${1}"
+
+    wav-to-airhorn-redirection:
+      redirectregex:
+        permanent: true
+        regex: "^https:?://airhorn.courgettes.club"
+        replacement: "https://airhorn.wav.courgettes.club"
 
     https-redirectscheme:
       redirectScheme:

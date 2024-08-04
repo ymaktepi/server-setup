@@ -1,0 +1,13 @@
+services:
+  app:
+    image: contra
+    restart: always
+    build:
+      context: .
+      args:
+        URL: "{{contra_url}}"
+        DOMAIN: "{{contra_domain}}"
+        PROTOCOL: "{{contra_protocol}}"
+        PASSWORD: "{{contra_password}}"
+    ports:
+      - "127.0.0.1:{{contra_port}}:80"

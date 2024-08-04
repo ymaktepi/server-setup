@@ -25,7 +25,7 @@ http:
     courgettes:
       entryPoints:
         - "https"
-      rule: "Host(`courgettes.club`) || Host(`www.courgettes.club`) || Host(`budget.courgettes.club`)"
+      rule: "Host(`courgettes.club`) || Host(`www.courgettes.club`) || Host(`budget.courgettes.club`) || Host(`contra.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme

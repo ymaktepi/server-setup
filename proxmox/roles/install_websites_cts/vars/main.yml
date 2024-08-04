@@ -14,3 +14,6 @@ website_hosts:
   - name: Budget Manager
     port: 8005
     host: budget.courgettes.club
+  - name: Contra
+    port: 8006
+    host: contra.courgettes.club

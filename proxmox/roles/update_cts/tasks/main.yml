@@ -20,7 +20,7 @@
     state: absent
 
 - name: Create sshd jail conf
-  copy:
+  template:
     src: sshd-jail.conf
     dest: '/etc/fail2ban/jail.d/sshd-jail.conf'
     owner: root

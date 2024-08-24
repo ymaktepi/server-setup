@@ -1,0 +1,12 @@
+
+- hosts:
+    - infomaniak
+  gather_facts: false
+  become: true
+  become_method: sudo
+  roles:
+    - update_cts
+    - install_docker_debian
+    - install_teamspeak
+    - role: install_rathole
+      rathole_mode: server

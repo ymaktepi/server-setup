@@ -2,5 +2,9 @@
   gather_facts: false
 
   roles:
-    - update_cts
+    - role: update_cts
+      fail2ban_allow_ips: [ "172.17.0.0/16" ]
+    - install_docker_debian
     - install_jumphost_cts
+    - role: install_rathole
+      rathole_mode: client

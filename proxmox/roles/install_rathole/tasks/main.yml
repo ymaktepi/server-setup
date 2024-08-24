@@ -1,0 +1,22 @@
+- name: Create /opt/rathole
+  ansible.builtin.file:
+    path: /opt/rathole
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for rathole
+  template:
+    src: docker-compose-rathole.yaml
+    dest: '/opt/rathole/docker-compose.yml'
+    mode: '0644'
+
+- name: Create config.toml for rathole
+  template:
+    src: config.toml
+    dest: '/opt/rathole/config.toml'
+    mode: '0644'
+
+- name: Run `docker-compose up` for Rathole
+  community.docker.docker_compose:
+    project_src: /opt/rathole
+    build: false

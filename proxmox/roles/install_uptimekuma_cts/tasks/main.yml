@@ -1,0 +1,46 @@
+- name: Create /opt/uptimekuma directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/uptimekuma
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose
+  copy:
+    src: docker-compose.yml
+    dest: '/opt/uptimekuma/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up`
+  community.docker.docker_compose:
+    project_src: /opt/uptimekuma
+    build: false
+
+
+- name: Create nginx conf
+  template:
+    src: uptime-kuma-nginx.conf
+    dest: '/etc/nginx/sites-available/uptime-kuma-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/uptime-kuma-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/uptime-kuma-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted
+
+- name: Import Backup
+  ansible.builtin.debug:
+    msg: Use the Backup File to import notifications.
+
+- name: Telegram notification
+  ansible.builtin.debug:
+    msg: Setup telegram notification

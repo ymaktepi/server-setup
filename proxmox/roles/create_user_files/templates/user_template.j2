@@ -1,0 +1,25 @@
+#cloud-config
+hostname: {{item.name}}
+manage_etc_hosts: true
+fqdn: {{item.name}}{{item.domain_name | default(default_domain_name)}}
+user: {{ansible_user}}
+ssh_authorized_keys:
+- {{ lookup("file", "{{ansible_key_file}}") }}
+chpasswd:
+expire: False
+users:
+- default
+package_update: true
+package_upgrade: true
+timezone: {{timezone}}
+packages:
+- qemu-guest-agent
+- ufw
+runcmd:
+- systemctl enable qemu-guest-agent
+- systemctl start qemu-guest-agent
+#- ufw limit proto tcp from {ansible_ip} to any port 22
+#- ufw enable
+- locale-gen {{locale}}
+- localectl set-locale LANG={{locale}}
+- chfn -f Ansible {{ansible_user}}

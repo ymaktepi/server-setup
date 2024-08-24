@@ -1,0 +1,12 @@
+# Create user cloud-init files
+# NOTE: The storage used for these files has to support snippets
+- name: Create user cloud-init files
+  template:
+    src: user_template.j2
+    dest: '{{snippets_path}}{{item.vmid}}-user.yml'
+    owner: root
+    group: root
+    mode: 0644
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  #no_log: yes

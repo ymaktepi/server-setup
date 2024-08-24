@@ -1,0 +1,17 @@
+ansible_key_file: "{{lookup('env','HOME') + '/.ssh/id_ecdsa.pub'}}"
+project_path: "{{lookup('env','HOME') + '/dev/perso/server-setup/proxmox/'}}"
+image_path: '/mnt/pve/isos/images/0/'
+cts_storage: 'isos'
+disk_storage: 'm2-noraid'
+mounted_disk_storage: 'hdd-8tb-raid'
+default_domain_name: '.nico'
+timezone: 'Europe/Bern'
+locale: 'en_US.UTF-8'
+group_name: pvenodes
+root_domain: local.courgettes.cloud
+github_username: ymaktepi
+variable_files:
+ - images
+ - vms
+ - cts_images
+ - cts

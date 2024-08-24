@@ -1,0 +1,43 @@
+
+version: "3.4"
+services:
+  broker:
+    image: docker.io/library/redis:7
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+
+  db:
+    image: docker.io/library/postgres:15
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - data:/usr/src/paperless/data
+      - /mnt/paperless-media:/usr/src/paperless/media
+      - /mnt/paperless-exports:/usr/src/paperless/export
+      - /mnt/scans:/usr/src/paperless/consume
+    env_file: docker-compose.env
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_OCR_USER_ARGS: '{"invalidate_digital_signatures": true}'
+
+volumes:
+  data:
+  media:
+  pgdata:
+  redisdata:

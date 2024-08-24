@@ -1,0 +1,154 @@
+http:
+  #region routers
+  routers:
+    paperless:
+      entryPoints:
+        - "https"
+      rule: "Host(`paperless.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: paperless
+    synology:
+      entryPoints:
+        - "https"
+      rule: "Host(`synology.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: synology
+    uptime:
+      entryPoints:
+        - "https"
+      rule: "Host(`uptime.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: uptime
+    nwCheckerDefault:
+      entryPoints:
+        - "https"
+      rule: "Host(`nc-default.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: nwCheckerDefault
+    nwCheckerEntertainment:
+      entryPoints:
+        - "https"
+      rule: "Host(`nc-entertainment.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: nwCheckerEntertainment
+    nwCheckerGuest:
+      entryPoints:
+        - "https"
+      rule: "Host(`nc-guest.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: nwCheckerGuest
+    nwCheckerCrusted:
+      entryPoints:
+        - "https"
+      rule: "Host(`nc-crusted.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: nwCheckerCrusted
+    nwCheckerDMZ:
+      entryPoints:
+        - "https"
+      rule: "Host(`nc-dmz.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: nwCheckerDMZ
+    proxmox:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox.local.courgettes.cloud`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: proxmox
+
+  #endregion
+  #region services
+  services:
+    paperless:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.11"
+        passHostHeader: true
+    synology:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.252:5001"
+          - url: "https://10.10.0.251:5001"
+        passHostHeader: true
+    uptime:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.253"
+        passHostHeader: true
+    nwCheckerDefault:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.254"
+        passHostHeader: true
+    nwCheckerEntertainment:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.2.254"
+        passHostHeader: true
+    nwCheckerGuest:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.3.254"
+        passHostHeader: true
+    nwCheckerCrusted:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.4.254"
+        passHostHeader: true
+    nwCheckerDMZ:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.5.254"
+        passHostHeader: true
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.100:8006"
+        passHostHeader: true
+  #endregion
+  middlewares:
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+        #replacement: '/'
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https

@@ -1,0 +1,31 @@
+- hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+
+    # Create variables files for images and VMs
+    - name: Create Variable Files
+      include_role:
+        name: create_variables_file
+      vars:
+        variable_name: '{{item}}'
+      loop:
+        '{{variable_files}}'
+
+- hosts: pvenodes
+  become: true
+  gather_facts: false
+
+  roles:
+    # Download cloud-init images
+    - download_cloud_init_images
+    # Create cloud-init files
+    - create_user_files
+
+- hosts: pvenodes[0]
+  become: false
+  gather_facts: false
+
+  roles:
+    # Create VMs
+    - create_vms

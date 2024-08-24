@@ -1,0 +1,22 @@
+# Create a download folder
+- name: Create download folder
+  file:
+    path: '{{image_path}}'
+    state: directory
+
+# Download cloud-init images
+- name: Download cloud-init images
+  get_url:
+    url: '{{item.image_url}}'
+    dest: '{{image_path}}{{item.cloud_init_file}}'
+    checksum: '{{item.image_checksum}}'
+  loop: '{{os_images}}'
+  when: 'item.state == "present"'
+
+# Delete cloud-init images, that are no longer needed
+- name: Delete unused cloud-init images
+  file:
+    path: '{{image_path}}{{item.cloud_init_file}}'
+    state: absent
+  loop: '{{os_images}}'
+  when: 'item.state == "absent"'

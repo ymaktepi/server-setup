@@ -1,0 +1,44 @@
+[pvenodes]
+10.10.0.100 ansible_user=ansible proxmox_node_name=proxmox
+
+[networkcheckers]
+10.10.0.254 network_type=default        reachable_urls="https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" unreachable_urls=""
+10.10.2.254 network_type=entertainment  reachable_urls="https://10.10.3.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
+10.10.3.254 network_type=guest          reachable_urls="https://10.10.2.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
+10.10.4.254 network_type=crusted        reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.5.254"
+10.10.5.254 network_type=dmz            reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.4.254"
+
+[networkcheckers:vars]
+ansible_user=root
+
+[uptimekuma]
+10.10.0.253 ansible_user=root
+
+[rsync_backup]
+10.10.0.249 ansible_user=root
+
+[traefik_default]
+10.10.0.250 ansible_user=root
+
+[traefik_dmz]
+10.10.5.250 ansible_user=root
+
+[jumphost]
+10.10.5.252 ansible_user=root
+
+[pi]
+10.10.0.11 ansible_user=ymaktepi
+
+[pocket]
+10.10.5.100 ansible_user=root
+
+[cara]
+10.10.5.101 ansible_user=root
+
+[websites]
+10.10.5.249 ansible_user=root
+
+[infomaniak]
+# assumes that the host exists in .ssh/config
+# uses 1password ssh agent
+infomaniak

@@ -1,0 +1,16 @@
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+
+Match Address 10.10.0.*
+  PermitRootLogin prohibit-password
+
+Match Address 10.10.1.*
+  PermitRootLogin prohibit-password
+
+Match User jumper
+  PermitTTY no
+  X11Forwarding no
+  PermitTunnel no
+  GatewayPorts no
+  ForceCommand /usr/sbin/nologin

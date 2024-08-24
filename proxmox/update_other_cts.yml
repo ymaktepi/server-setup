@@ -1,0 +1,35 @@
+- hosts:
+   - pocket
+   - cara
+   - websites
+  gather_facts: false
+  roles:
+    - update_cts
+    - install_docker_debian
+
+- hosts: pi
+  gather_facts: false
+  become: true
+  become_method: sudo
+  roles:
+    - role: install_nginx
+      courgettes_subdomain: "paperless"
+    - install_paperless
+
+- hosts: websites
+  gather_facts: false
+  roles:
+    - role: install_nginx
+      courgettes_subdomain: "websites"
+    - install_websites_cts
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Add ssh keys
+      ansible.builtin.debug:
+        msg: >
+          Add key to jumphost and to pocketbox after adding his key to the main files folder:
+          ansible-playbook add-ssh-key-to-host.yml -e '{"ssh_copy_hosts": "jumphost:pocket", "ssh_copy_user": "root", "ssh_copy_filename": "pocket.pub"}'
+          Add key to jumphost and to carabox after adding his key to the main files folder:
+          ansible-playbook add-ssh-key-to-host.yml -e '{"ssh_copy_hosts": "jumphost:cara", "ssh_copy_user": "root", "ssh_copy_filename": "cara.pub"}'

@@ -1,0 +1,11 @@
+version: '3.1'
+services:
+  teamspeak:
+    image: teamspeak:latest
+    restart: always
+    ports:
+      - 0.0.0.0:9987:9987/udp
+      - 0.0.0.0:10011:10011
+      - 0.0.0.0:30033:30033
+    volumes:
+      - ./data:/var/ts3server

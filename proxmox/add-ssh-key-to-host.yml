@@ -1,0 +1,5 @@
+- hosts: "{{ssh_copy_hosts}}"
+  gather_facts: false
+
+  roles:
+    - copy_ssh_key

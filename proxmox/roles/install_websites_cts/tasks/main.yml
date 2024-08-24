@@ -1,0 +1,136 @@
+- name: Git checkout CourgetteSite
+  ansible.builtin.git:
+    repo: 'https://{{github_username}}:{{github_token}}@github.com/ymaktepi/CourgetteSite.git'
+    dest: /opt/courgettesite
+
+
+- name: Create Docker Compose for CourgetteSite
+  copy:
+    src: docker-compose-courgettes.yml
+    dest: '/opt/courgettesite/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for CourgetteSite
+  community.docker.docker_compose:
+    project_src: /opt/courgettesite
+    build: false
+
+- name: Create /opt/egj directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/egj
+    state: directory
+    mode: '0755'
+
+- name: Log into Github Container Registry
+  community.docker.docker_login:
+    username: "{{github_username}}"
+    password: "{{github_token}}"
+    registry_url: "ghcr.io"
+
+- name: Create Docker Compose for egj
+  template:
+    src: docker-compose-egj.yml
+    dest: '/opt/egj/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for egj
+  community.docker.docker_compose:
+    project_src: /opt/egj
+    build: false
+
+- name: Git checkout Airhorn
+  ansible.builtin.git:
+    repo: 'https://github.com/ymaktepi/airhorn.club.git'
+    dest: /opt/airhorn
+
+- name: Create Docker Compose for airhorn
+  template:
+    src: docker-compose-airhorn.yml
+    dest: '/opt/airhorn/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for airhorn
+  community.docker.docker_compose:
+    project_src: /opt/airhorn
+    build: false
+
+- name: Create /opt/budget directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/budget
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for budget
+  template:
+    src: docker-compose-budget.yml
+    dest: '/opt/budget/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create credentials for budget
+  template:
+    src: credentials_example.js
+    dest: '/opt/budget/credentials_example.js'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for budget
+  community.docker.docker_compose:
+    project_src: /opt/budget
+    build: false
+
+- name: Git checkout contra
+  ansible.builtin.git:
+    repo: 'https://{{github_username}}:{{github_token}}@github.com/ymaktepi/contra.git'
+    dest: /opt/contra
+
+- name: Create Docker Compose for contra
+  template:
+    src: docker-compose-contra.yml
+    dest: '/opt/contra/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    contra_port: "8006"
+    contra_domain: "contra.courgettes.club"
+    contra_protocol: "https"
+
+
+- name: Run `docker-compose up` for contra
+  community.docker.docker_compose:
+    project_src: /opt/contra
+    build: true
+
+
+- name: Create nginx conf for {{item.name}}
+  template:
+    src: nginx-reverse-proxy.conf
+    dest: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+  loop: "{{website_hosts}}"
+  vars:
+    server_name: "{{item.host}}"
+    container_port: "{{item.port}}"
+
+- name: Create a symbolic link for nginx conf for {{item.name}}
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/{{item.host}}-nginx.conf'
+    owner: root
+    group: root
+    state: link
+  loop: "{{website_hosts}}"
+
+- name: restart nginx
+  service: name=nginx state=restarted

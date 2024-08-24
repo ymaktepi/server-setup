@@ -1,0 +1,20 @@
+- name: create jumper user
+  user:
+    name: jumper
+    shell: '/bin/bash'
+
+- name: add jumper ssh key
+  authorized_key:
+    user: jumper
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ecdsa.pub') }}"
+
+- name: Create sshd conf
+  copy:
+    src: sshd_conf
+    dest: '/etc/ssh/sshd_config.d/jumper.conf'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: restart ssh
+  service: name=ssh state=restarted

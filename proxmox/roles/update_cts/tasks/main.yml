@@ -1,0 +1,34 @@
+- name: Update and upgrade apt packages
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 #One day
+
+- name: Install default packages
+  apt:
+    name:
+      - curl
+      - vim
+      - htop
+      - wget
+      - fail2ban
+    state: latest
+
+- name: Remove default debian jail
+  ansible.builtin.file:
+    path: /etc/fail2ban/jail.d/defaults-debian.conf
+    state: absent
+
+- name: Create sshd jail conf
+  template:
+    src: sshd-jail.conf
+    dest: '/etc/fail2ban/jail.d/sshd-jail.conf'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Start fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true

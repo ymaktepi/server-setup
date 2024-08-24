@@ -1,7 +1,0 @@
-- name: Install nginx-proxy-generator 
-  hosts: courgettes-debian
-  tasks:
-    - name: Pull git 
-      git:
-        repo: 'https://github.com/fa18swiss/nginx-proxy-generator.git'
-        dest: '$HOME/gits/nginx-proxy-generator'

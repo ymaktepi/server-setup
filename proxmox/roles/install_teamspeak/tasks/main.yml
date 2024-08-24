@@ -1,0 +1,23 @@
+- name: Create /opt/teamspeak
+  ansible.builtin.file:
+    path: /opt/teamspeak/data
+    state: directory
+    mode: '0755'
+
+- name: Ensure license file exists
+  copy:
+    content: ""
+    dest: /opt/teamspeak/data/.ts3server_license_accepted
+    force: false
+    mode: '0755'
+
+- name: Create Docker Compose for TS
+  copy:
+    src: docker-compose-teamspeak.yaml
+    dest: '/opt/teamspeak/docker-compose.yml'
+    mode: '0644'
+
+- name: Run `docker-compose up` for TS
+  community.docker.docker_compose:
+    project_src: /opt/teamspeak
+    build: false

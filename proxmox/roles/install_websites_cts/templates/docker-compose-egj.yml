@@ -1,0 +1,8 @@
+version: '2.1'
+services:
+  egj2021:
+    container_name: egj_app
+    restart: always
+    image: "ghcr.io/{{github_username}}/epic-game-jam-2021/epic-game-jam-2021:latest"
+    ports:
+      - "127.0.0.1:8333:80"

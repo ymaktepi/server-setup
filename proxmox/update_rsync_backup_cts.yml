@@ -1,0 +1,5 @@
+- hosts: rsync_backup
+  gather_facts: false
+  roles:
+    - update_cts
+    - install_rsync_backup_cts

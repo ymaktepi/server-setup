@@ -1,0 +1,14 @@
+- name: Delete CTs
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  community.general.proxmox:
+    api_user: "{{ api_user }}"
+    api_token_id: "{{ api_token_name }}"
+    api_token_secret: "{{ api_token }}"
+    api_host: "{{ ansible_host }}"
+    vmid: '{{item.ctid}}'
+    node: '{{item.node}}'
+    state: absent
+    purge: true
+  loop: '{{cts}}'
+  when: 'item.state == "absent"'

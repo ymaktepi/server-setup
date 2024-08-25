@@ -4,7 +4,7 @@ http:
     paperless:
       entryPoints:
         - "https"
-      rule: "Host(`paperless.local.courgettes.cloud`)"
+      rule: "Host(`paperless.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -13,7 +13,7 @@ http:
     synology:
       entryPoints:
         - "https"
-      rule: "Host(`synology.local.courgettes.cloud`)"
+      rule: "Host(`synology.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -22,7 +22,7 @@ http:
     uptime:
       entryPoints:
         - "https"
-      rule: "Host(`uptime.local.courgettes.cloud`)"
+      rule: "Host(`uptime.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -31,7 +31,7 @@ http:
     nwCheckerDefault:
       entryPoints:
         - "https"
-      rule: "Host(`nc-default.local.courgettes.cloud`)"
+      rule: "Host(`nc-default.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -40,7 +40,7 @@ http:
     nwCheckerEntertainment:
       entryPoints:
         - "https"
-      rule: "Host(`nc-entertainment.local.courgettes.cloud`)"
+      rule: "Host(`nc-entertainment.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -49,7 +49,7 @@ http:
     nwCheckerGuest:
       entryPoints:
         - "https"
-      rule: "Host(`nc-guest.local.courgettes.cloud`)"
+      rule: "Host(`nc-guest.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -58,7 +58,7 @@ http:
     nwCheckerCrusted:
       entryPoints:
         - "https"
-      rule: "Host(`nc-crusted.local.courgettes.cloud`)"
+      rule: "Host(`nc-crusted.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -67,7 +67,7 @@ http:
     nwCheckerDMZ:
       entryPoints:
         - "https"
-      rule: "Host(`nc-dmz.local.courgettes.cloud`)"
+      rule: "Host(`nc-dmz.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -76,7 +76,7 @@ http:
     proxmox:
       entryPoints:
         - "https"
-      rule: "Host(`proxmox.local.courgettes.cloud`)"
+      rule: "Host(`proxmox.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme

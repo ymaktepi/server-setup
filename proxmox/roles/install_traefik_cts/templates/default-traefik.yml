@@ -21,13 +21,13 @@ providers:
     filename: /config.yml
     watch: true
 certificatesResolvers:
-  cloudflare:
+  infomaniak:
     acme:
       email: courgettesmaster@courgettes.club
       storage: acme.json
       dnsChallenge:
-        provider: cloudflare
-        # uncomment this if you have issues pulling certificates through cloudflare, By setting this flag to true disables the need to wait for the propagation of the TXT record to all authoritative name servers.
+        provider: infomaniak
+        # uncomment this if you have issues pulling certificates through infomaniak, By setting this flag to true disables the need to wait for the propagation of the TXT record to all authoritative name servers.
         disablePropagationCheck: true
         # uncomment along with disablePropagationCheck if needed to ensure the TXT record is ready before verification is attempted
         delayBeforeCheck: 60

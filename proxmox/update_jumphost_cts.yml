@@ -3,7 +3,7 @@
 
   roles:
     - role: update_cts
-      fail2ban_allow_ips: [ "172.17.0.0/16" ]
+      fail2ban_allow_ips: [ "172.16.0.0/12" ]
     - install_docker_debian
     - install_jumphost_cts
     - role: install_rathole

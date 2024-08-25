@@ -1,0 +1,38 @@
+- name: Install tailscale apt source
+  ansible.builtin.shell: |
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+    curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list
+
+- name: Install tailscale package
+  apt:
+    name:
+      - tailscale
+    state: latest
+    update_cache: true
+
+- name: Create tailscaled default conf
+  copy:
+    src: default-tailscaled
+    dest: "/etc/default/tailscaled"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Create tailscale sysctl conf
+  copy:
+    src: 99-tailscale.conf
+    dest: "/etc/sysctl.d/99-tailscale.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable and run tailscaled
+  ansible.builtin.systemd_service:
+    name: tailscaled
+    state: started
+    enabled: true
+
+- name: Start tailscale
+  ansible.builtin.shell: |
+    # auth key is to be renewed after 90 days
+    tailscale up --advertise-exit-node --advertise-routes=10.10.0.0/24,10.10.1.0/24,10.10.2.0/24,10.10.3.0/24,10.10.4.0/24,10.10.5.0/24 --auth-key "{{tailscale_auth_key}}"

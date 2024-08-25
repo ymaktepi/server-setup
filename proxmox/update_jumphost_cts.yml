@@ -1,3 +1,19 @@
+- hosts: vpn
+  gather_facts: false
+
+  roles:
+    - role: update_cts
+    - install_tailscale_exit_node
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Updates to perform on tailscale side
+      ansible.builtin.debug:
+        msg: >
+          Accept router and exit node in tailscale webapp.
+          Disable key expiry of new node.
+
 - hosts: jumphost
   gather_facts: false
 

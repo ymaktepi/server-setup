@@ -23,6 +23,9 @@ ansible_user=root
 [traefik_dmz]
 10.10.5.250 ansible_user=root
 
+[traefik_test]
+10.10.5.200 ansible_user=root
+
 [jumphost]
 10.10.5.252 ansible_user=root
 

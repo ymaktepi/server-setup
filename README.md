@@ -34,8 +34,8 @@ We assume a proxy VM is available somewhere with a public IP. Its hostname is `p
 
 A jumphost VM is spawned in the VLAN. It creates a SSH and HTTP(S) tunnel to the proxy. The SSH tunnel
 binds `proxy.courgettes.club:2222` to `jumphost:22`.
-The HTTP(S) tunnels bind `proxy.courgettes.club:80` to `traefik.local-dmz.courgettes.cloud:80`
-and `proxy.courgettes.club:443` to `traefik.local-dmz.courgettes.cloud:443` respectively.
+The HTTP(S) tunnels bind `proxy.courgettes.club:80` to `traefik.local-dmz.courgettes.club:80`
+and `proxy.courgettes.club:443` to `traefik.local-dmz.courgettes.club:443` respectively.
 
 The Traefik VM therefore listens to and trafic on port 80 and 443 of `proxy.courgettes.club`. This effectively allows
 the Traefik VM to generate LetsEncrypt certs for domains that are `CNAME`d to `proxy.courgettes.club`.

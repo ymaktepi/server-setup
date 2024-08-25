@@ -20,7 +20,7 @@
     memory: 512
     vlan: 5
     ipv4mode: static
-    ipv4_address: 10.10.5.250/23
+    ipv4_address: 10.10.5.250/24
     ipv4_gateway: 10.10.5.1
     state: started
 

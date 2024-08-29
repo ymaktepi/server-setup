@@ -43,6 +43,13 @@ the Traefik VM to generate LetsEncrypt certs for domains that are `CNAME`d to `p
 The Websites VM has a self-signed certificate that is trusted by the Traefik VM for inside-VLAN communication.
 The `install_nginx` ansible role handles the creation of the self signed cert for all hosts needing one.
 
+### Tailscale
+
+Tailscale is installed in an LXC in the Main VLAN, configured as an exit node. It's using userspace network routing (
+i.e. so you don't have to change the default settings for LXCs), publishes all the subnet routes in there (so that you
+can access all resources if you have access to tailscale), and has keys expiry disabled - as expected for headless
+servers. See details in the [`install_tailscale_exit_node` role](proxmox/roles/install_tailscale_exit_node).
+
 ## Guest Manual
 
 ### Getting a new box

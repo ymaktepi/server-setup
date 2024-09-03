@@ -10,6 +10,15 @@ http:
         - https-redirectscheme
       tls: {}
       service: paperless
+    homeAssistant:
+      entryPoints:
+        - "https"
+      rule: "Host(`ha.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: homeAssistant
     synology:
       entryPoints:
         - "https"
@@ -90,6 +99,11 @@ http:
       loadBalancer:
         servers:
           - url: "https://10.10.0.11"
+        passHostHeader: true
+    homeAssistant:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.247"
         passHostHeader: true
     synology:
       loadBalancer:

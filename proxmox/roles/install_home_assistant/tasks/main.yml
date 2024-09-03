@@ -1,0 +1,41 @@
+- name: Create /opt/ha/config
+  ansible.builtin.file:
+    path: /opt/ha/config
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for HA
+  copy:
+    src: docker-compose.yaml
+    dest: '/opt/ha/docker-compose.yml'
+    mode: '0644'
+
+- name: Create config for HA
+  copy:
+    src: configuration.yaml
+    dest: '/opt/ha/config/configuration.yaml'
+    mode: '0644'
+
+- name: Run `docker-compose up` for HA
+  community.docker.docker_compose:
+    project_src: /opt/ha
+    build: false
+
+- name: Create nginx conf
+  template:
+    src: ha-nginx.conf
+    dest: '/etc/nginx/sites-available/ha-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/ha-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/ha-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

@@ -1,0 +1,20 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: "Courgettes"
+  # Location required to calculate the time the sun rises and sets
+  latitude: 47
+  longitude: 7
+  # 'metric' for Metric, 'us_customary' for US Customary
+  unit_system: metric
+  # Pick yours from here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: "Europe/Zurich"
+http:
+  # For extra security set this to only accept connections on localhost if NGINX is on the same machine
+  # Uncommenting this will mean that you can only reach Home Assistant using the proxy, not directly via IP from other clients.
+  # server_host: 127.0.0.1
+  use_x_forwarded_for: true
+  # You must set the trusted proxy IP address so that Home Assistant will properly accept connections
+  # Set this to your NGINX machine IP, or localhost if hosted on the same machine.
+  trusted_proxies:
+    - 10.10.0.0/23
+    - 172.0.0.0/8

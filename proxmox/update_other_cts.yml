@@ -2,10 +2,18 @@
    - pocket
    - cara
    - websites
+   - home_assistant
   gather_facts: false
   roles:
     - update_cts
     - install_docker_debian
+
+- hosts: home_assistant
+  gather_facts: false
+  roles:
+    - role: install_nginx
+      courgettes_subdomain: "ha"
+    - install_home_assistant
 
 - hosts: pi
   gather_facts: false

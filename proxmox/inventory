@@ -23,9 +23,6 @@ ansible_user=root
 [traefik_dmz]
 10.10.5.250 ansible_user=root
 
-[traefik_test]
-10.10.5.200 ansible_user=root
-
 [vpn]
 10.10.0.248 ansible_user=root
 
@@ -34,6 +31,9 @@ ansible_user=root
 
 [pi]
 10.10.0.11 ansible_user=ymaktepi
+
+[home_assistant]
+10.10.0.247 ansible_user=root
 
 [pocket]
 10.10.5.100 ansible_user=root

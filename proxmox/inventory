@@ -44,6 +44,9 @@ ansible_user=root
 [websites]
 10.10.5.249 ansible_user=root
 
+[game_server]
+10.10.5.248 ansible_user=root
+
 [infomaniak]
 # assumes that the host exists in .ssh/config
 # uses 1password ssh agent

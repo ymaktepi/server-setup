@@ -1,3 +1,3 @@
   - name: Debian12-CT-Image
-    proxmox_image_name: 'debian-12-standard_12.2-1_amd64.tar.zst'
+    proxmox_image_name: 'debian-12-standard_12.7-1_amd64.tar.zst'
     state: present

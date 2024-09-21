@@ -1,0 +1,16 @@
+- name: Install ddclient
+  apt:
+    name:
+      - ddclient
+    state: latest
+
+- name: Create ddclient conf
+  template:
+    src: ddclient.conf
+    dest: '/etc/ddclient.conf'
+    owner: root
+    group: root
+    mode: 0700
+
+- name: restart ddclient
+  service: name=ddclient state=restarted

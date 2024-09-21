@@ -1,0 +1,40 @@
+- name: Create /opt/factorio/data/config
+  when: install_factorio
+  ansible.builtin.file:
+    path: /opt/factorio/data/config
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for Factorio
+  when: install_factorio
+  copy:
+    src: factorio/docker-compose.yml
+    dest: '/opt/factorio/docker-compose.yml'
+    mode: '0644'
+
+- name: Create map-gen-settings.json
+  when: install_factorio
+  copy:
+    src: factorio/map-gen-settings.json
+    dest: '/opt/factorio/data/config/map-gen-settings.json'
+    mode: '0644'
+
+- name: Create map-settings.json
+  when: install_factorio
+  copy:
+    src: factorio/map-settings.json
+    dest: '/opt/factorio/data/config/map-settings.json'
+    mode: '0644'
+
+- name: Create server-settings.json
+  when: install_factorio
+  template:
+    src: factorio/server-settings.json
+    dest: '/opt/factorio/data/config/server-settings.json'
+    mode: '0644'
+
+- name: Run `docker-compose up` for factorio
+  when: install_factorio
+  community.docker.docker_compose:
+    project_src: /opt/factorio
+    build: true

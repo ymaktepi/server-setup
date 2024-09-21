@@ -3,10 +3,17 @@
    - cara
    - websites
    - home_assistant
+   - game_server
   gather_facts: false
   roles:
     - update_cts
     - install_docker_debian
+
+- hosts: game_server
+  gather_facts: false
+  roles:
+    - role: install_game_server
+      install_factorio: true
 
 - hosts: home_assistant
   gather_facts: false

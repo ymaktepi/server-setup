@@ -1,0 +1,19 @@
+- name: Create /opt/satisfactory/data/config
+  when: install_satisfactory
+  ansible.builtin.file:
+    path: /opt/satisfactory/data/config
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for Satisfactory
+  when: install_satisfactory
+  copy:
+    src: satisfactory/docker-compose.yml
+    dest: '/opt/satisfactory/docker-compose.yml'
+    mode: '0644'
+
+- name: Run `docker-compose up` for satisfactory
+  when: install_satisfactory
+  community.docker.docker_compose:
+    project_src: /opt/satisfactory
+    build: true

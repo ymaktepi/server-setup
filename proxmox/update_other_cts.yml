@@ -9,6 +9,14 @@
     - update_cts
     - install_docker_debian
 
+- hosts: cara
+  gather_facts: false
+  roles:
+    - role: install_nginx
+      courgettes_subdomain: ""
+      root_domain: "piratefache.ch"
+    - install_piratefache
+
 - hosts: game_server
   gather_facts: false
   roles:

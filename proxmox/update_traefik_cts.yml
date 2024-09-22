@@ -15,6 +15,7 @@
   roles:
     - role: update_cts
     - role: install_docker_debian
+    - role: install_ddclient
     - role: install_traefik_cts
       config_file: dmz-config.yml
       docker_compose_file: dmz-docker-compose.yml

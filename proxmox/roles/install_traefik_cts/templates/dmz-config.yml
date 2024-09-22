@@ -44,6 +44,29 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-nico
+    piratefache:
+      entryPoints:
+        - "https"
+      rule: "Host(`piratefache.ch`) || Host(`www.piratefache.ch`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - www-to-non-www-redirection
+      tls:
+        certresolver: letsencrypt
+      service: websites-cara
+    mcaraccio:
+      entryPoints:
+        - "https"
+      rule: "Host(`mcaraccio.ch`) || Host(`www.mcaraccio.ch`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - www-to-non-www-redirection
+        - mcaraccio-to-piratefache-redirection
+      tls:
+        certresolver: letsencrypt
+      service: websites-cara
 
   #endregion
   #region services
@@ -52,6 +75,11 @@ http:
       loadBalancer:
         servers:
           - url: "https://10.10.5.249"
+        passHostHeader: true
+    websites-cara:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.5.101"
         passHostHeader: true
   #endregion
   middlewares:
@@ -72,6 +100,12 @@ http:
         permanent: true
         regex: "^https:?://airhorn.courgettes.club"
         replacement: "https://airhorn.wav.courgettes.club"
+
+    mcaraccio-to-piratefache-redirection:
+      redirectregex:
+        permanent: true
+        regex: "^https:?://mcaraccio.ch"
+        replacement: "https://piratefache.ch"
 
     https-redirectscheme:
       redirectScheme:

@@ -8,25 +8,25 @@ services:
       - '7777:7777/tcp'
     restart: unless-stopped
     volumes:
-      - './data:/config'
+      - '/mnt/mounted-raid/satisfactory/data:/config'
     environment:
       AUTOSAVENUM: 5 # number of rotating autosave files
-      DEBUG: false # for debugging the server
-      DISABLESEASONALEVENTS: false # disable the FICSMAS event (you miserable bastard)
-      LOG: false # disable Satisfactory log pruning
+      DEBUG: "false" # for debugging the server
+      DISABLESEASONALEVENTS: "false" # disable the FICSMAS event (you miserable bastard)
+      LOG: "false" # disable Satisfactory log pruning
       MAXOBJECTS: 2162688 # set the object limit for your server
       MAXPLAYERS: 4 # set the player limit for your server
       MAXTICKRATE: 30 # set the maximum sim tick rate for your server
       PGID: 1000 # set the group ID of the user the server will run as
       PUID: 1000 # set the user ID of the user the server will run as
-      ROOTLESS: false # run the container as a non-root user
+      ROOTLESS: "false" # run the container as a non-root user
       SERVERGAMEPORT: 7777 # set the game's port
-      SERVERIP: 0.0.0.0 # set the game's ip (usually not needed)
-      SERVERSTREAMING: true # toggle whether the game utilizes asset streaming
-      SKIPUPDATE: false # avoid updating the game on container start/restart
-      STEAMBETA: false # set experimental game version
+      SERVERIP: "0.0.0.0" # set the game's ip (usually not needed)
+      SERVERSTREAMING: "true" # toggle whether the game utilizes asset streaming
+      SKIPUPDATE: "false" # avoid updating the game on container start/restart
+      STEAMBETA: "false" # set experimental game version
       TIMEOUT: 30 # set client timeout (in seconds)
-      VMOVERRIDE: false # skips the CPU model check (should not ordinarily be used)
+      VMOVERRIDE: "false" # skips the CPU model check (should not ordinarily be used)
     healthcheck:
       test: bash /healthcheck.sh
       interval: 30s

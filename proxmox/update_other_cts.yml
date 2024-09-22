@@ -22,7 +22,6 @@
   roles:
     - role: install_game_server
       install_factorio: true
-    - role: install_satisfactory
       install_satisfactory: true
 
 - hosts: home_assistant

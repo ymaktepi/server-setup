@@ -4,7 +4,7 @@
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 4
     cpus: 4
-    memory: 4096
+    memory: 16384
     vlan: 5
     ipv4mode: static
     ipv4_address: 10.10.5.248/24

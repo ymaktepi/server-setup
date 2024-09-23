@@ -15,7 +15,7 @@ services:
       DISABLESEASONALEVENTS: "false" # disable the FICSMAS event (you miserable bastard)
       LOG: "false" # disable Satisfactory log pruning
       MAXOBJECTS: 2162688 # set the object limit for your server
-      MAXPLAYERS: 4 # set the player limit for your server
+      MAXPLAYERS: 12 # set the player limit for your server
       MAXTICKRATE: 30 # set the maximum sim tick rate for your server
       PGID: 1000 # set the group ID of the user the server will run as
       PUID: 1000 # set the user ID of the user the server will run as

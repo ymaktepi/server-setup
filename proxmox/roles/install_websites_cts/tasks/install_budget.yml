@@ -1,0 +1,26 @@
+- name: Create /opt/budget directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/budget
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for budget
+  template:
+    src: docker-compose-budget.yml
+    dest: '/opt/budget/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create credentials for budget
+  template:
+    src: credentials_example.js
+    dest: '/opt/budget/credentials_example.js'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for budget
+  community.docker.docker_compose:
+    project_src: /opt/budget
+    build: false

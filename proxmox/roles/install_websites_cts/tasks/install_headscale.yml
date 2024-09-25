@@ -1,0 +1,22 @@
+- name: Create /opt/headscale/config directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/headscale/config
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for headscale
+  copy:
+    src: docker-compose-headscale.yml
+    dest: '/opt/headscale/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create config for headscale
+  copy:
+    src: config-headscale.yml
+    dest: '/opt/headscale/config/config.yaml'
+    owner: root
+    group: root
+    mode: 0644
+

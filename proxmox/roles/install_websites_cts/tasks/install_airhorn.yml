@@ -1,0 +1,17 @@
+- name: Git checkout Airhorn
+  ansible.builtin.git:
+    repo: 'https://github.com/ymaktepi/airhorn.club.git'
+    dest: /opt/airhorn
+
+- name: Create Docker Compose for airhorn
+  template:
+    src: docker-compose-airhorn.yml
+    dest: '/opt/airhorn/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for airhorn
+  community.docker.docker_compose:
+    project_src: /opt/airhorn
+    build: false

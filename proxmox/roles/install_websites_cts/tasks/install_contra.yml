@@ -1,0 +1,22 @@
+- name: Git checkout contra
+  ansible.builtin.git:
+    repo: 'https://{{github_username}}:{{github_token}}@github.com/ymaktepi/contra.git'
+    dest: /opt/contra
+
+- name: Create Docker Compose for contra
+  template:
+    src: docker-compose-contra.yml
+    dest: '/opt/contra/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    contra_port: "8006"
+    contra_domain: "contra.courgettes.club"
+    contra_protocol: "https"
+
+
+- name: Run `docker-compose up` for contra
+  community.docker.docker_compose:
+    project_src: /opt/contra
+    build: true

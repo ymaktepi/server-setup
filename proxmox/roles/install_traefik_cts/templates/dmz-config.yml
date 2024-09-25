@@ -12,6 +12,16 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-nico
+    headscale:
+      entryPoints:
+        - "https"
+      rule: "Host(`headscale.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certresolver: letsencrypt
+      service: websites-nico
     egj:
       entryPoints:
         - "https"

@@ -20,7 +20,23 @@
     group: root
     mode: 0644
 
-- name: Run `docker-compose up` for headscale
-  community.docker.docker_compose:
-    project_src: /opt/headscale
-    build: false
+# too lazy to make it work for now :coffin:
+#- name: Run `docker-compose up` for headscale
+#  community.docker.docker_compose:
+#    project_src: /opt/headscale
+#    build: false
+#
+#- name: Create user and api keys and stuff
+#  ansible.builtin.shell: |
+#    HEADSCALE="docker exec -ti headscale headscale"
+#    USERNAME=nico
+#    USERS=$($HEADSCALE users list)
+#    if [ -n "$(echo $USERS | grep -o $USERNAME)" ]
+#    then
+#      echo "User $USERNAME exists, skipping creation"
+#    else
+#      $HEADSCALE users create $USERNAME
+#    fi
+#
+#  args:
+#    chdir: /opt/headscale

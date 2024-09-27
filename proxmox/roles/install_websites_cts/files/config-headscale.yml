@@ -15,14 +15,13 @@ server_url: https://headscale.courgettes.club
 # Address to listen to / bind to on the server
 #
 # For production:
-# listen_addr: 0.0.0.0:8080
-listen_addr: 127.0.0.1:8080
+listen_addr: 0.0.0.0:8080
 
 # Address to listen to /metrics, you may want
 # to keep this endpoint private to your internal
 # network
 #
-metrics_listen_addr: 127.0.0.1:9090
+metrics_listen_addr: 0.0.0.0:9090
 
 # Address to listen for gRPC.
 # gRPC is used for controlling a headscale server
@@ -121,7 +120,7 @@ derp:
   #
   # paths:
   #   - /etc/headscale/derp-example.yaml
-  paths: []
+  paths: [ ]
 
   # If enabled, a worker will be set up to periodically
   # refresh the given sources and update the derpmap
@@ -285,21 +284,21 @@ dns:
     # Split DNS (see https://tailscale.com/kb/1054/dns/),
     # a map of domains and which DNS server to use for each.
     split:
-      {}
+      { }
       # foo.bar.com:
       #   - 1.1.1.1
       # darp.headscale.net:
-      #   - 1.1.1.1
+    #   - 1.1.1.1
     #   - 8.8.8.8
 
   # Set custom DNS search domains. With MagicDNS enabled,
   # your tailnet base_domain is always the first search domain.
-  search_domains: []
+  search_domains: [ ]
 
   # Extra DNS records
   # so far only A-records are supported (on the tailscale side)
   # See https://github.com/juanfont/headscale/blob/main/docs/dns-records.md#Limitations
-  extra_records: []
+  extra_records: [ ]
   #   - name: "grafana.myvpn.example.com"
   #     type: "A"
   #     value: "100.64.0.3"

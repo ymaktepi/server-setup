@@ -1,0 +1,42 @@
+- name: Create /opt/headscale/config directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/headscale/config
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for headscale
+  copy:
+    src: docker-compose-headscale.yml
+    dest: '/opt/headscale/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create config for headscale
+  copy:
+    src: config-headscale.yml
+    dest: '/opt/headscale/config/config.yaml'
+    owner: root
+    group: root
+    mode: 0644
+
+# too lazy to make it work for now :coffin:
+#- name: Run `docker-compose up` for headscale
+#  community.docker.docker_compose:
+#    project_src: /opt/headscale
+#    build: false
+#
+#- name: Create user and api keys and stuff
+#  ansible.builtin.shell: |
+#    HEADSCALE="docker exec -ti headscale headscale"
+#    USERNAME=nico
+#    USERS=$($HEADSCALE users list)
+#    if [ -n "$(echo $USERS | grep -o $USERNAME)" ]
+#    then
+#      echo "User $USERNAME exists, skipping creation"
+#    else
+#      $HEADSCALE users create $USERNAME
+#    fi
+#
+#  args:
+#    chdir: /opt/headscale

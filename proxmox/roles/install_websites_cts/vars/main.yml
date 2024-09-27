@@ -1,19 +1,25 @@
 website_hosts:
   - name: CourgetteSite
+    filename: install_courgettes.yml
     port: 8000
     host: courgettes.club
-  - name: CourgetteSite
-    port: 8000
-    host: test.courgettes.club
   - name: EGJ
+    filename: install_egj.yml
     port: 8333
     host: egj2021.courgettes.club
   - name: Airhorn
+    filename: install_airhorn.yml
     port: 8001
     host: airhorn.wav.courgettes.club
   - name: Budget Manager
+    filename: install_budget.yml
     port: 8005
     host: budget.courgettes.club
   - name: Contra
+    filename: install_contra.yml
     port: 8006
     host: contra.courgettes.club
+  - name: Headscale
+    filename: install_headscale.yml
+    port: 8080
+    host: headscale.courgettes.club

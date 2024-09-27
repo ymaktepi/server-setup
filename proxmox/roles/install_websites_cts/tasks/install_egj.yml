@@ -1,0 +1,24 @@
+- name: Create /opt/egj directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/egj
+    state: directory
+    mode: '0755'
+
+- name: Log into Github Container Registry
+  community.docker.docker_login:
+    username: "{{github_username}}"
+    password: "{{github_token}}"
+    registry_url: "ghcr.io"
+
+- name: Create Docker Compose for egj
+  template:
+    src: docker-compose-egj.yml
+    dest: '/opt/egj/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for egj
+  community.docker.docker_compose:
+    project_src: /opt/egj
+    build: false

@@ -1,0 +1,19 @@
+- name: Git checkout CourgetteSite
+  ansible.builtin.git:
+    repo: 'https://{{github_username}}:{{github_token}}@github.com/ymaktepi/CourgetteSite.git'
+    dest: /opt/courgettesite
+
+
+- name: Create Docker Compose for CourgetteSite
+  copy:
+    src: docker-compose-courgettes.yml
+    dest: '/opt/courgettesite/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for CourgetteSite
+  community.docker.docker_compose:
+    project_src: /opt/courgettesite
+    build: false
+

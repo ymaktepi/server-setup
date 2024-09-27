@@ -1,0 +1,23 @@
+- name: Create /opt/satisfactory
+  ansible.builtin.file:
+    path: /opt/satisfactory
+    state: directory
+    mode: '0755'
+
+- name: Create /mnt/mounted-raid/satisfactory/data
+  ansible.builtin.file:
+    path: /mnt/mounted-raid/satisfactory/data
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for Satisfactory
+  copy:
+    src: satisfactory/docker-compose.yml
+    dest: '/opt/satisfactory/docker-compose.yml'
+    mode: '0644'
+
+- name: Run `docker-compose up` for satisfactory
+  community.docker.docker_compose:
+    project_src: /opt/satisfactory
+    build: true
+

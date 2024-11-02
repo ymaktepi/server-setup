@@ -51,7 +51,7 @@
   "autosave_slots": 5,
 
   "_comment_afk_autokick_interval": "How many minutes until someone is kicked when doing nothing, 0 for never.",
-  "afk_autokick_interval": 0,
+  "afk_autokick_interval": 30,
 
   "_comment_auto_pause": "Whether should the server be paused when no players are present.",
   "auto_pause": true,

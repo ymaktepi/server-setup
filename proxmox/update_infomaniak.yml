@@ -8,5 +8,5 @@
     - update_cts
     - install_docker_debian
     - install_teamspeak
-    - role: install_rathole
-      rathole_mode: server
+    #- role: install_rathole
+    #  rathole_mode: server

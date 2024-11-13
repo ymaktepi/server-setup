@@ -32,3 +32,9 @@
     - start_cts
     - stop_cts
     - delete_cts
+
+- hosts: pvenodes_root
+  become: false
+  gather_facts: false
+  roles:
+    - create_cts_bind_mounts

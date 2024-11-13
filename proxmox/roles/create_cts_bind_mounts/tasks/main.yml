@@ -1,0 +1,6 @@
+- name: Create CT Bind Mount
+  ansible.builtin.lineinfile:
+    path: "/etc/pve/lxc/{{item.ctid}}.conf"
+    line: "{{item.bind_mount}}"
+  loop: '{{cts}}'
+  when: 'item.state == "new" and item.bind_mount is defined'

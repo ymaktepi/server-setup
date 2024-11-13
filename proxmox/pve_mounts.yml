@@ -1,0 +1,24 @@
+- hosts: pvenodes_root
+
+  tasks:
+    - name: get the username running the deploy
+      remote_user: root
+      become: false
+      local_action: command whoami
+      register: username_on_the_host
+
+    - debug: var=username_on_the_host
+    - name: Create /mnt/lxc_shares/arr
+      ansible.builtin.file:
+        path: /mnt/lxc_shares/arr
+        state: directory
+        mode: '0777'
+
+    - name: Mount arr
+      remote_user: root
+      ansible.posix.mount:
+        path: /mnt/lxc_shares/arr
+        src: //nas-1.nico/arr
+        fstype: cifs
+        opts: "_netdev,x-systemd.automount,noatime,uid=100000,gid=110000,dir_mode=0770,file_mode=0770,user=arr,pass={{arr_smb_password}}"
+        state: mounted

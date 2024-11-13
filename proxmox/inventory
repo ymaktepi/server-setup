@@ -39,6 +39,9 @@ ansible_user=root
 [home_assistant]
 10.10.0.247 ansible_user=root
 
+[arr_server]
+10.10.0.246 ansible_user=root
+
 [pocket]
 10.10.5.100 ansible_user=root
 

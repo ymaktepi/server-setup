@@ -1,0 +1,11 @@
+- name: Create /opt/arr
+  ansible.builtin.file:
+    path: /opt/arr
+    state: directory
+    mode: '0755'
+
+- name: Ensure group "lxc_shares" exists with correct gid
+  ansible.builtin.group:
+    name: lxc_shares
+    state: present
+    gid: 10000

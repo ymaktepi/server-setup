@@ -33,7 +33,7 @@ TP_THEME=nord
 
 # If you intend to use Plex as your Media Server, then enter your Plex Claim
 # information below, to link this Plex Media Server to your Plex account
-PLEX_CLAIM=
+PLEX_CLAIM={{plex_claim}}
 
 # These are the folders on your local host computer / NAS running docker, they MUST exist
 # and have correct permissions for PUID and PGUI prior to running the docker compose.
@@ -95,5 +95,3 @@ WEBUI_PORT_PROWLARR=9696
 WEBUI_PORT_QBITTORRENT=8200
 WEBUI_PORT_RADARR=7878
 WEBUI_PORT_SONARR=8989
-
-PLEX_CLAIM={{plex_claim}}

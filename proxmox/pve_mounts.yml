@@ -1,13 +1,6 @@
 - hosts: pvenodes_root
 
   tasks:
-    - name: get the username running the deploy
-      remote_user: root
-      become: false
-      local_action: command whoami
-      register: username_on_the_host
-
-    - debug: var=username_on_the_host
     - name: Create /mnt/lxc_shares/arr
       ansible.builtin.file:
         path: /mnt/lxc_shares/arr

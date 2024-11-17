@@ -1,11 +1,66 @@
-- name: Create /opt/arr
+- name: Create /opt/arr/config
   ansible.builtin.file:
-    path: /opt/arr
+    path: /opt/arr/config
     state: directory
     mode: '0755'
+
+- name: Create tree
+  ansible.builtin.file:
+    path: "{{item}}"
+    state: directory
+    mode: '0755'
+  loop:
+  - /mnt/arr/movies
+  - /mnt/arr/series
+  - /mnt/mounted-raid/movies
+  - /mnt/mounted-raid/series
+  - /mnt/mounted-raid/other
+  - /mnt/mounted-raid/prowlarr
+  - /mnt/mounted-raid/watch
 
 - name: Ensure group "lxc_shares" exists with correct gid
   ansible.builtin.group:
     name: lxc_shares
     state: present
     gid: 10000
+
+- name: Create Docker Compose
+  copy:
+    src: docker-compose.yml
+    dest: '/opt/arr/docker-compose.yml'
+    mode: '0644'
+
+- name: Create Env
+  template:
+    src: env
+    dest: '/opt/arr/.env'
+    mode: '0644'
+
+- name: Run `docker-compose up` for arr stack
+  community.docker.docker_compose:
+    project_src: /opt/arr
+    build: true
+
+- name: Create nginx conf for {{item.name}}
+  template:
+    src: nginx-reverse-proxy.conf
+    dest: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+  loop: "{{web_hosts}}"
+  vars:
+    server_name: "{{item.host}}.local-dmz.courgettes.club"
+    container_port: "{{item.port}}"
+
+- name: Create a symbolic link for nginx conf for {{item.name}}
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/{{item.host}}-nginx.conf'
+    owner: root
+    group: root
+    state: link
+  loop: "{{web_hosts}}"
+
+- name: restart nginx
+  service: name=nginx state=restarted

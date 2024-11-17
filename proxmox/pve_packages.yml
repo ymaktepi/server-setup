@@ -12,4 +12,6 @@
       apt:
         name:
           - python3-proxmoxer
+          - vainfo
+          - pve-headers
         state: latest

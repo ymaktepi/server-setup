@@ -22,5 +22,5 @@
       fail2ban_allow_ips: [ "172.16.0.0/12" ]
     - install_docker_debian
     - install_jumphost_cts
-    - role: install_rathole
-      rathole_mode: client
+    #- role: install_rathole
+    #  rathole_mode: client

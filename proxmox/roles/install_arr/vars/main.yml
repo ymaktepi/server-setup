@@ -1,0 +1,19 @@
+web_hosts:
+  - name: Radarr
+    port: "7878"
+    host: radarr
+  - name: Sonarr
+    port: "8989"
+    host: sonarr
+  - name: Prowlarr
+    port: "9696"
+    host: prowlarr
+  - name: aBittorent
+    port: "8200"
+    host: qbittorrent
+  - name: Plex
+    port: "32400"
+    host: plex
+  - name: Jellyseerr
+    port: "5055"
+    host: jellyseerr

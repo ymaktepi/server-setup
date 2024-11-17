@@ -1,6 +1,10 @@
 [pvenodes]
 10.10.0.100 ansible_user=ansible proxmox_node_name=proxmox
 
+# for some reason i can't pass --user=root when mounting stuff?
+[pvenodes_root]
+10.10.0.100 ansible_user=root proxmox_node_name=proxmox
+
 [networkcheckers]
 10.10.0.254 network_type=default        reachable_urls="https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" unreachable_urls=""
 10.10.2.254 network_type=entertainment  reachable_urls="https://10.10.3.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
@@ -46,6 +50,9 @@ ansible_user=root
 
 [game_server]
 10.10.5.248 ansible_user=root
+
+[arr_server]
+10.10.5.247 ansible_user=root
 
 [infomaniak]
 # assumes that the host exists in .ssh/config

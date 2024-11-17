@@ -32,6 +32,28 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-nico
+    arr:
+      entryPoints:
+        - "https"
+      rule: "Host(`sonarr.local-dmz.courgettes.club`) || Host(`radarr.local-dmz.courgettes.club`) || Host(`prowlarr.local-dmz.courgettes.club`) || Host(`qbittorrent.local-dmz.courgettes.club`) || Host(`plex.local-dmz.courgettes.club`) || Host(`jellyseerr.local-dmz.courgettes.club`)"
+      middlewares:
+        - local-only
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certresolver: infomaniak
+      service: websites-arr
+    # todo: open plex and jellyseer to outside maybe?
+    #plex:
+    #  entryPoints:
+    #    - "https"
+    #  rule: "Host(`plex.courgettes.club`)"
+    #  middlewares:
+    #    - default-headers
+    #    - https-redirectscheme
+    #  tls:
+    #    certresolver: infomaniak
+    #  service: websites-arr
     courgettes:
       entryPoints:
         - "https"
@@ -86,6 +108,11 @@ http:
         servers:
           - url: "https://10.10.5.249"
         passHostHeader: true
+    websites-arr:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.5.247"
+        passHostHeader: true
     websites-cara:
       loadBalancer:
         servers:
@@ -122,6 +149,10 @@ http:
         scheme: https
         permanent: true
         #replacement: '/'
+
+    local-only:
+      ipwhitelist:
+        sourcerange: "10.10.0.0/23,10.10.2.0/24,10.10.5.0/24"
 
     default-headers:
       headers:

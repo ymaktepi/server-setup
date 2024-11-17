@@ -1,0 +1,259 @@
+# https://github.com/geekau/mediastack/blob/master/min-vpn_single-yaml/docker-compose-mediastack.yaml
+###########################################################################
+###########################################################################
+networks:
+  mediastack:
+    name: mediastack
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${DOCKER_SUBNET:?err}
+          gateway: ${DOCKER_GATEWAY:?err}
+
+###########################################################################
+###########################################################################
+##
+##  Docker Compose File: Gluetun (qmcgaw)
+##  Function: VPN Client
+##
+##  Documentation: https://github.com/qdm12/gluetun-wiki
+##
+###########################################################################
+###########################################################################
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "8888:8888/tcp"                         # Gluetun Local Network HTTP proxy
+      - "8388:8388/tcp"                         # Gluetun Local Network Shadowsocks
+      - "8388:8388/udp"                         # Gluetun Local Network Shadowsocks
+      - "${WEBUI_PORT_QBITTORRENT:?err}:${WEBUI_PORT_QBITTORRENT:?err}"   # WebUI Portal: qBittorrent
+      - "${QBIT_PORT:?err}:6881"                # Transmission Torrent Port
+
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/gluetun:/gluetun
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - UMASK=${UMASK:?err}
+      - TZ=${TIMEZONE:?err}
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER:?err}
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES}
+      - SERVER_REGIONS=${SERVER_REGIONS}
+      - SERVER_CITIES=${SERVER_CITIES}
+      - SERVER_HOSTNAMES=${SERVER_HOSTNAMES}
+      - SERVER_CATEGORIES=${SERVER_CATEGORIES}
+      - VPN_TYPE=${VPN_TYPE}
+      #- WIREGUARD_ENDPOINT_IP=${VPN_ENDPOINT_IP}
+      #- WIREGUARD_ENDPOINT_PORT=${VPN_ENDPOINT_PORT}
+      #- WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      #- WIREGUARD_PRESHARED_KEY=${WIREGUARD_PRESHARED_KEY}
+      #- WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - HTTPPROXY=on
+      - SHADOWSOCKS=on
+
+    # NOTE: Gluetun VPN container MUST ONLY connect to the mediastack
+
+    networks:
+      - mediastack
+
+  ###########################################################################
+  ###########################################################################
+  ##
+  ##  Docker Compose File: Flaresolverr (Flaresolverr)
+  ##  Function: Cloudflare Proxy Server
+  ##
+  ##  Documentation: https://github.com/FlareSolverr/FlareSolverr
+  ##
+  ###########################################################################
+  ###########################################################################
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    ports:
+      - "${FLARESOLVERR_PORT:?err}:8191"
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=${TIMEZONE:?err}
+    networks:
+      - mediastack
+
+  ###########################################################################
+  ###########################################################################
+  ##
+  ##  Docker Compose File: Jellyseerr (fallenbagel)
+  ##  Function: Media Request Manager
+  ##
+  ##  Documentation: https://hub.docker.com/r/fallenbagel/jellyseerr
+  ##
+  ###########################################################################
+  ###########################################################################
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: unless-stopped
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/jellyseerr:/app/config
+    ports:
+      - "127.0.0.1:${WEBUI_PORT_JELLYSEERR:?err}:5055"
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - UMASK=${UMASK:?err}
+      - TZ=${TIMEZONE:?err}
+    networks:
+      - mediastack
+
+
+  ###########################################################################
+  ###########################################################################
+  ##
+  ##  Docker Compose File: Prowlarr (LinuxServer.io)
+  ##  Function: Indexer and Search Manager
+  ##
+  ##  Documentation: https://docs.linuxserver.io/images/docker-prowlarr
+  ##
+  ###########################################################################
+  ###########################################################################
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    restart: unless-stopped
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/prowlarr:/config
+    ports:
+      - "127.0.0.1:${WEBUI_PORT_PROWLARR:?err}:9696"
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - TZ=${TIMEZONE:?err}
+      - DOCKER_MODS=ghcr.io/themepark-dev/theme.park:prowlarr
+      - TP_THEME=${TP_THEME:?err}
+    networks:
+      - mediastack
+
+  ###########################################################################
+  ###########################################################################
+  ##
+  ##  Docker Compose File: qBittorrent (LinuxServer.io)
+  ##  Function: Torrent Download Client
+  ##
+  ##  Documentation: https://docs.linuxserver.io/images/docker-qbittorrent
+  ##
+  ###########################################################################
+  ###########################################################################
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/qbittorrent:/config
+      - ${FOLDER_FOR_MEDIA:?err}:/data/media
+      - ${FOLDER_FOR_TORRENTS:?err}:/data/torrents
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - UMASK=${UMASK:?err}
+      - TZ=${TIMEZONE:?err}
+      - WEBUI_PORT=${WEBUI_PORT_QBITTORRENT:?err}
+      #- DOCKER_MODS=ghcr.io/themepark-dev/theme.park:qbittorrent
+      # - TP_THEME=${TP_THEME:?err}
+    ## Do Not Change Network for qBittorrent
+    ## qBittorrent MUST always use a VPN / Secure Internet connection
+    network_mode: "service:gluetun"
+
+  ###########################################################################
+  ###########################################################################
+  ##
+  ##  Docker Compose File: Radarr (LinuxServer.io)
+  ##  Function: Movie Library Manager
+  ##
+  ##  Documentation: https://docs.linuxserver.io/images/docker-radarr
+  ##
+  ###########################################################################
+  ###########################################################################
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/radarr:/config
+      - ${FOLDER_FOR_MEDIA:?err}:/data/media
+      - ${FOLDER_FOR_TORRENTS:?err}:/data/torrents
+    ports:
+      - "127.0.0.1:${WEBUI_PORT_RADARR:?err}:7878"
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - TZ=${TIMEZONE:?err}
+      - DOCKER_MODS=ghcr.io/themepark-dev/theme.park:radarr
+      - TP_THEME=${TP_THEME:?err}
+    networks:
+      - mediastack
+
+
+  ###########################################################################
+  ###########################################################################
+  ##
+  ##  Docker Compose File: Sonarr (LinuxServer.io)
+  ##  Function: Series Library Manager (TV Shows)
+  ##
+  ##  Documentation: https://docs.linuxserver.io/images/docker-sonarr
+  ##
+  ###########################################################################
+  ###########################################################################
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/sonarr:/config
+      - ${FOLDER_FOR_MEDIA:?err}:/data/media
+      - ${FOLDER_FOR_TORRENTS:?err}:/data/torrents
+    ports:
+      - "127.0.0.1:${WEBUI_PORT_SONARR:?err}:8989"
+    environment:
+      - PUID=${PUID:?err}
+      - PGID=${PGID:?err}
+      - TZ=${TIMEZONE:?err}
+      - DOCKER_MODS=ghcr.io/themepark-dev/theme.park:sonarr
+      - TP_THEME=${TP_THEME:?err}
+    networks:
+      - mediastack
+
+
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker
+    restart: unless-stopped
+    environment:
+      - TZ=${TIMEZONE:?err}
+      - PLEX_CLAIM=${PLEX_CLAIM:?err}
+      - PLEX_UID=${PUID:?err}
+      - PLEX_GID=${PGID:?err}
+    volumes:
+      - ${FOLDER_FOR_DATA:?err}/plex:/config
+      - ${FOLDER_FOR_MEDIA:?err}:/data/media
+      - ${FOLDER_FOR_DATA:?err}/plex_transcode:/transcode
+    ports:
+      - 127.0.0.1:32400:32400/tcp
+      - 127.0.0.1:32400:32400/udp
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp

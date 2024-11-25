@@ -41,7 +41,7 @@
     project_src: /opt/arr
     build: true
 
-- name: Create nginx conf for {{item.name}}
+- name: Create nginx conf for {{item.name}} dmz
   template:
     src: nginx-reverse-proxy.conf
     dest: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
@@ -53,7 +53,7 @@
     server_name: "{{item.host}}.local-dmz.courgettes.club"
     container_port: "{{item.port}}"
 
-- name: Create a symbolic link for nginx conf for {{item.name}}
+- name: Create a symbolic link for nginx conf for {{item.name}} dmz
   ansible.builtin.file:
     src: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
     dest: '/etc/nginx/sites-enabled/{{item.host}}-nginx.conf'
@@ -61,6 +61,29 @@
     group: root
     state: link
   loop: "{{web_hosts}}"
+
+- name: Create nginx conf for {{item.name}} outwards facing
+  template:
+    src: nginx-reverse-proxy.conf
+    dest: '/etc/nginx/sites-available/{{item.host}}-out-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+  loop: "{{web_hosts}}"
+  when: "item.out is defined and item.out == True"
+  vars:
+    server_name: "{{item.host}}.courgettes.club"
+    container_port: "32400"
+
+- name: Create a symbolic link for nginx conf for {{item.name}} outward facing
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/{{item.host}}-out-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/{{item.host}}-out-nginx.conf'
+    owner: root
+    group: root
+    state: link
+  loop: "{{web_hosts}}"
+  when: "item.out is defined and item.out == True"
 
 - name: restart nginx
   service: name=nginx state=restarted

@@ -43,17 +43,16 @@ http:
       tls:
         certresolver: infomaniak
       service: websites-arr
-    # todo: open plex and jellyseer to outside maybe?
-    #plex:
-    #  entryPoints:
-    #    - "https"
-    #  rule: "Host(`plex.courgettes.club`)"
-    #  middlewares:
-    #    - default-headers
-    #    - https-redirectscheme
-    #  tls:
-    #    certresolver: infomaniak
-    #  service: websites-arr
+    plex:
+      entryPoints:
+        - "https"
+      rule: "Host(`plex.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certresolver: letsencrypt
+      service: websites-arr
     courgettes:
       entryPoints:
         - "https"

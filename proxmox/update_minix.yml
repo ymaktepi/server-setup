@@ -10,3 +10,4 @@
     - role: install_nginx
       courgettes_subdomain: "minix"
     - install_jellyfin
+    - install_paperless

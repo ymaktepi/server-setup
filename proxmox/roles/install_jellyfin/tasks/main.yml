@@ -1,0 +1,65 @@
+- name: Install default packages
+  apt:
+    name:
+      - cifs-utils
+    state: latest
+
+- name: Create /mnt/arr
+  ansible.builtin.file:
+    path: /mnt/arr
+    state: directory
+    mode: '0777'
+
+- name: Mount arr
+  remote_user: root
+  ansible.posix.mount:
+    path: /mnt/arr
+    src: //10.10.0.252/arr
+    fstype: cifs
+    opts: "vers=2.0,file_mode=0777,dir_mode=0777,user=arr,pass={{arr_smb_password}}"
+    state: mounted
+
+- name: Create /opt/jellyfin/config
+  ansible.builtin.file:
+    path: /opt/jellyfin/config
+    state: directory
+    mode: '0777'
+
+- name: Create Docker Compose
+  template:
+    src: docker-compose.yml
+    dest: '/opt/jellyfin/docker-compose.yml'
+    mode: '0644'
+
+- name: Create Env
+  template:
+    src: env
+    dest: '/opt/jellyfin/.env'
+    mode: '0644'
+
+- name: Run `docker-compose up` for jellyfin stack
+  community.docker.docker_compose:
+    project_src: /opt/jellyfin
+    build: true
+
+- name: Create nginx conf for jellyfin dmz
+  template:
+    src: nginx-reverse-proxy.conf
+    dest: '/etc/nginx/sites-available/jellyfin-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+  vars:
+    server_name: "jellyfin.local.courgettes.club"
+    container_port: "8096"
+
+- name: Create a symbolic link for nginx conf for jellyfin dmz
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/jellyfin-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/jellyfin-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

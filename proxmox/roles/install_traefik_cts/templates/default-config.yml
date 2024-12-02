@@ -28,6 +28,15 @@ http:
         - https-redirectscheme
       tls: {}
       service: synology
+    synology2:
+      entryPoints:
+        - "https"
+      rule: "Host(`synology2.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: synology2
     uptime:
       entryPoints:
         - "https"
@@ -110,6 +119,11 @@ http:
         servers:
           - url: "https://10.10.0.252:5001"
           - url: "https://10.10.0.251:5001"
+        passHostHeader: true
+    synology2:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.0.200:5001"
         passHostHeader: true
     uptime:
       loadBalancer:

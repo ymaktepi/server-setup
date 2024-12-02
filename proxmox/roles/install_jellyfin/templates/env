@@ -1,0 +1,32 @@
+#################################################################################
+#################################################################################
+#################################################################################
+##
+##  Docker Compose Environment Variable file for Jellyfin / *ARR Media Stack
+##
+##  Update any of the environment variables below as required.
+##
+##  It is highly recommended Linux users set up a "docker" user, so the
+##  applications can access the local filesystem with this user's access
+##  privileges. Use PUID / PGID to map user access between the Docker apps
+##  and local filesystem.
+##
+##  The MediaStack Guide is located at https://MediaStack.Guide
+##
+#################################################################################
+#################################################################################
+#################################################################################
+
+# Host Data Folders - Will accept Linux, Windows, NAS folders.
+# Make sure these folders exists before running the "docker compose" command.
+FOLDER_FOR_MEDIA=/mnt/arr
+FOLDER_FOR_DATA=/opt/jellyfin/config
+
+# File access, date and time details for the containers / applications to use.
+# Run "sudo id docker" on host computer to find PUID / PGID and update these to suit.
+PUID=0
+PGID=0
+UMASK=0002
+TIMEZONE=Europe/Zurich
+
+WEBUI_PORT_JELLYFIN=8096

@@ -1,0 +1,13 @@
+
+- hosts:
+    - minix
+  gather_facts: false
+  become: true
+  become_method: sudo
+  roles:
+    - update_cts
+    - install_docker_debian
+    - role: install_nginx
+      courgettes_subdomain: "minix"
+    - install_jellyfin
+    - install_paperless

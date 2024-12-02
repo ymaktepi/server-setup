@@ -35,4 +35,4 @@
 - name: Start tailscale
   ansible.builtin.shell: |
     # auth key is to be renewed after 90 days
-    tailscale up --advertise-exit-node --advertise-routes=10.10.0.0/24,10.10.1.0/24,10.10.2.0/24,10.10.3.0/24,10.10.4.0/24,10.10.5.0/24 --auth-key "{{tailscale_auth_key}}"
+    tailscale up --advertise-exit-node {{routes_flag}} --auth-key "{{tailscale_auth_key}}"

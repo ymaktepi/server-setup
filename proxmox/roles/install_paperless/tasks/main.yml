@@ -53,7 +53,7 @@
     src: //nas-1.nico/scans
     fstype: cifs
     opts: "user=paperless-pi,password={{paperless_pi_smb_password}},vers=2.0,file_mode=0777,dir_mode=0777"
-    state: present
+    state: mounted
 
 - name: Mount scans
   ansible.posix.mount:
@@ -61,7 +61,7 @@
     src: //nas-1.nico/paperless-exports
     fstype: cifs
     opts: "user=paperless-pi,password={{paperless_pi_smb_password}},vers=2.0,file_mode=0777,dir_mode=0777"
-    state: present
+    state: mounted
 
 - name: Mount scans
   ansible.posix.mount:
@@ -69,7 +69,7 @@
     src: //nas-1.nico/paperless-media
     fstype: cifs
     opts: "user=paperless-pi,password={{paperless_pi_smb_password}},vers=2.0,file_mode=0777,dir_mode=0777"
-    state: present
+    state: mounted
 
 - name: Create Docker Compose
   copy:
@@ -87,4 +87,4 @@
     name: "weekly exports"
     minute: "20"
     hour: "4"
-    job: "docker-compose -f /opt/paperless/docker-compose.yml exec -T webserver document_exporter /usr/src/paperless/export --zip"
+    job: "docker compose -f /opt/paperless/docker-compose.yml exec -T webserver document_exporter /usr/src/paperless/export --zip"

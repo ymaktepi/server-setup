@@ -11,10 +11,6 @@ web_hosts:
   - name: aBittorent
     port: "8200"
     host: qbittorrent
-  - name: Plex
-    port: "32400"
-    host: plex
-    out: true
   - name: Jellyseerr
     port: "5055"
     host: jellyseerr

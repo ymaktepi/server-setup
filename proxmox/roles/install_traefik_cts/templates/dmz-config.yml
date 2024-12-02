@@ -35,23 +35,13 @@ http:
     arr:
       entryPoints:
         - "https"
-      rule: "Host(`sonarr.local-dmz.courgettes.club`) || Host(`radarr.local-dmz.courgettes.club`) || Host(`prowlarr.local-dmz.courgettes.club`) || Host(`qbittorrent.local-dmz.courgettes.club`) || Host(`plex.local-dmz.courgettes.club`) || Host(`jellyseerr.local-dmz.courgettes.club`)"
+      rule: "Host(`sonarr.local-dmz.courgettes.club`) || Host(`radarr.local-dmz.courgettes.club`) || Host(`prowlarr.local-dmz.courgettes.club`) || Host(`qbittorrent.local-dmz.courgettes.club`) || Host(`jellyseerr.local-dmz.courgettes.club`)"
       middlewares:
         - local-only
         - default-headers
         - https-redirectscheme
       tls:
         certresolver: infomaniak
-      service: websites-arr
-    plex:
-      entryPoints:
-        - "https"
-      rule: "Host(`plex.courgettes.club`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls:
-        certresolver: letsencrypt
       service: websites-arr
     courgettes:
       entryPoints:

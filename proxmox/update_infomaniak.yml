@@ -8,5 +8,7 @@
     - update_cts
     - install_docker_debian
     - install_teamspeak
+    - role: install_tailscale_exit_node
+      routes_flag: ""
     #- role: install_rathole
     #  rathole_mode: server

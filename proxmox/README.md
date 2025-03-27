@@ -3,6 +3,12 @@
 Following tutorials [here](https://www.techtutorials.tv/sections/promox/proxmox-how-to-automate-using-ansible/)
 and [here](https://www.techtutorials.tv/sections/promox/automate-vm-creation-on-proxmox-with-ansible/)
 
+## Update everything
+
+```bash
+ansible all -m apt -a "upgrade=yes update_cache=yes cache_valid_time=86400" --become
+```
+
 ## Password management
 
 Put the vault password inside `password_file`.

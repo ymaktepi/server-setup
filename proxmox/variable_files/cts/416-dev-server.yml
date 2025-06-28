@@ -1,0 +1,15 @@
+  - name: dev_server
+    ctid: 416
+    node: proxmox
+    image_name: debian-12-standard_12.2-1_amd64.tar.zst
+    cores: 8
+    cpus: 8
+    memory: 16384
+    vlan: 1
+    ipv4mode: static
+    ipv4_address: 10.10.0.246/23
+    ipv4_gateway: 10.10.0.1
+    state: started
+    disk: 50
+    # optional, allows you to add some mounted disk in raid
+    mounts: '{"mp0":"{{mounted_disk_storage}}:200,mp=/mnt/mounted-raid/,backup=0"}'

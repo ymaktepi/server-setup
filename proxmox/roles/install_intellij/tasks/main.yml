@@ -1,0 +1,30 @@
+# we can for now just install intellij remote stuff via ssh from the client so we just need a folder and an ssh key
+#- name: Check for intellij download in /opt
+#  stat: path=/opt/{{ij_version | replace('.tar.gz','')}}
+#  register: p
+#
+#- name: Download IntelliJ tar
+#  when: not p.stat.exists
+#  ansible.builtin.get_url:
+#    url: https://download.jetbrains.com/idea/{{ij_version}}
+#    dest: /tmp/{{ij_version}}
+#
+#- name: Install Intellij
+#  when: not p.stat.exists
+#  ansible.builtin.shell: |
+#    cd ~
+#    tar -xzf /tmp/{{ij_version}} -C /opt
+#    touch /opt/{{ij_version | replace('.tar.gz','')}}
+
+
+- name: Create SSH Key for host
+  community.crypto.openssh_keypair:
+    path: /root/.ssh/id_ecdsa
+    type: ecdsa
+    size: 521
+
+- name: Create intellij default dir
+  ansible.builtin.file:
+    path: /root/intellij
+    state: directory
+    mode: '0755'

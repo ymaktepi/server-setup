@@ -30,6 +30,9 @@ ansible_user=root
 [vpn]
 10.10.0.248 ansible_user=root
 
+[dev_server]
+10.10.0.246 ansible_user=root
+
 [jumphost]
 10.10.5.252 ansible_user=root
 

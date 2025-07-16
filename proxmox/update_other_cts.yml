@@ -32,14 +32,14 @@
 #      courgettes_subdomain: "ha"
 #    - install_home_assistant
 
-- hosts: pi
-  gather_facts: false
-  become: true
-  become_method: sudo
-  roles:
-    - role: install_nginx
-      courgettes_subdomain: "paperless"
-    - install_paperless
+#- hosts: pi
+#  gather_facts: false
+#  become: true
+#  become_method: sudo
+#  roles:
+#    - role: install_nginx
+#      courgettes_subdomain: "paperless"
+#    - install_paperless
 
 - hosts: websites
   gather_facts: false

@@ -18,6 +18,6 @@
     mode: '0644'
 
 - name: Run `docker-compose up` for TS
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: /opt/teamspeak
-    build: false
+    build: policy

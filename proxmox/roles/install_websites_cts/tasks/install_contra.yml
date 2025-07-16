@@ -17,6 +17,6 @@
 
 
 - name: Run `docker-compose up` for contra
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: /opt/contra
-    build: true
+    build: policy

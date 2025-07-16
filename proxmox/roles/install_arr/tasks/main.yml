@@ -37,9 +37,9 @@
     mode: '0644'
 
 - name: Run `docker-compose up` for arr stack
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: /opt/arr
-    build: true
+    build: policy
 
 - name: Create nginx conf for {{item.name}} dmz
   template:

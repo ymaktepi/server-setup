@@ -17,9 +17,9 @@
     mode: '0644'
 
 - name: Run `docker-compose up` for HA
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: /opt/ha
-    build: false
+    build: policy
 
 - name: Create nginx conf
   template:

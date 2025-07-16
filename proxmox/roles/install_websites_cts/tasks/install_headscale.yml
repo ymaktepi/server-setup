@@ -22,9 +22,9 @@
 
 # too lazy to make it work for now :coffin:
 #- name: Run `docker-compose up` for headscale
-#  community.docker.docker_compose:
+#  community.docker.docker_compose_v2:
 #    project_src: /opt/headscale
-#    build: false
+#    build: policy
 #
 #- name: Create user and api keys and stuff
 #  ansible.builtin.shell: |

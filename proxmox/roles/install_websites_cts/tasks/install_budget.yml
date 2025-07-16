@@ -24,3 +24,5 @@
   community.docker.docker_compose_v2:
     project_src: /opt/budget
     build: policy
+    pull: always
+    state: restarted

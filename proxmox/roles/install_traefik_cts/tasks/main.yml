@@ -55,3 +55,5 @@
     project_src: /opt/traefik
     build: policy
     recreate: always
+    pull: always
+    state: restarted

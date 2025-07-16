@@ -20,6 +20,8 @@
   community.docker.docker_compose_v2:
     project_src: /opt/ha
     build: policy
+    pull: always
+    state: restarted
 
 - name: Create nginx conf
   template:

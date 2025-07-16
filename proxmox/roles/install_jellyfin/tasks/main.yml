@@ -42,6 +42,8 @@
   become_method: sudo
   community.docker.docker_compose_v2:
     project_src: /opt/jellyfin
+    pull: always
+    state: restarted
 
 - name: Create nginx conf for jellyfin dmz
   template:

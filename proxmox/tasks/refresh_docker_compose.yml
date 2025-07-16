@@ -1,0 +1,20 @@
+# docker_compose_refresh.yml
+- name: Pull latest images for {{ compose_project_dir }}
+  community.docker.docker_compose_v2:
+    project_src: "{{ compose_project_dir }}"
+    pull: always
+
+- name: Stop and remove existing containers for {{ compose_project_dir }}
+  community.docker.docker_compose_v2:
+    project_src: "{{ compose_project_dir }}"
+    state: absent
+
+- name: Recreate containers from updated images for {{ compose_project_dir }}
+  community.docker.docker_compose_v2:
+    project_src: "{{ compose_project_dir }}"
+    state: present
+
+- name: Remove unused Docker images
+  ansible.builtin.command: docker image prune -f --filter "dangling=true"
+  register: prune_result
+  changed_when: "'Deleted Images' in prune_result.stdout"

@@ -18,7 +18,7 @@
     group: root
     mode: 0644
 
+  # i'm not expecting this to change so i'm not calling the custom task for docker pulls and updates
 - name: Run `docker-compose up` for egj
   community.docker.docker_compose_v2:
     project_src: /opt/egj
-    build: policy

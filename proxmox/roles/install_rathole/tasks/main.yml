@@ -19,6 +19,5 @@
 - name: Run `docker-compose up` for Rathole
   community.docker.docker_compose_v2:
     project_src: /opt/rathole
-    build: policy
     pull: always
     state: restarted

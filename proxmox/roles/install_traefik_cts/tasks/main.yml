@@ -50,10 +50,8 @@
     group: root
     mode: 0644
 
-- name: Run `docker-compose up`
-  community.docker.docker_compose_v2:
-    project_src: /opt/traefik
-    build: policy
-    recreate: always
-    pull: always
-    state: restarted
+
+- name: Refresh docker
+  include_tasks: refresh_docker_compose.yml
+  vars:
+    compose_project_dir: /opt/traefik

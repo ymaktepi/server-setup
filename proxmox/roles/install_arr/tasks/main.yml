@@ -39,7 +39,6 @@
 - name: Run `docker-compose up` for arr stack
   community.docker.docker_compose_v2:
     project_src: /opt/arr
-    build: policy
     pull: always
     state: restarted
 

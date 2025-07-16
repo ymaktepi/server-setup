@@ -77,11 +77,14 @@
     dest: '/opt/paperless/docker-compose.env'
     mode: 0644
 
-- name: Run `docker-compose up`
+- name: Refresh docker
+  # need to add this as a block in order to pass the become and become_method to all the steps in the task
+  block:
+    - include_tasks: refresh_docker_compose.yml
   become: true
   become_method: sudo
-  community.docker.docker_compose_v2:
-    project_src: /opt/paperless
+  vars:
+    compose_project_dir: /opt/paperless
 
 - name: Create a weekly export crontab
   ansible.builtin.cron:

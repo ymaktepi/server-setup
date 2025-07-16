@@ -13,7 +13,6 @@
     mode: 0644
 
 - name: Run `docker-compose up` for CourgetteSite
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: /opt/courgettesite
-    build: false
 

@@ -32,7 +32,20 @@
     state: started
     enabled: true
 
+- name: Ask for manual approval before running tailscale up
+  pause:
+    prompt: "Type 'yes' if you have an updated tailscale auth key in the vault, or Ctrl+C to skip the registering."
+    echo: yes
+  register: pause_result
+
 - name: Start tailscale
   ansible.builtin.shell: |
     # auth key is to be renewed after 90 days
     tailscale up --advertise-exit-node {{routes_flag}} --auth-key "{{tailscale_auth_key}}"
+  when: pause_result.user_input == "yes"
+
+- name: Restart tailscaled
+  ansible.builtin.systemd_service:
+    name: tailscaled
+    state: restarted
+    enabled: true

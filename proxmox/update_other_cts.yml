@@ -2,7 +2,7 @@
    - pocket
    - cara
    - websites
-   - home_assistant
+   #- home_assistant
    - game_server
   gather_facts: false
   roles:
@@ -24,21 +24,22 @@
       install_factorio: true
       install_satisfactory: true
 
-- hosts: home_assistant
-  gather_facts: false
-  roles:
-    - role: install_nginx
-      courgettes_subdomain: "ha"
-    - install_home_assistant
+# disabled for now
+#- hosts: home_assistant
+#  gather_facts: false
+#  roles:
+#    - role: install_nginx
+#      courgettes_subdomain: "ha"
+#    - install_home_assistant
 
-- hosts: pi
-  gather_facts: false
-  become: true
-  become_method: sudo
-  roles:
-    - role: install_nginx
-      courgettes_subdomain: "paperless"
-    - install_paperless
+#- hosts: pi
+#  gather_facts: false
+#  become: true
+#  become_method: sudo
+#  roles:
+#    - role: install_nginx
+#      courgettes_subdomain: "paperless"
+#    - install_paperless
 
 - hosts: websites
   gather_facts: false

@@ -9,4 +9,4 @@
     ipv4mode: static
     ipv4_address: 10.10.0.247/23
     ipv4_gateway: 10.10.0.1
-    state: started
+    state: absent

@@ -1,0 +1,37 @@
+- name: Create /opt/nextcloud
+  ansible.builtin.file:
+    path: /opt/nextcloud
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose
+  copy:
+    src: docker-compose.yml
+    dest: '/opt/nextcloud/docker-compose.yml'
+    mode: '0644'
+
+- name: Run `docker-compose up` for nextcloud stack
+  community.docker.docker_compose_v2:
+    project_src: /opt/nextcloud
+    pull: always
+    state: restarted
+
+- name: Create nginx conf
+  template:
+    src: nextcloud-nginx.conf
+    dest: '/etc/nginx/sites-available/nextcloud.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/nextcloud.conf'
+    dest: '/etc/nginx/sites-enabled/nextcloud.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted
+

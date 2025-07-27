@@ -1,0 +1,21 @@
+services:
+  nextcloud-aio-mastercontainer:
+    image: ghcr.io/nextcloud-releases/all-in-one:latest
+    container_name: nextcloud-aio-mastercontainer
+    restart: always
+    init: true
+    ports:
+      - "8080:8080"
+    environment:
+      APACHE_PORT: 11000
+      APACHE_IP_BINDING: 0.0.0.0
+      APACHE_ADDITIONAL_NETWORK: ""
+      SKIP_DOMAIN_VALIDATION: "false"
+    volumes:
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    stop_signal: SIGINT  # Equivalent to --sig-proxy=false workaround (optional)
+
+volumes:
+  nextcloud_aio_mastercontainer:
+    name: nextcloud_aio_mastercontainer

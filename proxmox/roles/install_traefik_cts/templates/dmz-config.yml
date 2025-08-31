@@ -37,6 +37,7 @@ http:
         - "https"
       rule: "Host(`sonarr.local-dmz.courgettes.club`) || Host(`radarr.local-dmz.courgettes.club`) || Host(`prowlarr.local-dmz.courgettes.club`) || Host(`qbittorrent.local-dmz.courgettes.club`) || Host(`jellyseerr.local-dmz.courgettes.club`)"
       middlewares:
+        - local-only
         - default-headers
         - https-redirectscheme
       tls:

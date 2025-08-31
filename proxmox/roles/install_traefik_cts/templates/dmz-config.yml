@@ -43,6 +43,17 @@ http:
       tls:
         certresolver: infomaniak
       service: websites-arr
+    nextcloud:
+      entryPoints:
+        - "https"
+      rule: "Host(`nextcloud.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - www-to-non-www-redirection
+      tls:
+        certresolver: letsencrypt
+      service: nextcloud
     courgettes:
       entryPoints:
         - "https"
@@ -101,6 +112,11 @@ http:
       loadBalancer:
         servers:
           - url: "https://10.10.5.247"
+        passHostHeader: true
+    nextcloud:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.5.246"
         passHostHeader: true
     websites-cara:
       loadBalancer:

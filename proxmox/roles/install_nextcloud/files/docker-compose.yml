@@ -11,9 +11,11 @@ services:
       APACHE_IP_BINDING: 0.0.0.0
       APACHE_ADDITIONAL_NETWORK: ""
       SKIP_DOMAIN_VALIDATION: "false"
+      NEXTCLOUD_DATADIR: "/data"
     volumes:
       - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/mounted-raid/:/data/
     stop_signal: SIGINT  # Equivalent to --sig-proxy=false workaround (optional)
 
 volumes:

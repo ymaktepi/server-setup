@@ -1,66 +1,66 @@
 [pvenodes]
-10.10.0.100 ansible_user=ansible proxmox_node_name=proxmox
+host_pvenodes ansible_host=10.10.0.100 ansible_user=ansible proxmox_node_name=proxmox
 
 # for some reason i can't pass --user=root when mounting stuff?
 [pvenodes_root]
-10.10.0.100 ansible_user=root proxmox_node_name=proxmox
+host_pvenodes_root ansible_host=10.10.0.100 ansible_user=root proxmox_node_name=proxmox
 
 [networkcheckers]
-10.10.0.254 network_type=default        reachable_urls="https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" unreachable_urls=""
-10.10.2.254 network_type=entertainment  reachable_urls="https://10.10.3.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
-10.10.3.254 network_type=guest          reachable_urls="https://10.10.2.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
-10.10.4.254 network_type=crusted        reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.5.254"
-10.10.5.254 network_type=dmz            reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.4.254"
+host_network_checker_default       ansible_host=10.10.0.254 network_type=default        reachable_urls="https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" unreachable_urls=""
+host_network_checker_entertainment ansible_host=10.10.2.254 network_type=entertainment  reachable_urls="https://10.10.3.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
+host_network_checker_guest         ansible_host=10.10.3.254 network_type=guest          reachable_urls="https://10.10.2.254"                                                             unreachable_urls="https://10.10.0.254;https://10.10.4.254;https://10.10.5.254"
+host_network_checker_cursted       ansible_host=10.10.4.254 network_type=crusted        reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.5.254"
+host_network_checker_dmz           ansible_host=10.10.5.254 network_type=dmz            reachable_urls=""                                                                                unreachable_urls="https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.4.254"
 
 [networkcheckers:vars]
 ansible_user=root
 
 [uptimekuma]
-10.10.0.253 ansible_user=root
+host_uptimekuma ansible_host=10.10.0.253 ansible_user=root
 
 [rsync_backup]
-10.10.0.249 ansible_user=root
+host_rsync_backup ansible_host=10.10.0.249 ansible_user=root
 
 [traefik_default]
-10.10.0.250 ansible_user=root
+host_traefik_default ansible_host=10.10.0.250 ansible_user=root
 
 [traefik_dmz]
-10.10.5.250 ansible_user=root
+host_traefik_dmz ansible_host=10.10.5.250 ansible_user=root
 
 [vpn]
-10.10.0.248 ansible_user=root
+host_vpn ansible_host=10.10.0.248 ansible_user=root
 
 [jumphost]
-10.10.5.252 ansible_user=root
+host_jumphost ansible_host=10.10.5.252 ansible_user=root
 
 [pi]
-10.10.0.11 ansible_user=ymaktepi
+host_pi ansible_host=10.10.0.11 ansible_user=ymaktepi
 
 [minix]
-10.10.0.201 ansible_user=ymaktepi
+host_minix ansible_host=10.10.0.201 ansible_user=ymaktepi
 
 [home_assistant]
-10.10.0.247 ansible_user=root
+host_home_assistant ansible_host=10.10.0.247 ansible_user=root
 
 [pocket]
-10.10.5.100 ansible_user=root
+host_vm_pocket ansible_host=10.10.5.100 ansible_user=root
 
 [cara]
-10.10.5.101 ansible_user=root
+host_vm_cara ansible_host=10.10.5.101 ansible_user=root
 
 [websites]
-10.10.5.249 ansible_user=root
+host_websites ansible_host=10.10.5.249 ansible_user=root
 
 [game_server]
-10.10.5.248 ansible_user=root
+host_game_server ansible_host=10.10.5.248 ansible_user=root
 
 [arr_server]
-10.10.5.247 ansible_user=root
+host_arr_server ansible_host=10.10.5.247 ansible_user=root
 
 [nextcloud]
-10.10.5.246 ansible_user=root
+host_nextcloud ansible_host=10.10.5.246 ansible_user=root
 
 [infomaniak]
 # assumes that the host exists in .ssh/config
 # uses 1password ssh agent
-infomaniak
+infomaniak_vps

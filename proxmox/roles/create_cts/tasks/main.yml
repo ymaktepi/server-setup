@@ -20,11 +20,12 @@
     memory: '{{item.memory}}'
     netif: '{"net0":"name=eth0,gw={{item.ipv4_gateway}},ip={{item.ipv4_address}},bridge={{linux_bridge}},tag={{item.vlan}}"}'
     hostname: "{{ item.name | replace('_', '-') }}{{item.domain_name | default(default_domain_name)}}"
+    unprivileged: '{{item.unprivileged | default(omit)}}'
     timezone: host
     onboot: true
     state: present
     force: true
-    features:
-      - nesting=1
+    # can't have feature flags when running a privileged container
+    features: "{{ ['nesting=1'] if (item.unprivileged | default(false)) else omit }}"
   loop: '{{cts}}'
   when: 'item.state == "new"'

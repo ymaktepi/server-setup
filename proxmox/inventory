@@ -60,6 +60,11 @@ host_arr_server ansible_host=10.10.5.247 ansible_user=root
 [nextcloud]
 host_nextcloud ansible_host=10.10.5.246 ansible_user=root
 
+[k3s_nodes]
+host_k3s_control  ansible_host=10.10.5.10 ansible_user=root is_root_k3s=true
+host_k3s_worker_1 ansible_host=10.10.5.11 ansible_user=root is_root_k3s=false
+host_k3s_worker_2 ansible_host=10.10.5.12 ansible_user=root is_root_k3s=false
+
 [infomaniak]
 # assumes that the host exists in .ssh/config
 # uses 1password ssh agent

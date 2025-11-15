@@ -33,8 +33,9 @@
     - stop_cts
     - delete_cts
 
-- hosts: pvenodes_root
-  become: false
+- hosts: pvenodes[0]
+  become: true
   gather_facts: false
   roles:
+    - k3s_lxc_config
     - create_cts_bind_mounts

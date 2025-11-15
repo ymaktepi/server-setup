@@ -1,0 +1,100 @@
+# The debian image i'm using is lacking kmsg, which is needed by k3s
+# we create a service so that the file is always present even after a reboot
+- name: Create kmsg-fix systemd service
+  copy:
+    dest: /etc/systemd/system/kmsg-fix.service
+    content: |
+      [Unit]
+      Description=Ensure /dev/kmsg exists
+      DefaultDependencies=no
+      Before=sysinit.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/bin/env bash -c 'if [ ! -e /dev/kmsg ]; then ln -s /dev/console /dev/kmsg; fi; mount --make-rshared /'
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=sysinit.target
+  notify:
+    - Reload systemd
+
+- name: Enable kmsg-fix service
+  systemd:
+    name: kmsg-fix.service
+    enabled: yes
+    state: started
+
+#- name: uninstall control k3s
+#  ansible.builtin.command: |
+#    /usr/local/bin/k3s-uninstall.sh
+#  when: >
+#    'control' in inventory_hostname
+
+#- name: uninstall worker k3s
+#  ansible.builtin.command: |
+#    /usr/local/bin/k3s-agent-uninstall.sh
+#  when: >
+#    'control' not in inventory_hostname
+
+  # could probably use the files like /usr/local/bin/k3s-*uninstall.sh instead
+  # to check if k3s is installed. good enough as a proxy on an empty debian image
+- name: Check if kubectl is installed
+  ansible.builtin.command: kubectl version --client
+  register: kubectl_check
+  failed_when: false
+  changed_when: false
+
+- name: Install control k3s if not present
+  ansible.builtin.shell: |
+    curl -sfL https://get.k3s.io | sh -s - --disable=servicelb
+  when: "kubectl_check.rc != 0 and 'control' in inventory_hostname"
+
+- name: Read k3s token on control node
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_token_raw
+  when: "'control' in inventory_hostname"
+
+- name: Set k3s token fact on control node
+  ansible.builtin.set_fact:
+    k3s_token: "{{ k3s_token_raw.content | b64decode | trim }}"
+  when: "'control' in inventory_hostname"
+
+- name: Set cluster token on workers
+  ansible.builtin.set_fact:
+    k3s_cluster_token: "{{ hostvars['host_k3s_control'].k3s_token }}"
+  when: "'control' not in inventory_hostname"
+
+  # could probably use the files like /usr/local/bin/k3s-*uninstall.sh instead
+  # to check if k3s is installed. good enough as a proxy on an empty debian image
+- name: Check if kubectl is installed
+  ansible.builtin.command: kubectl version --client
+  register: kubectl_check
+  failed_when: false
+  changed_when: false
+
+- name: Install worker k3s if not present
+  ansible.builtin.shell: |
+    curl -sfL https://get.k3s.io | \
+      K3S_URL="https://{{ hostvars['host_k3s_control'].ansible_host }}:6443" \
+      K3S_TOKEN="{{ hostvars['host_k3s_control'].k3s_token }}" \
+      sh -s
+  when: >
+    kubectl_check.rc != 0
+    and 'control' not in inventory_hostname
+
+- name: Fetch kubeconfig from control node
+  ansible.builtin.fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: ./kubeconfig
+    flat: yes
+  when: "'control' in inventory_hostname"
+
+- name: Update local kubeconfig to use public control node IP
+  ansible.builtin.replace:
+    path: ./kubeconfig
+    regexp: '127\.0\.0\.1'
+    replace: '{{ hostvars["host_k3s_control"].ansible_host }}'
+  delegate_to: localhost
+  run_once: true

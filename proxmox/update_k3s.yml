@@ -1,0 +1,12 @@
+
+- hosts:
+    - k3s_nodes
+  gather_facts: false
+  roles:
+    - update_cts
+    - install_k3s
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes

@@ -25,6 +25,12 @@
     enabled: yes
     state: started
 
+- name: Create subfolder in raid folder for k3s storage class
+  ansible.builtin.file:
+    path: /mnt/mounted-raid/k3s-storage
+    state: directory
+    mode: '0777'
+
 #- name: uninstall control k3s
 #  ansible.builtin.command: |
 #    /usr/local/bin/k3s-uninstall.sh

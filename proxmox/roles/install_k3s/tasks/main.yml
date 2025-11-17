@@ -53,7 +53,7 @@
 
 - name: Install control k3s if not present
   ansible.builtin.shell: |
-    curl -sfL https://get.k3s.io | sh -s - --disable=servicelb
+    curl -sfL https://get.k3s.io | sh -s 
   when: "kubectl_check.rc != 0 and 'control' in inventory_hostname"
 
 - name: Read k3s token on control node

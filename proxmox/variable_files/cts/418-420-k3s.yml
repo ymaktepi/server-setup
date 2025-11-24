@@ -12,7 +12,7 @@
     ipv4_gateway: 10.10.5.1
     unprivileged: false
     k3s: yes
-    state: started
+    state: stopped
       # optional, allows you to add some mounted disk in raid
     mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
   - name: k3s-worker-1
@@ -29,7 +29,7 @@
     ipv4_gateway: 10.10.5.1
     unprivileged: false
     k3s: yes
-    state: started
+    state: stopped
       # optional, allows you to add some mounted disk in raid
     mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
   - name: k3s-worker-2
@@ -46,6 +46,6 @@
     ipv4_gateway: 10.10.5.1
     unprivileged: false
     k3s: yes
-    state: started
+    state: stopped
       # optional, allows you to add some mounted disk in raid
     mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'

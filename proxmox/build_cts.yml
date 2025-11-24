@@ -37,5 +37,5 @@
   become: true
   gather_facts: false
   roles:
-    - k3s_lxc_config
+    #- k3s_lxc_config
     - create_cts_bind_mounts

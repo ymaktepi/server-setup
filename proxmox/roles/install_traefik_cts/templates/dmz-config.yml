@@ -86,30 +86,17 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-nico
-    piratefache:
+    pocket:
       entryPoints:
         - "https"
-      rule: "Host(`piratefache.ch`) || Host(`www.piratefache.ch`)"
+      rule: "Host(`mouni.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
         - www-to-non-www-redirection
       tls:
         certresolver: letsencrypt
-      service: websites-cara
-    mcaraccio:
-      entryPoints:
-        - "https"
-      rule: "Host(`mcaraccio.ch`) || Host(`www.mcaraccio.ch`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-        - www-to-non-www-redirection
-        - mcaraccio-to-piratefache-redirection
-      tls:
-        certresolver: letsencrypt
-      service: websites-cara
-
+      service: websites-pocket
   #endregion
   #region services
   services:
@@ -133,10 +120,10 @@ http:
         servers:
           - url: "https://10.10.5.246"
         passHostHeader: true
-    websites-cara:
+    websites-pocket:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.101"
+          - url: "https://10.10.5.100"
         passHostHeader: true
   #endregion
   middlewares:

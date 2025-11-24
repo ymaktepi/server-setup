@@ -1,0 +1,13 @@
+- name: Add K3s specific configs
+  ansible.builtin.blockinfile:
+    path: "/etc/pve/lxc/{{ item.ctid }}.conf"
+    create: no
+    marker: "# ANSIBLE LXC configs {mark}"
+    block: |
+      lxc.apparmor.profile: unconfined
+      lxc.cgroup.devices.allow: a
+      lxc.cap.drop:
+      lxc.mount.auto: "proc:rw sys:rw"
+      features: keyctl=1,nesting=1
+  loop: '{{cts}}'
+  when: 'item.state == "new" and item.k3s | default(False) == True'

@@ -1,0 +1,51 @@
+  - name: k3s-control
+    ctid: 418
+    node: proxmox
+    image_name: debian-12-standard_12.12-1_amd64.tar.zst
+    cores: 2
+    cpus: 2
+    memory: 2048
+    disk: 16
+    vlan: 5
+    ipv4mode: static
+    ipv4_address: 10.10.5.10/24
+    ipv4_gateway: 10.10.5.1
+    unprivileged: false
+    k3s: yes
+    state: stopped
+      # optional, allows you to add some mounted disk in raid
+    mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
+  - name: k3s-worker-1
+    ctid: 419
+    node: proxmox
+    image_name: debian-12-standard_12.12-1_amd64.tar.zst
+    cores: 2
+    cpus: 2
+    memory: 2048
+    disk: 16
+    vlan: 5
+    ipv4mode: static
+    ipv4_address: 10.10.5.11/24
+    ipv4_gateway: 10.10.5.1
+    unprivileged: false
+    k3s: yes
+    state: stopped
+      # optional, allows you to add some mounted disk in raid
+    mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
+  - name: k3s-worker-2
+    ctid: 420
+    node: proxmox
+    image_name: debian-12-standard_12.12-1_amd64.tar.zst
+    cores: 2
+    cpus: 2
+    memory: 2048
+    disk: 16
+    vlan: 5
+    ipv4mode: static
+    ipv4_address: 10.10.5.12/24
+    ipv4_gateway: 10.10.5.1
+    unprivileged: false
+    k3s: yes
+    state: stopped
+      # optional, allows you to add some mounted disk in raid
+    mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'

@@ -1,6 +1,16 @@
 http:
   #region routers
   routers:
+    #grafana:
+    #  entryPoints:
+    #    - "https"
+    #  rule: "Host(`grafana.courgettes.club`)"
+    #  middlewares:
+    #    - default-headers
+    #    - https-redirectscheme
+    #  tls:
+    #    certresolver: letsencrypt
+    #  service: grafana
     airhorn:
       entryPoints:
         - "https"
@@ -103,6 +113,11 @@ http:
   #endregion
   #region services
   services:
+    #grafana:
+    #  loadBalancer:
+    #    servers:
+    #      - url: "http://10.10.5.10"
+    #    passHostHeader: true
     websites-nico:
       loadBalancer:
         servers:

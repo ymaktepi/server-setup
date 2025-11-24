@@ -18,24 +18,3 @@
     line: "lxc.cgroup2.devices.allow: c 10:200 rwm"
   loop: '{{cts}}'
   when: 'item.state == "new" and item.vpn is defined and item.vpn == "yes"'
-
-#- name: card mount
-#  ansible.builtin.lineinfile:
-#    path: "/etc/pve/lxc/{{item.ctid}}.conf"
-#    line: "lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file 0 0"
-#  loop: '{{cts}}'
-#  when: 'item.state == "new" and item.gpu is defined and item.gpu == "yes"'
-#
-#- name: card mount
-#  ansible.builtin.lineinfile:
-#    path: "/etc/pve/lxc/{{item.ctid}}.conf"
-#    line: "lxc.mount.entry: /dev/dri/card1 dev/dri/card1 none bind,optional,create=file 0 0"
-#  loop: '{{cts}}'
-#  when: 'item.state == "new" and item.gpu is defined and item.gpu == "yes"'
-#
-#- name: allow stuff
-#  ansible.builtin.lineinfile:
-#    path: "/etc/pve/lxc/{{item.ctid}}.conf"
-#    line: "lxc.cgroup2.devices.allow: c 226:* rwm"
-#  loop: '{{cts}}'
-#  when: 'item.state == "new" and item.gpu is defined and item.gpu == "yes"'

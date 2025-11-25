@@ -1,0 +1,35 @@
+- name: Create nginx conf
+  template:
+    src: pocket-nginx.conf
+    dest: '/etc/nginx/sites-available/pocket-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/pocket-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/pocket-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: Ensure auth directory exists
+  file:
+    path: /etc/nginx/auth
+    state: directory
+    owner: root
+    group: www-data # nginx group
+    mode: "0750"
+
+- name: Ensure htpasswd file exists (empty if newly created)
+  ansible.builtin.file:
+    path: /etc/nginx/auth/.htpasswd
+    state: touch
+    owner: root
+    group: www-data # nginx group
+    mode: "0640"
+
+- name: restart nginx
+  service: name=nginx state=restarted
+

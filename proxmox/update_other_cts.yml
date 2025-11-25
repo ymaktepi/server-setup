@@ -1,6 +1,5 @@
 - hosts:
    - pocket
-   - cara
    - websites
    #- home_assistant
    - game_server
@@ -9,13 +8,13 @@
     - update_cts
     - install_docker_debian
 
-- hosts: cara
+- hosts: pocket
   gather_facts: false
   roles:
     - role: install_nginx
-      courgettes_subdomain: ""
-      root_domain: "piratefache.ch"
-    - install_piratefache
+      courgettes_subdomain: "mouni"
+    - role: install_pocket
+      courgettes_subdomain: "mouni"
 
 - hosts: game_server
   gather_facts: false

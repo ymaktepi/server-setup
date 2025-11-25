@@ -19,7 +19,7 @@
     path: /etc/nginx/auth
     state: directory
     owner: root
-    group: root
+    group: www-data # nginx group
     mode: "0750"
 
 - name: Ensure htpasswd file exists (empty if newly created)

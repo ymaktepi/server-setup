@@ -97,6 +97,17 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-pocket
+    ollama:
+      entryPoints:
+        - "https"
+      rule: "Host(`ollama.local-dmz.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - www-to-non-www-redirection
+      tls:
+        certresolver: infomaniak
+      service: ollama
   #endregion
   #region services
   services:
@@ -114,6 +125,11 @@ http:
       loadBalancer:
         servers:
           - url: "https://10.10.5.247"
+        passHostHeader: true
+    ollama:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.5.102"
         passHostHeader: true
     nextcloud:
       loadBalancer:

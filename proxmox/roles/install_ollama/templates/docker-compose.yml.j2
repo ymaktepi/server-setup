@@ -4,12 +4,13 @@ services:
     container_name: ollama
     restart: always
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+      - OLLAMA_KEEP_ALIVE=2m
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
 volumes:

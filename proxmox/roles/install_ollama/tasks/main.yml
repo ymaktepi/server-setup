@@ -32,3 +32,22 @@
   retries: 3
   delay: 10
 
+
+- name: Create nginx conf
+  template:
+    src: ollama-nginx.conf
+    dest: '/etc/nginx/sites-available/ollama-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/ollama-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/ollama-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

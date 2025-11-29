@@ -1,0 +1,8 @@
+ollama_models:
+  - name: qwen2.5-coder
+    version: 7b
+  - name: llama3.1
+    version: 8b
+  - name: phi3.5
+    version: 3.8b
+

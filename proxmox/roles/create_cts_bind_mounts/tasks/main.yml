@@ -18,3 +18,17 @@
     line: "lxc.cgroup2.devices.allow: c 10:200 rwm"
   loop: '{{cts}}'
   when: 'item.state == "new" and item.vpn is defined and item.vpn == "yes"'
+
+- name: Bind gpu
+  ansible.builtin.blockinfile:
+    path: "/etc/pve/lxc/{{ item.ctid }}.conf"
+    create: no
+    marker: "# ANSIBLE LXC configs {mark}"
+    block: |
+      # Pass GPU and its audio to container
+      hostpci0: 01:00.0,pcie=1
+      hostpci1: 01:00.1,pcie=1
+      lxc.cgroup2.devices.allow: a
+      lxc.apparmor.profile: unconfined
+  loop: '{{cts}}'
+  when: 'item.state == "new" and item.gpu | default(False) == True'

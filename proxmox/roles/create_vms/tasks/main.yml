@@ -16,6 +16,7 @@
     ide:
       ide2: '{{drive_storage}}:cloudinit'
     ostype: 'l26'
+    machine: '{{ "q35" if (item.gpu | default(False) == True) else omit }}'
     onboot: 'no'
     cpu: 'host'
     cores: '{{item.cores}}'
@@ -67,6 +68,16 @@
   loop: '{{computers}}'
   when: (item.state == "new") and
     (item.ipv4mode == 'static')
+  #no_log: yes
+
+# Pass GPU to VM
+- name: Pass GPU to VM
+  ansible.builtin.shell: |
+    qm set {{item.vmid}} --hostpci0 01:00.0,pcie=1 --hostpci1 01:00.1,pcie=1
+  loop: '{{computers}}'
+  when: (item.state == "new") and
+    (item.gpu | default(False) == True)
+  become: yes
   #no_log: yes
 
 # Resize the disk

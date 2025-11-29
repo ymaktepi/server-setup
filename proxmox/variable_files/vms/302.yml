@@ -9,5 +9,6 @@
     ipv4mode: static
     ipv4_address: 10.10.5.102/24
     ipv4_gateway: 10.10.5.1
+    gpu: yes
     state: new
 

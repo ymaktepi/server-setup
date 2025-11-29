@@ -1,0 +1,53 @@
+- name: Create /opt/ollama directory
+  ansible.builtin.file:
+    path: /opt/ollama
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for Ollama
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: '/opt/ollama/docker-compose.yml'
+    mode: '0644'
+
+- name: Pull and start Docker Compose for Ollama
+  community.docker.docker_compose_v2:
+    project_src: /opt/ollama
+    pull: always
+    state: present
+
+- name: Wait for Ollama container to be ready
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 11434
+    delay: 5
+    timeout: 60
+
+- name: Pull Ollama models
+  ansible.builtin.shell: |
+    docker exec ollama ollama pull {{ item.name }}:{{ item.version }}
+  loop: "{{ ollama_models }}"
+  register: pull_result
+  until: pull_result.rc == 0
+  retries: 3
+  delay: 10
+
+
+- name: Create nginx conf
+  template:
+    src: ollama-nginx.conf
+    dest: '/etc/nginx/sites-available/ollama-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/ollama-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/ollama-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

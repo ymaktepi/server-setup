@@ -1,7 +1,7 @@
-api_host: '{{inventory_hostname}}'
+api_host: '{{ ansible_host }}'
 drive_storage: m2-noraid
 drive_format: qcow2
 snippets_storage: isos
-snippets_path: '/mnt/pve/isos/snippets/'
+snippets_path: '/hdd-8tb-raid/isos/snippets/'
 image_storage: isos
 linux_bridge: vmbr0

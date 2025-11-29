@@ -7,4 +7,4 @@
     memory: 1024
     vlan: 4
     ipv4mode: dhcp
-    state: new
+    state: absent

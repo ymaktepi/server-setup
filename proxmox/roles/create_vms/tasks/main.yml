@@ -1,4 +1,4 @@
-# Create VMs
+# Create VMs (without disk, we'll import it separately)
 - name: Create VMs
   proxmox_kvm:
     api_user: '{{api_user}}'
@@ -13,18 +13,16 @@
     #net: '{"net0":"virtio,bridge={{linux_bridge}}"}'
     serial: '{"serial0":"socket"}'
     scsihw: virtio-scsi-single
-    scsi:
-      scsi0: '{{drive_storage}}:0,import-from={{image_storage}}:0/{{item.image_file}},format={{drive_format}},iothread=1'
     ide:
       ide2: '{{drive_storage}}:cloudinit'
     ostype: 'l26'
+    machine: '{{ "q35" if (item.gpu | default(False) == True) else omit }}'
     onboot: 'no'
     cpu: 'host'
     cores: '{{item.cores}}'
     sockets: 1
     memory: '{{item.memory}}'
     balloon: 0
-    boot: order=scsi0
     ipconfig:
       ipconfig0: 'ip=dhcp'
     cicustom: 'user={{snippets_storage}}:snippets/{{item.vmid}}-user.yml'
@@ -32,6 +30,24 @@
     timeout: 700
   loop: '{{computers}}'
   when: 'item.state == "new"'
+  #no_log: yes
+
+# Import disk image
+- name: Import disk image
+  ansible.builtin.shell: |
+    qm importdisk {{item.vmid}} {{image_path}}{{item.image_file}} {{drive_storage}} --format {{drive_format}}
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  become: yes
+  #no_log: yes
+
+# Attach imported disk
+- name: Attach imported disk
+  ansible.builtin.shell: |
+    qm set {{item.vmid}} --scsi0 {{drive_storage}}:vm-{{item.vmid}}-disk-0,iothread=1 --boot order=scsi0
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  become: yes
   #no_log: yes
 
 # Update network settings
@@ -54,6 +70,16 @@
     (item.ipv4mode == 'static')
   #no_log: yes
 
+# Pass GPU to VM
+- name: Pass GPU to VM
+  ansible.builtin.shell: |
+    qm set {{item.vmid}} --hostpci0 01:00.0,pcie=1,rombar=0 --hostpci1 01:00.1,pcie=1
+  loop: '{{computers}}'
+  when: (item.state == "new") and
+    (item.gpu | default(False) == True)
+  become: yes
+  #no_log: yes
+
 # Resize the disk
 # The Cloud-Init disk is only 2GB
 - name: Resize disk
@@ -64,7 +90,7 @@
     api_host: '{{api_host}}'
     vmid: '{{item.vmid}}'
     disk: 'scsi0'
-    size: '32G'
+    size: '{{item.disk_size | default("32G")}}'
     state: 'resized'
     timeout: 60
   loop: '{{computers}}'

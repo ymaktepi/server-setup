@@ -8,10 +8,16 @@
         update_cache: yes
         cache_valid_time: 86400 #One day
 
-    - name: install proxmoxer
+    - name: install proxmoxer dependencies
       apt:
         name:
-          - python3-proxmoxer
           - vainfo
           - pve-headers
+          - python3-pip
         state: latest
+
+    # proxmoxer >2.0 is not available in apt
+    - name: install python3-proxmoxer
+      ansible.builtin.pip:
+        name: proxmoxer
+        extra_args: --break-system-packages

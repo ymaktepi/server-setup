@@ -1,0 +1,140 @@
+- name: Check if GPU is passed through
+  ansible.builtin.shell: lspci -nn | grep -i nvidia
+  register: gpu_check
+  changed_when: false
+  failed_when: gpu_check.rc != 0
+
+- name: Ensure required packages for NVIDIA driver installation
+  apt:
+    name:
+      - build-essential
+      - dkms
+      - linux-headers-amd64
+    state: present
+    update_cache: yes
+
+- name: Add non-free and non-free-firmware repositories
+  apt_repository:
+    repo: "deb http://deb.debian.org/debian/ bookworm contrib non-free non-free-firmware"
+    state: present
+    update_cache: yes
+
+- name: Install NVIDIA driver
+  apt:
+    name: nvidia-driver
+    state: present
+    update_cache: yes
+
+- name: Reboot VM to load NVIDIA driver
+  ansible.builtin.reboot:
+    msg: "Rebooting to load NVIDIA driver kernel module"
+    reboot_timeout: 300
+    pre_reboot_delay: 5
+    post_reboot_delay: 30
+
+- name: Wait for system to be ready after reboot
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 300
+
+- name: Verify NVIDIA driver installation
+  ansible.builtin.shell: nvidia-smi
+  register: nvidia_smi_check
+  changed_when: false
+  failed_when: nvidia_smi_check.rc != 0
+
+- name: Check if nvidia-container-toolkit is installed
+  ansible.builtin.command: which nvidia-container-runtime
+  register: nvidia_runtime_check
+  changed_when: false
+  failed_when: false
+
+- name: Check if NVIDIA GPG key exists
+  when: nvidia_runtime_check.rc != 0
+  ansible.builtin.stat:
+    path: /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+  register: nvidia_gpg_key
+  become: yes
+
+- name: Add NVIDIA GPG key for container toolkit
+  when: (nvidia_runtime_check.rc != 0) and (not nvidia_gpg_key.stat.exists)
+  ansible.builtin.get_url:
+    url: https://nvidia.github.io/libnvidia-container/gpgkey
+    dest: /tmp/nvidia-container-toolkit-keyring.gpg
+    mode: '0644'
+  become: yes
+
+- name: Import NVIDIA GPG key
+  when: (nvidia_runtime_check.rc != 0) and (not nvidia_gpg_key.stat.exists)
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/nvidia-container-toolkit-keyring.gpg > /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    rm -f /tmp/nvidia-container-toolkit-keyring.gpg
+  become: yes
+
+- name: Check if NVIDIA repository file exists
+  when: nvidia_runtime_check.rc != 0
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/nvidia-container-toolkit.list
+  register: nvidia_repo_file
+  become: yes
+
+- name: Add NVIDIA container toolkit repository
+  when: (nvidia_runtime_check.rc != 0) and (not nvidia_repo_file.stat.exists)
+  ansible.builtin.get_url:
+    url: https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list
+    dest: /tmp/nvidia-container-toolkit.list
+    mode: '0644'
+  become: yes
+
+- name: Get system architecture
+  when: (nvidia_runtime_check.rc != 0) and (not nvidia_repo_file.stat.exists)
+  ansible.builtin.shell: dpkg --print-architecture
+  register: system_arch
+  changed_when: false
+  become: yes
+
+- name: Configure NVIDIA container toolkit repository with GPG key
+  when: (nvidia_runtime_check.rc != 0) and (not nvidia_repo_file.stat.exists)
+  ansible.builtin.shell: |
+    sed -e 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
+        -e "s/\$(ARCH)/{{ system_arch.stdout }}/g" \
+        /tmp/nvidia-container-toolkit.list > /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    rm -f /tmp/nvidia-container-toolkit.list
+  become: yes
+
+- name: Update apt cache
+  when: nvidia_runtime_check.rc != 0
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 0
+  become: yes
+
+- name: Install nvidia-container-toolkit
+  when: nvidia_runtime_check.rc != 0
+  ansible.builtin.apt:
+    name: nvidia-container-toolkit
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Verify nvidia-container-runtime is available
+  ansible.builtin.command: which nvidia-container-runtime
+  register: nvidia_runtime_available
+  changed_when: false
+  failed_when: false
+  become: yes
+
+- name: Check if Docker runtime is already configured for NVIDIA
+  when: nvidia_runtime_available.rc == 0
+  ansible.builtin.shell: |
+    docker info 2>/dev/null | grep -q "nvidia" || echo "not_configured"
+  register: docker_nvidia_check
+  changed_when: false
+  failed_when: false
+
+- name: Configure Docker runtime for NVIDIA
+  when: (nvidia_runtime_available.rc == 0) and ("not_configured" in docker_nvidia_check.stdout)
+  ansible.builtin.shell: |
+    nvidia-ctk runtime configure --runtime=docker
+    systemctl restart docker
+  become: yes

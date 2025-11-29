@@ -1,0 +1,7 @@
+- hosts:
+    - gpu
+  gather_facts: false
+  become: true
+  roles:
+    - update_cts
+    - install_gpu

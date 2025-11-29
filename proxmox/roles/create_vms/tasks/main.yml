@@ -73,7 +73,7 @@
 # Pass GPU to VM
 - name: Pass GPU to VM
   ansible.builtin.shell: |
-    qm set {{item.vmid}} --hostpci0 01:00.0,pcie=1 --hostpci1 01:00.1,pcie=1
+    qm set {{item.vmid}} --hostpci0 01:00.0,pcie=1,rombar=0 --hostpci1 01:00.1,pcie=1
   loop: '{{computers}}'
   when: (item.state == "new") and
     (item.gpu | default(False) == True)
@@ -90,7 +90,7 @@
     api_host: '{{api_host}}'
     vmid: '{{item.vmid}}'
     disk: 'scsi0'
-    size: '32G'
+    size: '{{item.disk_size | default("32G")}}'
     state: 'resized'
     timeout: 60
   loop: '{{computers}}'

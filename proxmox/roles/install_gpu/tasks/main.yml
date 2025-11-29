@@ -1,0 +1,44 @@
+- name: Check if GPU is passed through
+  ansible.builtin.shell: lspci -nn | grep -i nvidia
+  register: gpu_check
+  changed_when: false
+  failed_when: gpu_check.rc != 0
+
+- name: Ensure required packages for NVIDIA driver installation
+  apt:
+    name:
+      - build-essential
+      - dkms
+      - linux-headers-amd64
+    state: present
+    update_cache: yes
+
+- name: Add non-free and non-free-firmware repositories
+  apt_repository:
+    repo: "deb http://deb.debian.org/debian/ bookworm contrib non-free non-free-firmware"
+    state: present
+    update_cache: yes
+
+- name: Install NVIDIA driver
+  apt:
+    name: nvidia-driver
+    state: present
+    update_cache: yes
+
+- name: Reboot VM to load NVIDIA driver
+  ansible.builtin.reboot:
+    msg: "Rebooting to load NVIDIA driver kernel module"
+    reboot_timeout: 300
+    pre_reboot_delay: 5
+    post_reboot_delay: 30
+
+- name: Wait for system to be ready after reboot
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 300
+
+- name: Verify NVIDIA driver installation
+  ansible.builtin.shell: nvidia-smi
+  register: nvidia_smi_check
+  changed_when: false
+  failed_when: nvidia_smi_check.rc != 0

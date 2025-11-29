@@ -105,6 +105,7 @@ http:
         - default-headers
         - https-redirectscheme
         - www-to-non-www-redirection
+        - local-only
       tls:
         certresolver: infomaniak
       service: ollama

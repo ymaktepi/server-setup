@@ -1,4 +1,4 @@
-# Create VMs
+# Create VMs (without disk, we'll import it separately)
 - name: Create VMs
   proxmox_kvm:
     api_user: '{{api_user}}'
@@ -13,8 +13,6 @@
     #net: '{"net0":"virtio,bridge={{linux_bridge}}"}'
     serial: '{"serial0":"socket"}'
     scsihw: virtio-scsi-single
-    scsi:
-      scsi0: '{{drive_storage}}:0,import-from={{image_storage}}:0/{{item.image_file}},format={{drive_format}},iothread=1'
     ide:
       ide2: '{{drive_storage}}:cloudinit'
     ostype: 'l26'
@@ -24,7 +22,6 @@
     sockets: 1
     memory: '{{item.memory}}'
     balloon: 0
-    boot: order=scsi0
     ipconfig:
       ipconfig0: 'ip=dhcp'
     cicustom: 'user={{snippets_storage}}:snippets/{{item.vmid}}-user.yml'
@@ -32,6 +29,24 @@
     timeout: 700
   loop: '{{computers}}'
   when: 'item.state == "new"'
+  #no_log: yes
+
+# Import disk image
+- name: Import disk image
+  ansible.builtin.shell: |
+    qm importdisk {{item.vmid}} {{image_path}}{{item.image_file}} {{drive_storage}} --format {{drive_format}}
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  become: yes
+  #no_log: yes
+
+# Attach imported disk
+- name: Attach imported disk
+  ansible.builtin.shell: |
+    qm set {{item.vmid}} --scsi0 {{drive_storage}}:vm-{{item.vmid}}-disk-0,iothread=1 --boot order=scsi0
+  loop: '{{computers}}'
+  when: 'item.state == "new"'
+  become: yes
   #no_log: yes
 
 # Update network settings

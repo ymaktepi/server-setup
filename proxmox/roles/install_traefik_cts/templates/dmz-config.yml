@@ -120,27 +120,27 @@ http:
     websites-nico:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.249"
+          - url: "https://{{hostvars['host_websites']['ansible_host']}}"
         passHostHeader: true
     websites-arr:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.247"
+          - url: "https://{{hostvars['host_arr_server']['ansible_host']}}"
         passHostHeader: true
     ollama:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.102"
+          - url: "https://{{hostvars['host_gpu']['ansible_host']}}"
         passHostHeader: true
     nextcloud:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.246"
+          - url: "https://{{hostvars['host_nextcloud']['ansible_host']}}"
         passHostHeader: true
     websites-pocket:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.100"
+          - url: "https://{{hostvars['host_vm_pocket']['ansible_host']}}"
         passHostHeader: true
   #endregion
   middlewares:

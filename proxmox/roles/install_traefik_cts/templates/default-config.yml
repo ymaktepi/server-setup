@@ -117,13 +117,13 @@ http:
     paperless:
       loadBalancer:
         servers:
-          - url: "https://10.10.0.201"
+          - url: "https://{{hostvars['host_minix']['ansible_host']}}"
         passHostHeader: true
-    homeAssistant:
-      loadBalancer:
-        servers:
-          - url: "https://10.10.0.247"
-        passHostHeader: true
+    #homeAssistant:
+    #  loadBalancer:
+    #    servers:
+    #      - url: "https://10.10.0.247"
+    #    passHostHeader: true
     synology:
       loadBalancer:
         servers:
@@ -138,42 +138,42 @@ http:
     uptime:
       loadBalancer:
         servers:
-          - url: "https://10.10.0.253"
-        passHostHeader: true
-    nwCheckerDefault:
-      loadBalancer:
-        servers:
-          - url: "https://10.10.0.254"
+          - url: "https://{{hostvars['host_uptimekuma']['ansible_host']}}"
         passHostHeader: true
     jellyfin:
       loadBalancer:
         servers:
-          - url: "https://10.10.0.201"
+          - url: "https://{{hostvars['host_minix']['ansible_host']}}"
+        passHostHeader: true
+    nwCheckerDefault:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_network_checker_default']['ansible_host']}}"
         passHostHeader: true
     nwCheckerEntertainment:
       loadBalancer:
         servers:
-          - url: "https://10.10.2.254"
+          - url: "https://{{hostvars['host_network_checker_entertainment']['ansible_host']}}"
         passHostHeader: true
     nwCheckerGuest:
       loadBalancer:
         servers:
-          - url: "https://10.10.3.254"
+          - url: "https://{{hostvars['host_network_checker_guest']['ansible_host']}}"
         passHostHeader: true
     nwCheckerCrusted:
       loadBalancer:
         servers:
-          - url: "https://10.10.4.254"
+          - url: "https://{{hostvars['host_network_checker_cursted']['ansible_host']}}"
         passHostHeader: true
     nwCheckerDMZ:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.254"
+          - url: "https://{{hostvars['host_network_checker_dmz']['ansible_host']}}"
         passHostHeader: true
     proxmox:
       loadBalancer:
         servers:
-          - url: "https://10.10.0.100:8006"
+          - url: "https://{{hostvars['host_pvenodes']['ansible_host']}}:8006"
         passHostHeader: true
   #endregion
   middlewares:

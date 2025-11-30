@@ -33,20 +33,20 @@ host_vpn ansible_host=10.10.0.248 ansible_user=root
 [jumphost]
 host_jumphost ansible_host=10.10.5.252 ansible_user=root
 
-[pi]
-host_pi ansible_host=10.10.0.11 ansible_user=ymaktepi
+#[pi]
+#host_pi ansible_host=10.10.0.11 ansible_user=ymaktepi
 
 [minix]
 host_minix ansible_host=10.10.0.201 ansible_user=ymaktepi
 
-[home_assistant]
-host_home_assistant ansible_host=10.10.0.247 ansible_user=root
+#[home_assistant]
+#host_home_assistant ansible_host=10.10.0.247 ansible_user=root
 
 [pocket]
 host_vm_pocket ansible_host=10.10.5.100 ansible_user=root
 
-[cara]
-host_vm_cara ansible_host=10.10.5.101 ansible_user=root
+#[cara]
+#host_vm_cara ansible_host=10.10.5.101 ansible_user=root
 
 [websites]
 host_websites ansible_host=10.10.5.249 ansible_user=root
@@ -63,10 +63,10 @@ host_nextcloud ansible_host=10.10.5.246 ansible_user=root
 [gpu]
 host_gpu ansible_host=10.10.5.102 ansible_user=ansible
 
-[k3s_nodes]
-host_k3s_control  ansible_host=10.10.5.10 ansible_user=root is_root_k3s=true
-host_k3s_worker_1 ansible_host=10.10.5.11 ansible_user=root is_root_k3s=false
-host_k3s_worker_2 ansible_host=10.10.5.12 ansible_user=root is_root_k3s=false
+#[k3s_nodes]
+#host_k3s_control  ansible_host=10.10.5.10 ansible_user=root is_root_k3s=true
+#host_k3s_worker_1 ansible_host=10.10.5.11 ansible_user=root is_root_k3s=false
+#host_k3s_worker_2 ansible_host=10.10.5.12 ansible_user=root is_root_k3s=false
 
 [infomaniak]
 # assumes that the host exists in .ssh/config

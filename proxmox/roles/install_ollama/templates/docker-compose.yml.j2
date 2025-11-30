@@ -13,6 +13,11 @@ services:
       - OLLAMA_KEEP_ALIVE=2m
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
+      # GPU performance tuning
+      - OLLAMA_NUM_GPU=999        # offload all layers to GPU
+      - OLLAMA_FLASH_ATTENTION=true
+      - OLLAMA_KV_CACHE_TYPE=f16  # smaller KV cache for better VRAM utilization
+
 volumes:
   ollama_data:
     name: ollama_data

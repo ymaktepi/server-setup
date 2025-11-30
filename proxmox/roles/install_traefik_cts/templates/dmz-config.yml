@@ -189,4 +189,4 @@ http:
         stsSeconds: 15552000
         customFrameOptionsValue: SAMEORIGIN
         customRequestHeaders:
-          X-Forwarded-Proto: https
+          "X-Forwarded-Proto": https

@@ -1,0 +1,17 @@
+[model.chat.http]
+kind = "openai/chat"
+model_name = "mistral:7b"
+# For multi-model support
+supported_models = ["llama3.1:8b-instruct-q5_K_M", "mistral:7b"]
+api_endpoint = "https://ollama.local-dmz.courgettes.club/v1"
+
+[model.completion.http]
+kind = "ollama/completion"
+model_name = "qwen2.5-coder:7b"
+api_endpoint = "https://ollama.local-dmz.courgettes.club"
+prompt_template = "<PRE> {prefix} <SUF>{suffix} <MID>"
+
+[model.embedding.http]
+kind = "ollama/embedding"
+model_name = "nomic-embed-text:137m-v1.5-fp16"
+api_endpoint = "https://ollama.local-dmz.courgettes.club"

@@ -97,10 +97,10 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-pocket
-    ollama:
+    gpu:
       entryPoints:
         - "https"
-      rule: "Host(`ollama.local-dmz.courgettes.club`)"
+      rule: "Host(`ollama.local-dmz.courgettes.club`) || Host(`tabby.local-dmz.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -108,7 +108,7 @@ http:
         - local-only
       tls:
         certresolver: infomaniak
-      service: ollama
+      service: gpu
   #endregion
   #region services
   services:
@@ -127,7 +127,7 @@ http:
         servers:
           - url: "https://{{hostvars['host_arr_server']['ansible_host']}}"
         passHostHeader: true
-    ollama:
+    gpu:
       loadBalancer:
         servers:
           - url: "https://{{hostvars['host_gpu']['ansible_host']}}"

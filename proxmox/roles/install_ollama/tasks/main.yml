@@ -32,6 +32,24 @@
   retries: 3
   delay: 10
 
+- name: Copy Modelfile template to container for tool-compatible variants
+  ansible.builtin.shell: |
+    docker exec ollama bash -c "cat > /tmp/{{ item.name | replace('/', '_') }}-{{ item.version }}-tools.Modelfile << 'EOF'
+    FROM {{ item.name }}:{{ item.version }}
+    PARAMETER num_ctx {{ item.context_size }}
+    EOF"
+  loop: "{{ ollama_models | selectattr('create_tool_variant', 'equalto', true) | list }}"
+  when: item.create_tool_variant | default(false)
+  register: modelfile_result
+  changed_when: modelfile_result.rc == 0
+
+- name: Create tool-compatible model variants with increased context
+  ansible.builtin.shell: |
+    docker exec ollama ollama create {{ item.name }}:{{ item.version }}-tools -f /tmp/{{ item.name | replace('/', '_') }}-{{ item.version }}-tools.Modelfile
+  loop: "{{ ollama_models | selectattr('create_tool_variant', 'equalto', true) | list }}"
+  when: item.create_tool_variant | default(false)
+  register: variant_result
+  changed_when: "'success' in variant_result.stdout or variant_result.rc == 0"
 
 - name: Create nginx conf
   template:

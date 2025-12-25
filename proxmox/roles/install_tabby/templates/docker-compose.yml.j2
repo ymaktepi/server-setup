@@ -1,0 +1,11 @@
+services:
+  tabby:
+    image: registry.tabbyml.com/tabbyml/tabby
+    container_name: tabby
+    restart: always
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./config:/data
+    command: serve
+    environment: {}

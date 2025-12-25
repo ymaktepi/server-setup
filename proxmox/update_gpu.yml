@@ -9,3 +9,4 @@
       courgettes_subdomain: "gpu"
     - install_gpu
     - install_ollama
+    - install_tabby

@@ -1,0 +1,49 @@
+- name: Create /opt/tabby/config directory
+  ansible.builtin.file:
+    path: /opt/tabby/config
+    state: directory
+    mode: '0755'
+
+- name: Create config file for Tabby
+  ansible.builtin.template:
+    src: config.toml
+    dest: '/opt/tabby/config/config.toml'
+    mode: '0666'
+
+- name: Create Docker Compose for tabby
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: '/opt/tabby/docker-compose.yml'
+    mode: '0666'
+
+- name: Pull and start Docker Compose for tabby
+  community.docker.docker_compose_v2:
+    project_src: /opt/tabby
+    pull: always
+    state: present
+
+- name: Wait for tabby container to be ready
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 8080
+    delay: 5
+    timeout: 60
+
+- name: Create nginx conf
+  template:
+    src: tabby-nginx.conf
+    dest: '/etc/nginx/sites-available/tabby-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/tabby-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/tabby-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

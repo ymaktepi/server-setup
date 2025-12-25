@@ -3,6 +3,11 @@ ollama_models:
     version: 7b
   - name: llama3.1
     version: 8b
+  - name: llama3.1
+    version: 8b-instruct-q5_K_M
   - name: phi3.5
     version: 3.8b
-
+  - name: nomic-embed-text
+    version: 137m-v1.5-fp16
+  - name: mistral
+    version: 7b

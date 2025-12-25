@@ -97,10 +97,10 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-pocket
-    ollama:
+    gpu:
       entryPoints:
         - "https"
-      rule: "Host(`ollama.local-dmz.courgettes.club`)"
+      rule: "Host(`ollama.local-dmz.courgettes.club`) || Host(`tabby.local-dmz.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -108,7 +108,7 @@ http:
         - local-only
       tls:
         certresolver: infomaniak
-      service: ollama
+      service: gpu
   #endregion
   #region services
   services:
@@ -120,27 +120,27 @@ http:
     websites-nico:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.249"
+          - url: "https://{{hostvars['host_websites']['ansible_host']}}"
         passHostHeader: true
     websites-arr:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.247"
+          - url: "https://{{hostvars['host_arr_server']['ansible_host']}}"
         passHostHeader: true
-    ollama:
+    gpu:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.102"
+          - url: "https://{{hostvars['host_gpu']['ansible_host']}}"
         passHostHeader: true
     nextcloud:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.246"
+          - url: "https://{{hostvars['host_nextcloud']['ansible_host']}}"
         passHostHeader: true
     websites-pocket:
       loadBalancer:
         servers:
-          - url: "https://10.10.5.100"
+          - url: "https://{{hostvars['host_vm_pocket']['ansible_host']}}"
         passHostHeader: true
   #endregion
   middlewares:
@@ -189,4 +189,4 @@ http:
         stsSeconds: 15552000
         customFrameOptionsValue: SAMEORIGIN
         customRequestHeaders:
-          X-Forwarded-Proto: https
+          "X-Forwarded-Proto": https

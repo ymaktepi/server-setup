@@ -14,6 +14,7 @@
   apt:
     name:
       - rsync
+      - python3-passlib
     state: latest
 
 - name: Create rsync conf
@@ -31,6 +32,7 @@
   service: name=rsync state=restarted enabled=true
 
 # this user will be connecting via SSH to use rsync and back shit up
+# you may have to "pipx inject ansible passlib" if you get a passlib missing module error
 - name: Add the user 'user1' with a bash shell
   ansible.builtin.user:
     name: user1

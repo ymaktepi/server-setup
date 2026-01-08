@@ -1,0 +1,18 @@
+# list of the groups to be created in Authelia, only need the "name" field
+authelia_groups:
+  - name: lldap-users
+
+# list of the users to be created in authelia
+#
+authelia_users:
+  - id: authelia
+    email: authelia@courgettes.club
+    password: '{{ authelia_ldap_bind_password }}'
+    groups:
+      - lldap_password_manager
+  - id: test
+    email: testldap@courgettes.club
+    password: testtest
+    displayName: "Test User"
+    groups:
+      - lldap-users

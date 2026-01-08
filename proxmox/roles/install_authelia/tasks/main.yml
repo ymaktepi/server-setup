@@ -1,0 +1,143 @@
+- name: Create /opt/lldap directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/lldap
+    state: directory
+    mode: '0755'
+
+- name: Create directories if they do not exist
+  ansible.builtin.file:
+    path: "{{item}}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /opt/lldap/data
+    - /opt/lldap/bootstrap/user-configs
+    - /opt/lldap/bootstrap/group-configs
+
+- name: Create Docker Compose for lldap
+  template:
+    src: "docker-compose-lldap.yml.j2"
+    dest: '/opt/lldap/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: list existing files in user-configs and group-configs
+  ansible.builtin.find:
+    paths:
+      - /opt/lldap/bootstrap/user-configs
+      - /opt/lldap/bootstrap/group-configs
+    recurse: yes
+    file_type: any
+  register: found_items
+
+- name: delete existing files in user-configs and group-configs
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ found_items.files }}"
+  when: found_items.files | length > 0
+
+- name: Create user configs for lldap
+  # hide logs because of passwords
+  no_log: true
+  copy:
+    dest: '/opt/lldap/bootstrap/user-configs/user-{{item.id}}.json'
+    owner: root
+    group: root
+    mode: 0644
+    content: '{{ item | to_json }}'
+  loop: "{{authelia_users}}"
+
+- name: Create group config for lldap
+  copy:
+    dest: '/opt/lldap/bootstrap/group-configs/group-{{item.name}}.json'
+    owner: root
+    group: root
+    mode: 0644
+    content: '{{item | to_json}}'
+  loop: "{{authelia_groups}}"
+
+- name: Refresh docker for lldap
+  include_tasks: refresh_docker_compose.yml
+  vars:
+    compose_project_dir: /opt/lldap
+
+- name: Run bootstrap for lldap
+  community.docker.docker_compose_v2_exec:
+    project_src: "/opt/lldap"
+    service: lldap
+    env:
+      LLDAP_ADMIN_PASSWORD: "{{ lldap_admin_password }}"
+    command: "./bootstrap.sh"
+  register: result
+
+- name: Print stdout
+  ansible.builtin.debug:
+    var: result.stdout
+
+- name: Create /opt/authelia directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/authelia
+    state: directory
+    mode: '0755'
+
+- name: Create /opt/authelia/data directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/authelia/data
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for authelia
+  template:
+    src: "docker-compose-authelia.yml.j2"
+    dest: '/opt/authelia/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create Config for authelia
+  template:
+    src: "authelia_config.yml.j2"
+    dest: '/opt/authelia/data/configuration.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create /opt/authelia/secrets directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/authelia/secrets
+    state: directory
+    mode: '0755'
+
+- name: Ensure Authelia secrets directory exists
+  file:
+    path: /opt/authelia/secrets
+    state: directory
+    mode: '0700'
+
+- name: Generate JWT secret if missing
+  shell: "openssl rand -base64 32 > /opt/authelia/secrets/jwt_secret"
+  args:
+    creates: /opt/authelia/secrets/jwt_secret
+
+- name: Generate session secret if missing
+  shell: "openssl rand -base64 32 > /opt/authelia/secrets/session_secret"
+  args:
+    creates: /opt/authelia/secrets/session_secret
+
+- name: Generate storage encryption key if missing
+  shell: "openssl rand -base64 32 > /opt/authelia/secrets/storage_key"
+  args:
+    creates: /opt/authelia/secrets/storage_key
+
+- name: Ensure secrets have correct permissions
+  file:
+    path: /opt/authelia/secrets
+    recurse: yes
+    mode: '0600'
+
+- name: Refresh docker for authelia
+  include_tasks: refresh_docker_compose.yml
+  vars:
+    compose_project_dir: /opt/authelia

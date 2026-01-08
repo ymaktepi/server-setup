@@ -109,6 +109,27 @@ http:
       tls:
         certresolver: infomaniak
       service: gpu
+    authelia:
+      rule: "Host(`auth.courgettes.club`)"
+      entryPoints:
+        - "https"
+      service: authelia
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls:
+        certResolver: letsencrypt
+    lldap:
+      rule: "Host(`lldap.courgettes.club`)"
+      entryPoints:
+        - "https"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+        - authelia@file
+      service: lldap
+      tls:
+        certResolver: letsencrypt
   #endregion
   #region services
   services:
@@ -142,6 +163,16 @@ http:
         servers:
           - url: "https://{{hostvars['host_vm_pocket']['ansible_host']}}"
         passHostHeader: true
+    authelia:
+      loadBalancer:
+        servers:
+          # assumes "authelia" is a valid domain (i.e. inside the same docker network)
+          - url: http://authelia:9091
+    lldap:
+      loadBalancer:
+        servers:
+          # assumes "lldap" is a valid domain (i.e. inside the same docker network)
+          - url: http://lldap:17170
   #endregion
   middlewares:
     # Redirect www URLs to their non-www equivalent
@@ -161,12 +192,6 @@ http:
         permanent: true
         regex: "^https:?://airhorn.courgettes.club"
         replacement: "https://airhorn.wav.courgettes.club"
-
-    mcaraccio-to-piratefache-redirection:
-      redirectregex:
-        permanent: true
-        regex: "^https:?://mcaraccio.ch"
-        replacement: "https://piratefache.ch"
 
     https-redirectscheme:
       redirectScheme:
@@ -190,3 +215,14 @@ http:
         customFrameOptionsValue: SAMEORIGIN
         customRequestHeaders:
           "X-Forwarded-Proto": https
+
+    authelia:
+      forwardAuth:
+        # assumes "authelia" is a valid domain (i.e. inside the same docker network)
+        address: http://authelia:9091/api/verify?rd=https://auth.courgettes.club
+        trustForwardHeader: true
+        authResponseHeaders:
+          - Remote-User
+          - Remote-Groups
+          - Remote-Email
+          - Remote-Name

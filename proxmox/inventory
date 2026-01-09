@@ -48,6 +48,9 @@ host_vm_pocket ansible_host=10.10.5.100 ansible_user=root
 #[cara]
 #host_vm_cara ansible_host=10.10.5.101 ansible_user=root
 
+[bear]
+host_vm_bear ansible_host=10.10.5.103 ansible_user=root
+
 [websites]
 host_websites ansible_host=10.10.5.249 ansible_user=root
 

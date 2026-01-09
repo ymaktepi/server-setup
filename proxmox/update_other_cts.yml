@@ -3,6 +3,7 @@
    - websites
    #- home_assistant
    - game_server
+   - bear
   gather_facts: false
   roles:
     - update_cts

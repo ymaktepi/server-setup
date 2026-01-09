@@ -8,7 +8,7 @@
     api_host: "{{ ansible_host }}"
     # needed so that SSH is enabled :/
     password: "{{ lookup('ansible.builtin.password', '/tmp/passwordfile', chars=['ascii_letters', 'digits', 'punctuation'], length=20) }}"
-    pubkey: '{{ lookup("file", "{{ansible_key_file}}") }}'
+    pubkey: '{{ lookup("file", ansible_key_file) }}'
     node: '{{item.node}}'
     vmid: '{{item.ctid}}'
     ostype: "debian"

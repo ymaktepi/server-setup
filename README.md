@@ -10,7 +10,7 @@ Contains trusted things like laptops, desktops, phones, printer, NAS, PI, Proxmo
 
 ### Entertainment VLAN
 
-Contains devices like TVs, sound bars, chromecast. Can be accessed from guest network.
+Contains devices like TVs, sound bars, Chromecast. Can be accessed from guest network.
 
 ### Guest VLAN
 
@@ -22,32 +22,37 @@ Contains devices like IoT shit, smart things. Can only connect to internet.
 
 ### DMZ VLAN
 
-Contains websites and services that can be accessed from the internet. Currently there are no ports forwarded from the
-internet and Rathole is used to create a tunnel to a public IP.
-
-#### Details for DMZ
+Contains websites and services that can be accessed from the internet.
+HTTP(S) and game ports are forwarded from the ISP router.
 
 The DMZ VLAN is as follows:
 ![infra image](docs-images/infra-courgettes-cloud.png)
 
-We assume a proxy VM is available somewhere with a public IP. Its hostname is `proxy.courgettes.club`.
+#### HTTP(S)
 
-A jumphost VM is spawned in the VLAN. It creates a SSH and HTTP(S) tunnel to the proxy. The SSH tunnel
-binds `proxy.courgettes.club:2222` to `jumphost:22`.
-The HTTP(S) tunnels bind `proxy.courgettes.club:80` to `traefik.local-dmz.courgettes.club:80`
-and `proxy.courgettes.club:443` to `traefik.local-dmz.courgettes.club:443` respectively.
+The HTTP(S) ports are forwarded from the ISP router to the Traefik DMZ instance. `proxy.courgettes.club` is an alias for
+the actual IP of the ISP router, making it effectively the public facing domain name for the Traefik DMZ instance. Any
+new public domain wants to route to a DMZ website must CNAME to `proxy.courgettes.club`, or use ddclient (for root
+domains).
+In the end, DMZ Traefik listens to any traffic on port 80 and 443 of `proxy.courgettes.club` This effectively allows the
+Traefik VM to generate LetsEncrypt certs for domains that are `CNAME`d to `proxy.courgettes.club`.
 
-The Traefik VM therefore listens to and trafic on port 80 and 443 of `proxy.courgettes.club`. This effectively allows
-the Traefik VM to generate LetsEncrypt certs for domains that are `CNAME`d to `proxy.courgettes.club`.
+The Websites VMs have a self-signed certificate that is trusted by the Traefik VM for inside-VLAN communication.
+The `install_nginx` ansible role handles the creation of the self-signed certs for all hosts needing one.
 
-The Websites VM has a self-signed certificate that is trusted by the Traefik VM for inside-VLAN communication.
-The `install_nginx` ansible role handles the creation of the self signed cert for all hosts needing one.
+#### SSH
+
+A `jumphost` VM is spawned in the VLAN as well. Port 22222 from the ISP router is forwarded to it. A `jumphost` user on
+the VM is provisioned as well. It is not allowed to run shell, and can only proxy to other hosts in the VLAN.
+See [guest manual](#guest-manual) for details. New users need access to the `jumphost` via SSH key, as well as to their
+target VMs. Since shell is not available on the jump host, adding their SSH key to the `jumphost` user's config is fine,
+and actual access control happens on the VMs themselves.
 
 ### Tailscale
 
 Tailscale is installed in an LXC in the Main VLAN, configured as an exit node. It's using userspace network routing (
 i.e. so you don't have to change the default settings for LXCs), publishes all the subnet routes in there (so that you
-can access all resources if you have access to tailscale), and has keys expiry disabled - as expected for headless
+can access all resources if you have access to Tailscale), and has keys expiry disabled - as expected for headless
 servers. See details in the [`install_tailscale_exit_node` role](proxmox/roles/install_tailscale_exit_node).
 
 ## Guest Manual
@@ -58,7 +63,7 @@ Ask the admin to create a new box. Parameters include:
 
 - Number of CPU
 - RAM size
-- SSD size (for base drive)
+- SSD size (for base drive). Defaults to 4.
 - Backed up/replicated HDD size (for data, will be mounted to `/mnt/mounted-raid`)
 
 If it's the first time you ask for a box, sned pulbic shs kye.
@@ -87,7 +92,7 @@ Your box has unrestricted outbound internet access.
 
 Regarding inbound internet:
 
-- if you need to publish one or more websites:
+- If you need to publish one or more websites:
     - `CNAME` your domain to `proxy.courgettes.club`
     - Ask for a base `nginx` config with self-signed certs to be installed.
     - Add your nginx reverse proxy config for each one of the websites.
@@ -99,6 +104,5 @@ Regarding inbound internet:
           redirections, mapping multiple domains to the same website, ...
     - Ask for the traefik config to be redeployed. This is not really a piece that should be re-run often so the
       dependency to admin access should be OK.
-- if you want to have custom ports mapped to your machine (i.e. game server):
-    - change the `rathole.conf` config file
-    - ask for a change to be redeployed.
+- If you want to have custom ports mapped to your machine (i.e. game server):
+    - Ask for a new port forwarding.

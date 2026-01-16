@@ -26,6 +26,6 @@
     state: present
     force: true
     # can't have feature flags when running a privileged container
-    features: "{{ ['nesting=1'] if (item.unprivileged | default(false)) else omit }}"
+    features: "{{ ['nesting=1'] if (item.unprivileged | default(true)) else omit }}"
   loop: '{{cts}}'
   when: 'item.state == "new"'

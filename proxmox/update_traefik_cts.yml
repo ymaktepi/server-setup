@@ -20,3 +20,4 @@
       config_file: dmz-config.yml
       docker_compose_file: dmz-docker-compose.yml
       traefik_file: dmz-traefik.yml
+    - role: install_authelia

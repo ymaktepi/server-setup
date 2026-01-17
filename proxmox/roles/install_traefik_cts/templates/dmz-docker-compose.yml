@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    #networks:
-    #  - proxy
+    networks:
+      - traefik
     ports:
       - 80:80
       - 443:443
@@ -37,6 +37,9 @@ services:
       - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.local-dmz.courgettes.club"
       - "traefik.http.routers.traefik-secure.service=api@internal"
 
-#networks:
-#  proxy:
-#    external: true
+
+# explicit network since authelia/ldap is bound to traefik for simpler use of hostnames
+networks:
+  traefik:
+    name: traefik
+    driver: bridge

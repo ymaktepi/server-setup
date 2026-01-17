@@ -1,0 +1,64 @@
+server:
+  address: 'tcp://0.0.0.0:9091/'
+
+log:
+  level: info
+
+storage:
+  encryption_key: !file /secrets/storage_key
+  local:
+    path: /config/db.sqlite3
+
+session:
+  secret: !file /secrets/session_secret
+  name: authelia_session
+  same_site: lax
+  expiration: 1h
+  inactivity: 5m
+  cookies:
+    - domain: courgettes.club
+      authelia_url: 'https://auth.courgettes.club'
+
+authentication_backend:
+  ldap:
+    implementation: 'lldap'
+    address: 'ldap://lldap:3890'
+    base_dn: 'DC=courgettes,DC=club'
+    user: 'UID=authelia,OU=people,DC=courgettes,DC=club'
+    password: "{{ authelia_ldap_bind_password }}"
+
+totp:
+  issuer: courgettes.club
+  period: 30
+  skew: 1
+  digits: 6
+  algorithm: sha1
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain:
+        - 'auth.courgettes.club'
+      policy: one_factor
+    - domain:
+        - 'lldap.courgettes.club'
+      policy: two_factor
+      subject:
+        - "group:lldap-users"
+        - "user:admin"
+
+notifier:
+  disable_startup_check: false
+  smtp:
+    address: 'smtp://mail.infomaniak.com'
+    timeout: '5s'
+    username: 'bot@courgettes.club'
+    password: '{{ authelia_mail_password }}'
+    sender: "Authelia <bot@courgettes.club>"
+    identifier: 'localhost'
+    subject: "[Authelia] {title}"
+    startup_check_address: 'bot@courgettes.club'
+
+identity_validation:
+  reset_password:
+    jwt_secret: !file /secrets/jwt_secret

@@ -1,0 +1,26 @@
+services:
+  lldap:
+    container_name: lldap
+    hostname: lldap
+    image: lldap/lldap:stable
+    restart: unless-stopped
+    volumes:
+      #- ./secrets:/secrets
+      - ./data:/data
+      - ./bootstrap:/bootstrap
+    networks:
+      - traefik
+    environment:
+      - UID=0
+      - GID=0
+      - LLDAP_LDAP_BASE_DN=dc=courgettes,dc=club
+      - LLDAP_LDAP_USER_PASS={{ lldap_admin_password }}
+      - LLDAP_JWT_SECRET={{ lldap_jwt_secret }}
+      - LLDAP_KEY_SEED={{ (inventory_hostname ~ secret_salt ) | hash('sha256') }}
+      - LLDAP_DATABASE_URL=sqlite:///data/users.db?mode=rwc
+    expose:
+      - "17170"
+
+networks:
+  traefik:
+    external: true

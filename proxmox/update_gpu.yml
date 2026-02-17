@@ -10,3 +10,15 @@
     - install_gpu
     - install_ollama
     - install_tabby
+
+- hosts:
+    - pvenodes
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Reboot gpu VM every night. Allows for GPU to reset consumption back to 10W instead of 17.
+      ansible.builtin.cron:
+        name: "reboot gpu"
+        minute: "0"
+        hour: "0"
+        job: "qm reboot 302"

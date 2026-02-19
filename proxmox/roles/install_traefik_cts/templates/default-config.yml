@@ -173,7 +173,7 @@ http:
     proxmox:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_pvenodes']['ansible_host']}}:8006"
+          - url: "https://{{hostvars['host_main_node']['ansible_host']}}:8006"
         passHostHeader: true
   #endregion
   middlewares:

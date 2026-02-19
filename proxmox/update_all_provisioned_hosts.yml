@@ -1,3 +1,4 @@
+- import_playbook: pve_packages.yml
 - import_playbook: update_arr.yml
 - import_playbook: update_gpu.yml
 - import_playbook: update_infomaniak.yml

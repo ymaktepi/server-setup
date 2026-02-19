@@ -3,6 +3,6 @@
 # The variable file will then be created in a sub-folder within the group_vars folder
 - name: Create Variables File
   assemble:
-    src: '{{project_path}}variable_files/{{variable_name}}/'
-    dest: '{{project_path}}group_vars/{{group_name}}/{{variable_name}}'
+    src: '{{playbook_dir}}/variable_files/{{variable_name}}/'
+    dest: '{{playbook_dir}}/group_vars/{{group_name}}/{{variable_name}}'
   delegate_to: localhost

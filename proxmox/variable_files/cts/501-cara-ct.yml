@@ -1,7 +1,7 @@
   - name: cara
     domain_name: .cara
     ctid: 501
-    node: proxmox
+    node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
     cpus: 1

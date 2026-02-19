@@ -1,5 +1,4 @@
 ansible_key_file: "{{lookup('env','HOME') + '/.ssh/id_ecdsa.pub'}}"
-project_path: "{{lookup('env','HOME') + '/dev/perso/server-setup/proxmox/'}}"
 image_path: '/mnt/pve/isos/images/0/'
 cts_storage: 'isos'
 disk_storage: 'm2-noraid'

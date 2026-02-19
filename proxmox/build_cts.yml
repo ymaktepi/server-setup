@@ -12,15 +12,13 @@
       loop:
         '{{variable_files}}'
 
-- hosts: pvenodes
+- hosts: pvenodes[0]
   become: true
   gather_facts: false
 
   roles:
     # Download container images
     - download_ct_images
-    # Create cloud-init files
-    #- create_user_files
 
 - hosts: pvenodes[0]
   become: false

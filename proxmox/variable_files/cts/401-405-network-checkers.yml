@@ -1,6 +1,6 @@
   - name: network_testing_default_vlan
     ctid: 401
-    node: proxmox
+    node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
     cpus: 1
@@ -13,7 +13,7 @@
 
   - name: network_testing_entertainment
     ctid: 402
-    node: proxmox
+    node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
     cpus: 1
@@ -26,7 +26,7 @@
 
   - name: network_testing_guest
     ctid: 403
-    node: proxmox
+    node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
     cpus: 1
@@ -39,7 +39,7 @@
 
   - name: network_testing_crusted
     ctid: 404
-    node: proxmox
+    node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
     cpus: 1
@@ -51,7 +51,7 @@
     state: started
   - name: network_testing_dmz
     ctid: 405
-    node: proxmox
+    node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
     image_name: debian-12-standard_12.2-1_amd64.tar.zst
     cores: 1
     cpus: 1

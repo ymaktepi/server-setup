@@ -77,14 +77,6 @@ Install and update packages in proxmox.
 ansible-playbook pve_packages.yml
 ```
 
-### Spawn dumb LXC: `dumb_container.yml`
-
-Clones the VM 101 and starts it:
-
-```bash
-ansible-playbook dumb_container.yml
-```
-
 ### Build VMs: `build_vms.yml`
 
 ```bash

@@ -31,11 +31,12 @@ services:
       - "traefik.http.routers.traefik-secure.entrypoints=https"
       - "traefik.http.routers.traefik-secure.rule=Host(`traefik.local.courgettes.club`)"
       - "traefik.http.routers.traefik-secure.middlewares=traefik-auth,localipwhitelist"
-      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certresolver=infomaniak"
       - "traefik.http.routers.traefik-secure.tls.domains[0].main=local.courgettes.club"
       - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.local.courgettes.club"
+      - "traefik.http.routers.traefik-secure.tls.domains[1].main=proxmox.local.courgettes.club"
+      - "traefik.http.routers.traefik-secure.tls.domains[1].sans=*.proxmox.local.courgettes.club"
       - "traefik.http.routers.traefik-secure.service=api@internal"
 
 #networks:

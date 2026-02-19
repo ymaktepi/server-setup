@@ -104,7 +104,7 @@ http:
     proxmox1:
       entryPoints:
         - "https"
-      rule: "Host(`proxmox.local.courgettes.club`) || Host(`proxmox1.local.courgettes.club`)"
+      rule: "Host(`proxmox.local.courgettes.club`) || Host(`node1.proxmox.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
@@ -113,7 +113,7 @@ http:
     pbs:
       entryPoints:
         - "https"
-      rule: "Host(`pbs.local.courgettes.club`)"
+      rule: "Host(`pbs.local.courgettes.club`) || Host(`pbs.proxmox.local.courgettes.club`) || Host(`backup.proxmox.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme

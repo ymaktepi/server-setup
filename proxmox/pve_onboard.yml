@@ -37,55 +37,57 @@
         group: root
         mode: 0440
 
-    # GPU passthrough configuration
-    - name: Blacklist NVIDIA modules
-      copy:
-        dest: /etc/modprobe.d/blacklist-nvidia.conf
-        content: |
-          blacklist nouveau
-          blacklist nvidia
-          blacklist nvidiafb
-          blacklist rivafb
-          blacklist rivatv
-        owner: root
-        group: root
-        mode: 0644
+    - name: GPU passthrough configuration
+      when: "has_gpu == 'yes'"
+      block:
+      - name: Blacklist NVIDIA modules
+        copy:
+          dest: /etc/modprobe.d/blacklist-nvidia.conf
+          content: |
+            blacklist nouveau
+            blacklist nvidia
+            blacklist nvidiafb
+            blacklist rivafb
+            blacklist rivatv
+          owner: root
+          group: root
+          mode: 0644
 
-    - name: Add VFIO modules to /etc/modules
-      lineinfile:
-        path: /etc/modules
-        line: "{{ item }}"
-        state: present
-      loop:
-        - vfio
-        - vfio_iommu_type1
-        - vfio_pci
-        - vfio_virqfd
+      - name: Add VFIO modules to /etc/modules
+        lineinfile:
+          path: /etc/modules
+          line: "{{ item }}"
+          state: present
+        loop:
+          - vfio
+          - vfio_iommu_type1
+          - vfio_pci
+          - vfio_virqfd
 
-    - name: Configure VFIO PCI options
-      copy:
-        dest: /etc/modprobe.d/vfio.conf
-        content: |
-          options vfio-pci ids=10de:2504,10de:228e disable_vga=1
-        owner: root
-        group: root
-        mode: 0644
+      - name: Configure VFIO PCI options
+        copy:
+          dest: /etc/modprobe.d/vfio.conf
+          content: |
+            options vfio-pci ids=10de:2504,10de:228e disable_vga=1
+          owner: root
+          group: root
+          mode: 0644
 
-    - name: Update GRUB_CMDLINE_LINUX_DEFAULT for GPU passthrough
-      lineinfile:
-        path: /etc/default/grub
-        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt video=vesafb:off"'
-        backup: yes
+      - name: Update GRUB_CMDLINE_LINUX_DEFAULT for GPU passthrough
+        lineinfile:
+          path: /etc/default/grub
+          regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+          line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt video=vesafb:off"'
+          backup: yes
 
-    - name: Update GRUB
-      command: update-grub
-      changed_when: true
+      - name: Update GRUB
+        command: update-grub
+        changed_when: true
 
-    - name: Update initramfs
-      command: update-initramfs -u
-      changed_when: true
+      - name: Update initramfs
+        command: update-initramfs -u
+        changed_when: true
 
-    - name: Note that reboot is required
-      debug:
-        msg: "GPU passthrough configuration complete. A reboot is required for changes to take effect."
+      - name: Note that reboot is required
+        debug:
+          msg: "GPU passthrough configuration complete. A reboot is required for changes to take effect."

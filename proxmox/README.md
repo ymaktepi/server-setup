@@ -17,9 +17,48 @@ Put the vault password inside `password_file`.
 
 Only contains the proxmox host for now.
 
+## Playbooks
+
+### Root
+
+- `update_all.yml` - Runs all update playbooks in sequence
+
+### pve/ - Proxmox host management
+
+- `pve/pve_onboard.yml` - Initial Proxmox setup (installs sudo, creates ansible user, adds SSH key)
+- `pve/pve_mounts.yml` - Configure CIFS mounts for LXC shares
+- `pve/update_pve.yml` - Update Proxmox packages and install dependencies
+
+### provisioning/ - VM and container creation
+
+- `provisioning/build_vms.yml` - Create VMs from cloud-init images
+- `provisioning/build_cts.yml` - Create LXC containers
+- `provisioning/add_ssh_key_to_host.yml` - Copy SSH key to hosts
+
+> Note: when running `build_*` playbooks, we currently need to:
+> - Create a new entry in the vm or ct list, `state: new`.
+> - Run the `build_*` playbook, which _creates_ the vm/ct.
+> - Set the state to `started`.
+> - Run the playbook again, which _starts_ the vm/ct.
+
+### update/ - Update specific containers
+
+- `update/update_arr.yml` - Update ARR stack containers (Sonarr, Radarr, etc.)
+- `update/update_gpu.yml` - Update GPU-related containers
+- `update/update_infomaniak.yml` - Update Infomaniak containers
+- `update/update_jumphost_cts.yml` - Update Jumphost container
+- `update/update_k3s.yml` - Update K3s cluster
+- `update/update_minix.yml` - Update Minix container
+- `update/update_networkcheckers_cts.yml` - Update Network Checkers container
+- `update/update_nextcloud.yml` - Update Nextcloud container
+- `update/update_other_cts.yml` - Update other miscellaneous containers
+- `update/update_rsync_backup_cts.yml` - Update Rsync backup container
+- `update/update_traefik_cts.yml` - Update Traefik container
+- `update/update_uptimekuma_cts.yml` - Update Uptime Kuma container
+
 ## Preparing Proxmox
 
-### Base proxmox onboarding: `pve_onboard.yml`
+### Base proxmox onboarding: `pve/pve_onboard.yml`
 
 - Installs sudo
 - Creates an ansible user, sets ssh key (from default ssh key in home folder), adds it to sudoers (via
@@ -28,7 +67,7 @@ Only contains the proxmox host for now.
 To run it:
 
 ```bash
-ansible-playbook pve_onboard.yml --user=root
+ansible-playbook playbooks/pve/pve_onboard.yml --user=root
 ```
 
 To test the key was moved and that you can connect using the ansible user:
@@ -69,45 +108,61 @@ To edit the vault:
 ansible-vault edit --vault-password-file password_file vault-file
 ```
 
-### Update apt packages: `pve_packages.yml`
+### Update Proxmox: `pve/update_pve.yml`
 
-Install and update packages in proxmox.
+Update packages and install dependencies in Proxmox.
 
 ```bash
-ansible-playbook pve_packages.yml
+ansible-playbook playbooks/pve/update_pve.yml
 ```
 
-### Build VMs: `build_vms.yml`
+### Mounts: `pve/pve_mounts.yml`
+
+Configure CIFS mounts for LXC shares.
 
 ```bash
-ansible-playbook build_vms.yml
+ansible-playbook playbooks/pve/pve_mounts.yml
 ```
 
-### Build Containers: `build_cts.yml`
+### Build VMs: `provisioning/build_vms.yml`
 
 ```bash
-ansible-playbook build_cts.yml
+ansible-playbook playbooks/provisioning/build_vms.yml
+```
+
+### Build Containers: `provisioning/build_cts.yml`
+
+```bash
+ansible-playbook playbooks/provisioning/build_cts.yml
 ```
 
 Also used to delete/start/stop cts. To do so, change the state in the variable_files/cts.
 
-### Update Containers: `update_*_cts.yml`
+### Update Containers: `update/update_*_cts.yml`
 
 ```bash
-ansible-playbook update_uptimekuma_cts.yml
+ansible-playbook playbooks/update/update_uptimekuma_cts.yml
 ## you then need to import the backup json file to have all the uptime checkers up.
 ```
 
 ```bash
-ansible-playbook update_networkcheckers_cts.yml
+ansible-playbook playbooks/update/update_networkcheckers_cts.yml
 ```
 
 ```bash
-ansible-playbook update_traefik_cts.yml
+ansible-playbook playbooks/update/update_traefik_cts.yml
 ```
 
 ```bash
-ansible-playbook update_jumphost_cts.yml
+ansible-playbook playbooks/update/update_jumphost_cts.yml
+```
+
+### Update all: `update_all.yml`
+
+Run all update playbooks in sequence, for VMs, CTs **and** Proxmox nodes.
+
+```bash
+ansible-playbook playbooks/update_all.yml
 ```
 
 ## Jumphost config
@@ -127,7 +182,9 @@ Host jumphost
 ```
 
 ### Add ssh key to host
+
 Put pub key in `files` folder then:
+
 ```bash
-ansible-playbook add-ssh-key-to-host.yml -e '{"ssh_copy_hosts": "traefik_default:networkcheckers:uptimekuma", "ssh_copy_user": "root", "ssh_copy_filename": "key-name.pub"}'
+ansible-playbook playbooks/provisioning/add_ssh_key_to_host.yml -e '{"ssh_copy_hosts": "traefik_default:networkcheckers:uptimekuma", "ssh_copy_user": "root", "ssh_copy_filename": "key-name.pub"}'
 ```

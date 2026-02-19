@@ -1,13 +1,26 @@
 http:
   #region routers
   routers:
+    traefik-secure:
+      entryPoints:
+        - "https"
+      rule: "Host(`traefik.local-dmz.courgettes.club`)"
+      middlewares:
+        - traefik-auth
+        - localipwhitelist
+      service: api@internal
+      tls:
+        certResolver: infomaniak
+        domains:
+          - main: local-dmz.courgettes.club
+            sans:
+              - "*.local-dmz.courgettes.club"
     #grafana:
     #  entryPoints:
     #    - "https"
     #  rule: "Host(`grafana.courgettes.club`)"
     #  middlewares:
     #    - default-headers
-    #    - https-redirectscheme
     #  tls:
     #    certresolver: letsencrypt
     #  service: grafana
@@ -17,7 +30,6 @@ http:
       rule: "Host(`airhorn.courgettes.club`) || Host(`airhorn.wav.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
         - wav-to-airhorn-redirection
       tls:
         certresolver: letsencrypt
@@ -28,7 +40,6 @@ http:
     #  rule: "Host(`headscale.courgettes.club`)"
     #  middlewares:
     #    - default-headers
-    #    - https-redirectscheme
     #  tls:
     #    certresolver: letsencrypt
     #  service: websites-nico
@@ -38,7 +49,6 @@ http:
       rule: "Host(`egj2021.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls:
         certresolver: letsencrypt
       service: websites-nico
@@ -49,7 +59,6 @@ http:
       middlewares:
         - local-only
         - default-headers
-        - https-redirectscheme
       tls:
         certresolver: infomaniak
       service: websites-arr
@@ -59,7 +68,6 @@ http:
       rule: "Host(`nextcloud.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
         - www-to-non-www-redirection
       tls:
         certresolver: letsencrypt
@@ -70,7 +78,6 @@ http:
       rule: "Host(`courgettes.club`) || Host(`www.courgettes.club`) || Host(`budget.courgettes.club`) || Host(`contra.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
         - www-to-non-www-redirection
       tls:
         certresolver: letsencrypt
@@ -81,7 +88,6 @@ http:
       rule: "Host(`test.courgettes.club`) || Host(`www.test.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
         - www-to-non-www-redirection
       tls:
         certresolver: letsencrypt
@@ -92,7 +98,6 @@ http:
       rule: "Host(`mouni.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
         - www-to-non-www-redirection
       tls:
         certresolver: letsencrypt
@@ -102,10 +107,9 @@ http:
         - "https"
       rule: "Host(`ollama.local-dmz.courgettes.club`) || Host(`tabby.local-dmz.courgettes.club`)"
       middlewares:
-        - default-headers
-        - https-redirectscheme
-        - www-to-non-www-redirection
         - local-only
+        - default-headers
+        - www-to-non-www-redirection
       tls:
         certresolver: infomaniak
       service: gpu
@@ -116,7 +120,6 @@ http:
       service: authelia
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls:
         certResolver: letsencrypt
     lldap:
@@ -125,7 +128,6 @@ http:
         - "https"
       middlewares:
         - default-headers
-        - https-redirectscheme
         - authelia@file
       service: lldap
       tls:
@@ -175,6 +177,16 @@ http:
           - url: http://lldap:17170
   #endregion
   middlewares:
+    traefik-auth:
+      basicAuth:
+        users:
+          - "admin:{{traefik_basic_auth}}"
+
+    localipwhitelist:
+      ipWhiteList:
+        sourceRange:
+          - "10.10.0.0/23"
+
     # Redirect www URLs to their non-www equivalent
     # Use with traefik.http.routers.myRouter.middlewares: "redirect-www-to-non-www@file"
     www-to-non-www-redirection:
@@ -192,12 +204,6 @@ http:
         permanent: true
         regex: "^https:?://airhorn.courgettes.club"
         replacement: "https://airhorn.wav.courgettes.club"
-
-    https-redirectscheme:
-      redirectScheme:
-        scheme: https
-        permanent: true
-        #replacement: '/'
 
     local-only:
       ipwhitelist:

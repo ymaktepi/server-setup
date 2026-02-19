@@ -101,15 +101,24 @@ http:
         - https-redirectscheme
       tls: {}
       service: nwCheckerDMZ
-    proxmox:
+    proxmox1:
       entryPoints:
         - "https"
-      rule: "Host(`proxmox.local.courgettes.club`)"
+      rule: "Host(`proxmox.local.courgettes.club`) || Host(`proxmox1.local.courgettes.club`)"
       middlewares:
         - default-headers
         - https-redirectscheme
       tls: {}
-      service: proxmox
+      service: proxmox1
+    pbs:
+      entryPoints:
+        - "https"
+      rule: "Host(`pbs.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: pbs
 
   #endregion
   #region services
@@ -170,10 +179,15 @@ http:
         servers:
           - url: "https://{{hostvars['host_network_checker_dmz']['ansible_host']}}"
         passHostHeader: true
-    proxmox:
+    proxmox1:
       loadBalancer:
         servers:
           - url: "https://{{hostvars['host_main_node']['ansible_host']}}:8006"
+        passHostHeader: true
+    pbs:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_pbs']['ansible_host']}}:8007"
         passHostHeader: true
   #endregion
   middlewares:

@@ -13,7 +13,7 @@
         path: /mnt/lxc_shares/arr
         src: //nas-1.nico/arr
         fstype: cifs
-        opts: "_netdev,x-systemd.automount,noatime,uid=100000,gid=110000,dir_mode=0770,file_mode=0770,user=arr,pass={{arr_smb_password}}"
+        opts: "_netdev,x-systemd.automount,nofail,noatime,uid=100000,gid=110000,dir_mode=0770,file_mode=0770,user=arr,pass={{arr_smb_password}},retry=5,echo_interval=60,actimeo=1"
         state: mounted
 
     # https://pve.proxmox.com/wiki/OpenVPN_in_LXC

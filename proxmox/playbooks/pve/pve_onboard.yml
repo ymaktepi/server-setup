@@ -1,4 +1,6 @@
-- hosts: pvenodes
+- hosts:
+   - pvenodes
+   - pbsnode
   become: true
   tasks:
 
@@ -31,14 +33,14 @@
       # if we already ran it
       when: not result.stat.exists
       copy:
-        src: sudoer_ansible
+        src: "{{playbook_dir}}/../../files/sudoer_ansible"
         dest: /etc/sudoers.d/ansible
         owner: root
         group: root
         mode: 0440
 
     - name: GPU passthrough configuration
-      when: "has_gpu == 'yes'"
+      when: "has_gpu | default('no') == 'yes'"
       block:
       - name: Blacklist NVIDIA modules
         copy:

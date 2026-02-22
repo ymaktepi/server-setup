@@ -83,7 +83,7 @@
 # Resize the disk
 # The Cloud-Init disk is only 2GB
 - name: Resize disk
-  community.general.proxmox_disk:
+  community.proxmox.proxmox_disk:
     api_user: '{{api_user}}'
     api_token_id: '{{api_token_name}}'
     api_token_secret: '{{api_token}}'

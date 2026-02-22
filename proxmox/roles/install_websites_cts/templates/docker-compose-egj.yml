@@ -1,4 +1,3 @@
-version: '2.1'
 services:
   egj2021:
     container_name: egj_app

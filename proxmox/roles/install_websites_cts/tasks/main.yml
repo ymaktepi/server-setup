@@ -2,7 +2,7 @@
   include_tasks: "{{item.filename}}"
   loop: "{{website_hosts}}"
 
-- name: Create nginx conf for {{item.name}}
+- name: Create nginx conf
   template:
     src: nginx-reverse-proxy.conf
     dest: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
@@ -14,7 +14,7 @@
     server_name: "{{item.host}}"
     container_port: "{{item.port}}"
 
-- name: Create a symbolic link for nginx conf for {{item.name}}
+- name: Create a symbolic link for nginx conf
   ansible.builtin.file:
     src: '/etc/nginx/sites-available/{{item.host}}-nginx.conf'
     dest: '/etc/nginx/sites-enabled/{{item.host}}-nginx.conf'

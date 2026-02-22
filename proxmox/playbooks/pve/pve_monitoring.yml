@@ -1,0 +1,25 @@
+# cretes the monitoring user. you still need to create a token and add it to the vault as monitoring_api_token and monitoring_api_token_name
+- hosts:
+    - pvenodes[0]
+  become: true
+  tasks:
+    - name: Create monitoring user
+      community.proxmox.proxmox_user:
+        api_user: "{{ api_user }}"
+        api_token_id: "{{ api_token_name }}"
+        api_token_secret: "{{ api_token }}"
+        api_host: "{{ ansible_host }}"
+        name: monitoring@pam
+        enable: true
+    - name: Assign role to monitoring user
+      community.proxmox.proxmox_access_acl:
+        api_user: "{{ api_user }}"
+        api_token_id: "{{ api_token_name }}"
+        api_token_secret: "{{ api_token }}"
+        api_host: "{{ ansible_host }}"
+        state: "present"
+        path: /
+        type: user
+        ugid: "monitoring@pam"
+        roleid: PVEAuditor
+        propagate: 1

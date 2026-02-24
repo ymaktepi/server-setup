@@ -10,6 +10,7 @@
         update_cache: yes
         cache_valid_time: 86400 #One day
 
+    # fixme, not available in recent install?
     - name: Proxmoxer installation (for pve only)
       when: "'pbs' not in inventory_hostname"
       block:

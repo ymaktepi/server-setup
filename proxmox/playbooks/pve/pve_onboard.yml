@@ -8,8 +8,15 @@
       block:
       - name: Remove enterprise repos
         ansible.builtin.file:
-          path: /etc/apt/sources.list.d/pve-enterprise.sources
+          path: /etc/apt/sources.list.d/pve-enterprise.list
           state: absent
+
+      - name: Replace ceph
+        when: "'pbs' not in inventory_hostname"
+        ansible.builtin.replace:
+          path: /etc/apt/sources.list.d/ceph.list
+          regexp: 'enterprise'
+          replace: 'download'
 
       - name: use open repositories
         copy:

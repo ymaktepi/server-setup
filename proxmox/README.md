@@ -67,7 +67,7 @@ Only contains the proxmox host for now.
 To run it:
 
 ```bash
-ansible-playbook playbooks/pve/pve_onboard.yml --user=root
+ansible-playbook playbooks/pve/pve_onboard.yml -e 'ansible_user=root'
 ```
 
 To test the key was moved and that you can connect using the ansible user:

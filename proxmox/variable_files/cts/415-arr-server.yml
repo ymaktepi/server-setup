@@ -10,7 +10,7 @@
     ipv4mode: static
     ipv4_address: 10.10.5.247/24
     ipv4_gateway: 10.10.5.1
-    state: started
+    state: stopped
     # optional, allows you to add some mounted disk in raid
     # the mnt/lxc_shares mounting point is _not_ mounted here because of proxmox permissions as it needs
     # to be mounted by root

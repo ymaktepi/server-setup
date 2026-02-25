@@ -113,6 +113,22 @@ http:
         - default-headers
       tls: {}
       service: proxmox1
+    proxmox2:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox2.local.courgettes.club`) || Host(`node2.proxmox.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: proxmox2
+    proxmox3:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox3.local.courgettes.club`) || Host(`node3.proxmox.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: proxmox3
     pbs:
       entryPoints:
         - "https"
@@ -185,6 +201,16 @@ http:
       loadBalancer:
         servers:
           - url: "https://{{hostvars['host_main_node']['ansible_host']}}:8006"
+        passHostHeader: true
+    proxmox2:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_node_2']['ansible_host']}}:8006"
+        passHostHeader: true
+    proxmox3:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_node_3']['ansible_host']}}:8006"
         passHostHeader: true
     pbs:
       loadBalancer:

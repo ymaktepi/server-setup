@@ -12,7 +12,7 @@
       loop:
         '{{variable_files}}'
 
-- hosts: pvenodes[0]
+- hosts: pvenodes
   become: true
   gather_facts: false
 

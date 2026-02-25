@@ -1,0 +1,86 @@
+- name: Setup NFS install
+  hosts: pvenodes
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Install NFS server packages
+      ansible.builtin.apt:
+        name: nfs-kernel-server
+        state: present
+        update_cache: yes
+
+    - name: Ensure NFS service is enabled and started
+      ansible.builtin.systemd:
+        name: "nfs-server"
+        enabled: true
+        state: started
+
+    - name: Ensure exportfs command exists
+      ansible.builtin.command: which exportfs
+      register: exportfs_check
+      changed_when: false
+      failed_when: exportfs_check.rc != 0
+
+- name: Setup NFS ISO/Templates on main node
+  hosts: pvenodes[0]
+  become: yes
+  tasks:
+    - name: Create ZFS datasets
+      community.general.zfs:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - hdd-8tb-raid/isos
+        - hdd-8tb-raid/vztmpl
+
+    - name: Check current sharenfs
+      shell: zfs get -H -o value sharenfs "{{ item }}" 2>/dev/null || echo "off"
+      loop:
+        - hdd-8tb-raid/isos
+        - hdd-8tb-raid/vztmpl
+      register: sharenfs_current
+
+    - name: Set NFS share properties
+      shell: zfs set sharenfs="rw=10.10.0.0/23,no_root_squash" "{{ item.item }}"
+      when: '"rw=10.10.0.0/23,no_root_squash" not in item.stdout'
+      loop: "{{ sharenfs_current.results }}"
+
+- name: Add NFS storages on all Proxmox nodes
+  hosts: pvenodes[0]
+  become: yes
+  vars:
+    nfs_server_ip: "{{ hostvars['host_main_node']['ansible_host'] | default(ansible_host) }}"
+  tasks:
+    - name: Add cluster-isos NFS storage
+      community.proxmox.proxmox_storage:
+        api_user: "{{ api_user }}"
+        api_token_id: "{{ api_token_name }}"
+        api_token_secret: "{{ api_token }}"
+        api_host: "{{ ansible_host }}"
+        name: cluster-isos
+        type: nfs
+        nfs_options:
+          server: "{{ nfs_server_ip }}"
+          export: /hdd-8tb-raid/isos
+        content: iso
+        state: present
+        nodes: "{{ groups['pvenodes'] | map('extract', hostvars, 'proxmox_node_name') | list }}"
+
+    - name: Add cluster-templates NFS storage
+      community.proxmox.proxmox_storage:
+        api_user: "{{ api_user }}"
+        api_token_id: "{{ api_token_name }}"
+        api_token_secret: "{{ api_token }}"
+        api_host: "{{ ansible_host }}"
+        name: cluster-templates
+        type: nfs
+        nfs_options:
+          server: "{{ nfs_server_ip }}"
+          export: /hdd-8tb-raid/vztmpl
+        content: vztmpl
+        state: present
+        nodes: "{{ groups['pvenodes'] | map('extract', hostvars, 'proxmox_node_name') | list }}"
+
+  handlers:
+    - name: Rescan storage
+      shell: pvesm scan

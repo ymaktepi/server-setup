@@ -3,7 +3,6 @@
 - import_playbook: update/update_gpu.yml
 - import_playbook: update/update_infomaniak.yml
 - import_playbook: update/update_jumphost_cts.yml
-# - import_playbook: update_k3s.yml
 - import_playbook: update/update_minix.yml
 - import_playbook: update/update_networkcheckers_cts.yml
 - import_playbook: update/update_nextcloud.yml
@@ -11,3 +10,4 @@
 - import_playbook: update/update_rsync_backup_cts.yml
 - import_playbook: update/update_traefik_cts.yml
 - import_playbook: update/update_uptimekuma_cts.yml
+# - import_playbook: update_k3s.yml

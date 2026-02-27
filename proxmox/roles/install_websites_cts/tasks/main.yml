@@ -1,4 +1,4 @@
-- name: include tasks for {{item.name}}
+- name: include tasks for all websites
   include_tasks: "{{item.filename}}"
   loop: "{{website_hosts}}"
 

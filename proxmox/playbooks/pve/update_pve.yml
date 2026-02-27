@@ -1,0 +1,28 @@
+- hosts:
+  - pvenodes
+  - pbsnode
+  become: true
+  tasks:
+
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+
+    - name: Proxmoxer installation (for pve only)
+      when: "'pbs' not in inventory_hostname"
+      block:
+      - name: install proxmoxer dependencies
+        apt:
+          name:
+            - vainfo
+            - pve-headers
+            - python3-pip
+          state: latest
+
+      # proxmoxer >2.0 is not available in apt
+      - name: install python3-proxmoxer
+        ansible.builtin.pip:
+          name: proxmoxer
+          extra_args: --break-system-packages

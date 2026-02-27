@@ -12,30 +12,20 @@
       loop:
         '{{variable_files}}'
 
-- hosts: pvenodes
+- hosts: pvenodes[0]
   become: true
   gather_facts: false
 
   roles:
-    # Download container images
-    - download_ct_images
+    # Download cloud-init images
+    - download_cloud_init_images
     # Create cloud-init files
-    #- create_user_files
+    - create_user_files
 
 - hosts: pvenodes[0]
   become: false
   gather_facts: false
 
   roles:
-    # Create CTs
-    - create_cts
-    - start_cts
-    - stop_cts
-    - delete_cts
-
-- hosts: pvenodes[0]
-  become: true
-  gather_facts: false
-  roles:
-    #- k3s_lxc_config
-    - create_cts_bind_mounts
+    # Create VMs
+    - create_vms

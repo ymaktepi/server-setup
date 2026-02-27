@@ -1,0 +1,118 @@
+- hosts:
+    - pvenodes
+    - pbsnode
+  become: true
+  tasks:
+    - name: "update proxmox debian repos (todo: udpate proxmox main to same version)"
+      when: "has_gpu | default('no') == 'no'"
+      block:
+      - name: Remove enterprise repos
+        ansible.builtin.file:
+          path: /etc/apt/sources.list.d/pve-enterprise.list
+          state: absent
+
+      - name: Remove ceph repos
+        ansible.builtin.file:
+          path: /etc/apt/sources.list.d/ceph.list
+          state: absent
+
+      - name: use open repositories
+        copy:
+          dest: "/etc/apt/sources.list.d/proxmox.sources"
+          content: |
+            Types: deb
+            URIs: http://download.proxmox.com/debian/pve
+            Suites: bookworm
+            Components: pve-no-subscription
+            Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+
+    - name: install sudo package
+      apt:
+        name:
+          - sudo
+          - vim
+          - htop
+        update_cache: yes
+        cache_valid_time: 3600
+        state: latest
+
+    - name: create Ansible user
+      user:
+        name: ansible
+        shell: '/bin/bash'
+
+    - name: add Ansible ssh key
+      authorized_key:
+        user: ansible
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ecdsa.pub') }}"
+
+    - name: Check if sudoer file exists
+      stat:
+        path: "/etc/sudoers.d/ansible"
+      register: result
+
+    - name: add ansible to sudoers
+      # this task _will_ fail if we try to copy a file again (since it's 0440 chmoded), so we skip it
+      # if we already ran it
+      when: not result.stat.exists
+      copy:
+        src: "{{playbook_dir}}/../../files/sudoer_ansible"
+        dest: /etc/sudoers.d/ansible
+        owner: root
+        group: root
+        mode: 0440
+
+    - name: GPU passthrough configuration
+      when: "has_gpu | default('no') == 'yes'"
+      block:
+        - name: Blacklist NVIDIA modules
+          copy:
+            dest: /etc/modprobe.d/blacklist-nvidia.conf
+            content: |
+              blacklist nouveau
+              blacklist nvidia
+              blacklist nvidiafb
+              blacklist rivafb
+              blacklist rivatv
+            owner: root
+            group: root
+            mode: 0644
+
+        - name: Add VFIO modules to /etc/modules
+          lineinfile:
+            path: /etc/modules
+            line: "{{ item }}"
+            state: present
+          loop:
+            - vfio
+            - vfio_iommu_type1
+            - vfio_pci
+            - vfio_virqfd
+
+        - name: Configure VFIO PCI options
+          copy:
+            dest: /etc/modprobe.d/vfio.conf
+            content: |
+              options vfio-pci ids=10de:2504,10de:228e disable_vga=1
+            owner: root
+            group: root
+            mode: 0644
+
+        - name: Update GRUB_CMDLINE_LINUX_DEFAULT for GPU passthrough
+          lineinfile:
+            path: /etc/default/grub
+            regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+            line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt video=vesafb:off"'
+            backup: yes
+
+        - name: Update GRUB
+          command: update-grub
+          changed_when: true
+
+        - name: Update initramfs
+          command: update-initramfs -u
+          changed_when: true
+
+        - name: Note that reboot is required
+          debug:
+            msg: "GPU passthrough configuration complete. A reboot is required for changes to take effect."

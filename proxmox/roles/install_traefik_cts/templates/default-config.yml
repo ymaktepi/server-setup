@@ -1,31 +1,45 @@
 http:
   #region routers
   routers:
+    traefik-secure:
+      entryPoints:
+        - "https"
+      rule: "Host(`traefik.local.courgettes.club`)"
+      middlewares:
+        - traefik-auth
+        - localipwhitelist
+      service: api@internal
+      tls:
+        certResolver: infomaniak
+        domains:
+          - main: local.courgettes.club
+            sans:
+              - "*.local.courgettes.club"
+          - main: proxmox.local.courgettes.club
+            sans:
+              - "*.proxmox.local.courgettes.club"
     paperless:
       entryPoints:
         - "https"
       rule: "Host(`paperless.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: paperless
-    homeAssistant:
-      entryPoints:
-        - "https"
-      rule: "Host(`ha.local.courgettes.club`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: homeAssistant
+    #homeAssistant:
+    #  entryPoints:
+    #    - "https"
+    #  rule: "Host(`ha.local.courgettes.club`)"
+    #  middlewares:
+    #    - default-headers
+    # tls: {}
+    #  service: homeAssistant
     synology:
       entryPoints:
         - "https"
       rule: "Host(`synology.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: synology
     synology2:
@@ -34,8 +48,6 @@ http:
       rule: "Host(`synology2.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
-      tls: {}
       service: synology2
     uptime:
       entryPoints:
@@ -43,7 +55,6 @@ http:
       rule: "Host(`uptime.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: uptime
     jellyfin:
@@ -52,9 +63,7 @@ http:
       rule: "Host(`jellyfin.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
-      tls:
-        certresolver: infomaniak
+      tls: {}
       service: jellyfin
     nwCheckerDefault:
       entryPoints:
@@ -62,7 +71,6 @@ http:
       rule: "Host(`nc-default.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: nwCheckerDefault
     nwCheckerEntertainment:
@@ -71,7 +79,6 @@ http:
       rule: "Host(`nc-entertainment.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: nwCheckerEntertainment
     nwCheckerGuest:
@@ -80,7 +87,6 @@ http:
       rule: "Host(`nc-guest.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: nwCheckerGuest
     nwCheckerCrusted:
@@ -89,7 +95,6 @@ http:
       rule: "Host(`nc-crusted.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: nwCheckerCrusted
     nwCheckerDMZ:
@@ -98,18 +103,40 @@ http:
       rule: "Host(`nc-dmz.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
       service: nwCheckerDMZ
-    proxmox:
+    proxmox1:
       entryPoints:
         - "https"
-      rule: "Host(`proxmox.local.courgettes.club`)"
+      rule: "Host(`proxmox.local.courgettes.club`) || Host(`node1.proxmox.local.courgettes.club`)"
       middlewares:
         - default-headers
-        - https-redirectscheme
       tls: {}
-      service: proxmox
+      service: proxmox1
+    proxmox2:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox2.local.courgettes.club`) || Host(`node2.proxmox.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: proxmox2
+    proxmox3:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox3.local.courgettes.club`) || Host(`node3.proxmox.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: proxmox3
+    pbs:
+      entryPoints:
+        - "https"
+      rule: "Host(`pbs.local.courgettes.club`) || Host(`pbs.proxmox.local.courgettes.club`) || Host(`backup.proxmox.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: pbs
 
   #endregion
   #region services
@@ -170,18 +197,37 @@ http:
         servers:
           - url: "https://{{hostvars['host_network_checker_dmz']['ansible_host']}}"
         passHostHeader: true
-    proxmox:
+    proxmox1:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_pvenodes']['ansible_host']}}:8006"
+          - url: "https://{{hostvars['host_main_node']['ansible_host']}}:8006"
+        passHostHeader: true
+    proxmox2:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_node_2']['ansible_host']}}:8006"
+        passHostHeader: true
+    proxmox3:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_node_3']['ansible_host']}}:8006"
+        passHostHeader: true
+    pbs:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_pbs']['ansible_host']}}:8007"
         passHostHeader: true
   #endregion
   middlewares:
-    https-redirectscheme:
-      redirectScheme:
-        scheme: https
-        permanent: true
-        #replacement: '/'
+    traefik-auth:
+      basicAuth:
+        users:
+          - "admin:{{traefik_basic_auth}}"
+
+    localipwhitelist:
+      ipWhiteList:
+        sourceRange:
+          - "10.10.0.0/23"
 
     default-headers:
       headers:

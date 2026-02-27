@@ -1,7 +1,6 @@
 api_host: '{{ ansible_host }}'
 drive_storage: m2-noraid
 drive_format: qcow2
-snippets_storage: isos
-snippets_path: '/hdd-8tb-raid/isos/snippets/'
-image_storage: isos
+snippets_storage: cluster-snippets
+snippets_path: '/hdd-8tb-raid/snippets/snippets/'
 linux_bridge: vmbr0

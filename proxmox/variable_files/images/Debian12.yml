@@ -1,5 +1,5 @@
   - name: Debian12-Image
     cloud_init_file: debian-12-generic-amd64.qcow2
     image_url: 'https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2'
-    image_checksum: sha512:5da221d8f7434ee86145e78a2c60ca45eb4ef8296535e04f6f333193225792aa8ceee3df6aea2b4ee72d6793f7312308a8b0c6a1c7ed4c7c730fa7bda1bc665f
+    image_checksum: sha512:8c4504754ccfade3fd51ded859a593a930c9f9fa741688f0d1b73ff16e6aeb03e3c881cda3218978a1b20f44c346dac955c9e843df32e612f318a5d25313629a
     state: present

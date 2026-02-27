@@ -88,6 +88,20 @@ ansible pvenodes -m ping
 > `pvesm add dir isos --content iso --is_mountpoint  yes --shared 0 --path "/hdd-8tb-raid/isos/"`
 > you may want to add other types than just iso above
 
+Configure `/etc/network/interfaces` to have a bridge that is vlan-aware:
+```text
+iface vmbr0 inet static
+        address 10.10.0.100/23
+        gateway 10.10.0.1
+        bridge-ports enp5s0
+        bridge-stp off
+        bridge-fd 0
+        # here
+        bridge-vlan-aware yes
+        bridge-vids 2-4094
+        # to here
+```
+
 Open the vault:
 
 ```bash

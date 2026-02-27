@@ -12,7 +12,7 @@
       loop:
         '{{variable_files}}'
 
-- hosts: pvenodes
+- hosts: pvenodes[0]
   become: true
   gather_facts: false
 
@@ -22,7 +22,7 @@
 
 - hosts: pvenodes[0]
   become: false
-  gather_facts: false
+  gather_facts: true
 
   roles:
     # Create CTs

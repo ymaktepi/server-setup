@@ -17,6 +17,7 @@ snippets_path=/hdd-8tb-raid/snippets/snippets/
 disk_storage=m2-noraid
 drive_format=qcow2
 main_node_mounted_disk_storage=hdd-8tb-raid
+synology_mounted_disk_storage=synology
 linux_bridge=vmbr0
 
 # for some reason i can't pass --user=root when mounting stuff?

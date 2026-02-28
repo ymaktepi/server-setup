@@ -114,6 +114,7 @@
           - "snippets"
           - "iso"
           - "vztmpl"
+          - "rootdir"
         state: present
         nodes: "{{ groups['pvenodes'] | map('extract', hostvars, 'proxmox_node_name') | list }}"
 

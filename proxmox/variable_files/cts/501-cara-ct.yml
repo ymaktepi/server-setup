@@ -11,5 +11,5 @@
     ipv4_address: 10.10.5.101/24
     ipv4_gateway: 10.10.5.1
       # optional, allows you to add some mounted disk in raid
-    mounts: '{"mp0":"{{main_node_mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
+    mounts: '{"mp0":"{{synology_mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
     state: absent

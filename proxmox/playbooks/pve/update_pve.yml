@@ -10,6 +10,34 @@
         update_cache: yes
         cache_valid_time: 86400 #One day
 
+
+    - name: qdevice setup for pbs node
+      when: "'pbs' in inventory_hostname"
+      block:
+        - name: Install qdevice for quorum on pbs node
+          apt:
+            name:
+              - corosync-qnetd
+            state: latest
+
+        - name: Start service corosync-qnetd, if not started
+          ansible.builtin.service:
+            name: corosync-qnetd
+            state: started
+            enabled: yes
+
+    - name: Install qdevice for quorum on all proxmox nodes
+      when: "'pbs' not in inventory_hostname"
+      apt:
+        name:
+          - corosync-qdevice
+        state: latest
+
+    - name: Execute the command in remote shell; stdout goes to the specified file on the remote
+      delegate_to: host_main_node
+      run_once: true
+      ansible.builtin.shell: pvecm qdevice setup {{hostvars['host_pbs']['ansible_host']}}
+
     - name: Proxmoxer installation (for pve only)
       when: "'pbs' not in inventory_hostname"
       block:

@@ -22,7 +22,7 @@
           content: |
             Types: deb
             URIs: http://download.proxmox.com/debian/pve
-            Suites: bookworm
+            Suites: trixie
             Components: pve-no-subscription
             Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
 

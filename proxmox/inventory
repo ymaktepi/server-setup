@@ -6,9 +6,18 @@ host_node_3    ansible_host=10.10.0.103 proxmox_node_name=proxmox3 has_gpu=no
 
 [pvenodes:vars]
 ansible_user=ansible
-cts_storage=cluster-templates
+# where to store the containers images
+cts_storage=synology
+# where to store the vm base images and cloud init
+image_path=/mnt/pve/cluster-isos/isos/images/0/
+# where to store snippets
+snippets_storage=cluster-snippets
+snippets_path=/hdd-8tb-raid/snippets/snippets/
+# default boot drive for vms and cts
 disk_storage=m2-noraid
+drive_format=qcow2
 main_node_mounted_disk_storage=hdd-8tb-raid
+linux_bridge=vmbr0
 
 # for some reason i can't pass --user=root when mounting stuff?
 [pvenodes_root]

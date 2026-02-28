@@ -4,7 +4,7 @@
     api_user: '{{api_user}}'
     api_token_id: '{{api_token_name}}'
     api_token_secret: '{{api_token}}'
-    api_host: '{{api_host}}'
+    api_host: '{{ansible_host}}'
     node: '{{item.node}}'
     name: '{{item.name}}'
     vmid: '{{item.vmid}}'
@@ -14,7 +14,7 @@
     serial: '{"serial0":"socket"}'
     scsihw: virtio-scsi-single
     ide:
-      ide2: '{{drive_storage}}:cloudinit'
+      ide2: '{{disk_storage}}:cloudinit'
     ostype: 'l26'
     machine: '{{ "q35" if (item.gpu | default(False) == True) else omit }}'
     onboot: 'no'
@@ -35,7 +35,7 @@
 # Import disk image
 - name: Import disk image
   ansible.builtin.shell: |
-    qm importdisk {{item.vmid}} {{image_path}}{{item.image_file}} {{drive_storage}} --format {{drive_format}}
+    qm importdisk {{item.vmid}} {{image_path}}{{item.image_file}} {{disk_storage}} --format {{drive_format}}
   loop: '{{computers}}'
   when: 'item.state == "new"'
   become: yes
@@ -44,7 +44,7 @@
 # Attach imported disk
 - name: Attach imported disk
   ansible.builtin.shell: |
-    qm set {{item.vmid}} --scsi0 {{drive_storage}}:vm-{{item.vmid}}-disk-0,iothread=1 --boot order=scsi0
+    qm set {{item.vmid}} --scsi0 {{disk_storage}}:vm-{{item.vmid}}-disk-0,iothread=1 --boot order=scsi0
   loop: '{{computers}}'
   when: 'item.state == "new"'
   become: yes
@@ -58,7 +58,7 @@
     api_user: '{{api_user}}'
     api_token_id: '{{api_token_name}}'
     api_token_secret: '{{api_token}}'
-    api_host: '{{api_host}}'
+    api_host: '{{ansible_host}}'
     node: '{{item.node}}'
     vmid: '{{item.vmid}}'
     ipconfig:
@@ -87,7 +87,7 @@
     api_user: '{{api_user}}'
     api_token_id: '{{api_token_name}}'
     api_token_secret: '{{api_token}}'
-    api_host: '{{api_host}}'
+    api_host: '{{ansible_host}}'
     vmid: '{{item.vmid}}'
     disk: 'scsi0'
     size: '{{item.disk_size | default("32G")}}'
@@ -103,7 +103,7 @@
     api_user: '{{api_user}}'
     api_token_id: '{{api_token_name}}'
     api_token_secret: '{{api_token}}'
-    api_host: '{{api_host}}'
+    api_host: '{{ansible_host}}'
     node: '{{item.node}}'
     vmid: '{{item.vmid}}'
     state: 'started'

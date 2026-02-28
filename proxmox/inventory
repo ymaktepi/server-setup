@@ -8,6 +8,7 @@ host_node_3    ansible_host=10.10.0.103 proxmox_node_name=proxmox3 has_gpu=no
 ansible_user=ansible
 cts_storage=cluster-templates
 disk_storage=m2-noraid
+main_node_mounted_disk_storage=hdd-8tb-raid
 
 # for some reason i can't pass --user=root when mounting stuff?
 [pvenodes_root]

@@ -9,5 +9,5 @@
     ipv4mode: static
     ipv4_address: 10.10.0.253/23
     ipv4_gateway: 10.10.0.1
-    mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=1"}'
+    mounts: '{"mp0":"{{main_node_mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=1"}'
     state: started

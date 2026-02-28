@@ -1,6 +1,5 @@
 ansible_key_file: "{{lookup('env','HOME') + '/.ssh/id_ecdsa.pub'}}"
 image_path: '/mnt/pve/cluster-isos/isos/images/0/'
-mounted_disk_storage: 'hdd-8tb-raid'
 default_domain_name: '.nico'
 timezone: 'Europe/Bern'
 locale: 'en_US.UTF-8'

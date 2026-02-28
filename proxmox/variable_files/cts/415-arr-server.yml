@@ -14,7 +14,7 @@
     # optional, allows you to add some mounted disk in raid
     # the mnt/lxc_shares mounting point is _not_ mounted here because of proxmox permissions as it needs
     # to be mounted by root
-    mounts: '{"mp0":"{{mounted_disk_storage}}:1000,mp=/mnt/mounted-raid/,backup=0"}'
+    mounts: '{"mp0":"{{main_node_mounted_disk_storage}}:1000,mp=/mnt/mounted-raid/,backup=0"}'
     # to use direct bind mount
     bind_mount: "mp1: /mnt/lxc_shares/arr/,mp=/mnt/arr"
     vpn: "yes"

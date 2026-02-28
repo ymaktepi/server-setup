@@ -14,7 +14,7 @@
     k3s: yes
     state: absent
       # optional, allows you to add some mounted disk in raid
-    mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
+    mounts: '{"mp0":"{{synology_mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
   - name: k3s-worker-1
     ctid: 419
     node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
@@ -31,7 +31,7 @@
     k3s: yes
     state: absent
       # optional, allows you to add some mounted disk in raid
-    mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
+    mounts: '{"mp0":"{{synology_mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
   - name: k3s-worker-2
     ctid: 420
     node: "{{hostvars['host_main_node']['proxmox_node_name']}}"
@@ -48,4 +48,4 @@
     k3s: yes
     state: absent
       # optional, allows you to add some mounted disk in raid
-    mounts: '{"mp0":"{{mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'
+    mounts: '{"mp0":"{{synology_mounted_disk_storage}}:20,mp=/mnt/mounted-raid/,backup=0"}'

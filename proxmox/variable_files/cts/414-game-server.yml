@@ -11,4 +11,4 @@
     ipv4_gateway: 10.10.5.1
     state: started
     # optional, allows you to add some mounted disk in raid
-    mounts: '{"mp0":"{{mounted_disk_storage}}:200,mp=/mnt/mounted-raid/,backup=0"}'
+    mounts: '{"mp0":"{{main_node_mounted_disk_storage}}:200,mp=/mnt/mounted-raid/,backup=0"}'

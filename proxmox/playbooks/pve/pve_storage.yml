@@ -98,6 +98,26 @@
         state: present
         nodes: "{{ groups['pvenodes'] | map('extract', hostvars, 'proxmox_node_name') | list }}"
 
+    - name: Add synology NFS storage
+      community.proxmox.proxmox_storage:
+        api_user: "{{ api_user }}"
+        api_token_id: "{{ api_token_name }}"
+        api_token_secret: "{{ api_token }}"
+        api_host: "{{ ansible_host }}"
+        name: synology
+        type: nfs
+        nfs_options:
+          server: "10.10.0.251"
+          export: /volume1/proxmox
+        content:
+          - "images"
+          - "snippets"
+          - "iso"
+          - "vztmpl"
+          - "rootdir"
+        state: present
+        nodes: "{{ groups['pvenodes'] | map('extract', hostvars, 'proxmox_node_name') | list }}"
+
   handlers:
     - name: Rescan storage
       shell: pvesm scan

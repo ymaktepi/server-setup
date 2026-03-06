@@ -11,3 +11,5 @@
       courgettes_subdomain: "minix"
     - install_jellyfin
     - install_paperless
+    - role: install_kiosk
+      kiosk_username: kioskuser

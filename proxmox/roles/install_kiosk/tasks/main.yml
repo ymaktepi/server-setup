@@ -1,0 +1,95 @@
+- name: Install Base Packages
+  apt:
+    name:
+      - gnome-session
+      - gnome-terminal
+      - dconf-editor
+      - python3-psutil
+      - gnome-tweaks
+      - dbus-x11
+      - mpv
+      #- chromium-browser
+      - firefox
+      #- chrome-gnome-shell
+      #- gnome-shell-extension-prefs
+    state: present
+    update_cache: yes
+- name: Create user
+  ansible.builtin.user:
+    name: "{{kiosk_username}}"
+    create_home: yes
+
+- name: Automatic login for gdm
+  ansible.builtin.replace:
+    path: /etc/gdm3/custom.conf
+    regexp: '#  AutomaticLoginEnable = true'
+    replace: 'AutomaticLoginEnable = true'
+
+- name: Automatic login for gdm
+  ansible.builtin.replace:
+    path: /etc/gdm3/custom.conf
+    regexp: '#  AutomaticLogin = user1'
+    replace: 'AutomaticLogin = {{kiosk_username}}'
+
+
+- name: Create autostart folder
+  file:
+    path: '/home/{{kiosk_username}}/.config/autostart'
+    state: directory
+    owner: "{{kiosk_username}}"
+    group: "{{kiosk_username}}"
+
+- name: Create autostart
+  copy:
+    dest: "/home/{{kiosk_username}}/.config/autostart/firefox-private-sfc.desktop"
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Firefox (Private Mode - Status)
+      Exec=firefox --kiosk https://uptime.local.courgettes.club/status/pings
+      X-GNOME-Autostart-enabled=true
+      NoDisplay=false
+      Comment=Start Firefox in private mode and open Status Website
+
+- name: Create dconf folder
+  file:
+    path: '/home/{{kiosk_username}}/.config/dconf'
+    state: directory
+    owner: "{{kiosk_username}}"
+    group: "{{kiosk_username}}"
+
+- name: Configure things in dconf
+  community.general.dconf:
+    key: "{{item.key}}"
+    value: "{{item.value}}"
+    state: present
+  become_user: "{{kiosk_username}}"
+  loop:
+    - key: /org/gnome/desktop/screensaver/lock-enabled
+      value: false
+    - key: /org/gnome/settings-daemon/plugins/power/lock-on-suspend
+      value: false
+    - key: /org/gnome/desktop/session/idle-delay
+      value: "uint32 60"
+    - key: /org/gnome/settings-daemon/plugins/power/lid-close-ac-action
+      value: "'nothing'"
+    - key: /org/gnome/settings-daemon/plugins/power/lid-close-battery-action
+      value: "'nothing'"
+    - key: /org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type
+      value: "'nothing'"
+    - key: /org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-timeout
+      value: 0
+    - key: /org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type
+      value: "'nothing'"
+    - key: /org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-timeout
+      value: 0
+    - key: /org/gnome/desktop/screensaver/idle-activation-enabled
+      value: true
+    - key: /org/gnome/desktop/screensaver/lock-delay
+      value: "uint32 0"
+
+- name: Start gdm
+  ansible.builtin.service:
+    name: gdm
+    state: restarted
+    enabled: true

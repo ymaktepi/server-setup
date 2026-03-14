@@ -22,7 +22,7 @@
       failed_when: exportfs_check.rc != 0
 
 - name: Setup NFS ISO/Templates on main node
-  hosts: pvenodes[0]
+  hosts: host_main_node
   become: yes
   tasks:
     - name: Create ZFS datasets
@@ -48,7 +48,7 @@
       loop: "{{ sharenfs_current.results }}"
 
 - name: Add NFS storages on all Proxmox nodes
-  hosts: pvenodes[0]
+  hosts: host_main_node
   become: yes
   vars:
     nfs_server_ip: "{{ hostvars['host_main_node']['ansible_host'] | default(ansible_host) }}"

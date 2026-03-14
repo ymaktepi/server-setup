@@ -129,6 +129,15 @@ http:
         - default-headers
       tls: {}
       service: proxmox3
+    proxmox4:
+      entryPoints:
+        - "https"
+      rule: "Host(`proxmox4.local.courgettes.club`) || Host(`node4.proxmox.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: proxmox4
+    {% if hostvars.get('host_pbs') is defined %}
     pbs:
       entryPoints:
         - "https"
@@ -137,6 +146,7 @@ http:
         - default-headers
       tls: {}
       service: pbs
+    {% endif %}
 
   #endregion
   #region services
@@ -212,11 +222,18 @@ http:
         servers:
           - url: "https://{{hostvars['host_node_3']['ansible_host']}}:8006"
         passHostHeader: true
+    proxmox4:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_node_4']['ansible_host']}}:8006"
+        passHostHeader: true
+    {% if hostvars.get('host_pbs') is defined %}
     pbs:
       loadBalancer:
         servers:
           - url: "https://{{hostvars['host_pbs']['ansible_host']}}:8007"
         passHostHeader: true
+    {% endif %}
   #endregion
   middlewares:
     traefik-auth:

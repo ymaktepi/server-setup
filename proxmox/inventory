@@ -3,6 +3,7 @@
 host_main_node ansible_host=10.10.0.100 proxmox_node_name=proxmox  has_gpu=yes
 host_node_2    ansible_host=10.10.0.101 proxmox_node_name=proxmox2 has_gpu=no
 host_node_3    ansible_host=10.10.0.103 proxmox_node_name=proxmox3 has_gpu=no
+host_node_4    ansible_host=10.10.0.102 proxmox_node_name=proxmox4 has_gpu=no
 
 [pvenodes:vars]
 ansible_user=ansible
@@ -25,7 +26,7 @@ linux_bridge=vmbr0
 host_pvenodes_root ansible_host=10.10.0.100 ansible_user=root proxmox_node_name=proxmox
 
 [pbsnode]
-host_pbs ansible_host=10.10.0.105 ansible_user=root
+#host_pbs ansible_host=10.10.0.105 ansible_user=root
 
 [networkcheckers]
 host_network_checker_default       ansible_host=10.10.0.254 network_type=default        reachable_urls="https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" unreachable_urls=""

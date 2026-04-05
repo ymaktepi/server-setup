@@ -1,15 +1,31 @@
-- name: Create nginx conf
+- name: Create mouni nginx conf
   template:
-    src: pocket-nginx.conf
-    dest: '/etc/nginx/sites-available/pocket-nginx.conf'
+    src: pocket-nginx-mouni.conf
+    dest: '/etc/nginx/sites-available/pocket-nginx-mouni.conf'
     owner: root
     group: root
     mode: 0777
 
-- name: Create a symbolic link for nginx conf
+- name: Create a symbolic link for mouni nginx conf
   ansible.builtin.file:
-    src: '/etc/nginx/sites-available/pocket-nginx.conf'
-    dest: '/etc/nginx/sites-enabled/pocket-nginx.conf'
+    src: '/etc/nginx/sites-available/pocket-nginx-mouni.conf'
+    dest: '/etc/nginx/sites-enabled/pocket-nginx-mouni.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: Create planet-designer nginx conf
+  template:
+    src: pocket-nginx-planet-designer.conf
+    dest: '/etc/nginx/sites-available/pocket-nginx-planet-designer.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for planet-designer nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/pocket-nginx-planet-designer.conf'
+    dest: '/etc/nginx/sites-enabled/pocket-nginx-planet-designer.conf'
     owner: root
     group: root
     state: link

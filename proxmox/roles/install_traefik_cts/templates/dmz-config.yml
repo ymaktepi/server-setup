@@ -102,6 +102,16 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-pocket
+    pocket-planet-designer:
+      entryPoints:
+        - "https"
+      rule: "Host(`planet-designer.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - www-to-non-www-redirection
+      tls:
+        certresolver: letsencrypt
+      service: websites-pocket
     gpu:
       entryPoints:
         - "https"

@@ -1,6 +1,6 @@
-- name: Create /opt/uptimekuma directory if it does not exist
+- name: Create /opt/uptimekuma/data directory if it does not exist
   ansible.builtin.file:
-    path: /opt/uptimekuma
+    path: /opt/uptimekuma/data
     state: directory
     mode: '0755'
 

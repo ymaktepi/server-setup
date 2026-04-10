@@ -1,9 +1,9 @@
 services:
   uptime-kuma:
-    image: louislam/uptime-kuma:1
+    image: louislam/uptime-kuma:2
     container_name: uptime-kuma
     volumes:
-      - /mnt/mounted-raid/uptime-kuma-data:/app/data
+      - ./data:/app/data
     ports:
       - 127.0.0.1:3001:3001
     restart: always

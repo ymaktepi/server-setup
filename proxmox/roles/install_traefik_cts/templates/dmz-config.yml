@@ -142,6 +142,15 @@ http:
       service: lldap
       tls:
         certResolver: letsencrypt
+    status:
+      rule: "Host(`status.courgettes.club`)"
+      entryPoints:
+        - "https"
+      middlewares:
+        - default-headers
+      service: status
+      tls:
+        certResolver: letsencrypt
   #endregion
   #region services
   services:
@@ -185,6 +194,11 @@ http:
         servers:
           # assumes "lldap" is a valid domain (i.e. inside the same docker network)
           - url: http://lldap:17170
+    status:
+      loadBalancer:
+        servers:
+          - url: "https://uptime-status.local.courgettes.club"
+        passHostHeader: false
   #endregion
   middlewares:
     traefik-auth:

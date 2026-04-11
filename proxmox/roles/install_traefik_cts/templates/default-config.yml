@@ -57,6 +57,14 @@ http:
         - default-headers
       tls: {}
       service: uptime
+    uptime-status:
+      entryPoints:
+        - "https"
+      rule: "Host(`uptime-status.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: uptime-status
     jellyfin:
       entryPoints:
         - "https"
@@ -173,6 +181,11 @@ http:
           - url: "https://10.10.0.200:5001"
         passHostHeader: true
     uptime:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_uptimekuma']['ansible_host']}}"
+        passHostHeader: true
+    uptime-status:
       loadBalancer:
         servers:
           - url: "https://{{hostvars['host_uptimekuma']['ansible_host']}}"

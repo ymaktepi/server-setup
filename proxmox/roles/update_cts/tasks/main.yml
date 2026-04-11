@@ -32,3 +32,7 @@
     name: fail2ban
     state: started
     enabled: true
+
+- name: clear apt cache
+  ansible.builtin.apt:
+    clean: yes

@@ -46,7 +46,7 @@
       [Desktop Entry]
       Type=Application
       Name=Firefox (Private Mode - Status)
-      Exec=firefox --kiosk https://uptime.local.courgettes.club/status/pings
+      Exec=firefox --kiosk https://uptime-status.local.courgettes.club
       X-GNOME-Autostart-enabled=true
       NoDisplay=false
       Comment=Start Firefox in private mode and open Status Website

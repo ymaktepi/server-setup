@@ -12,7 +12,19 @@
       - htop
       - wget
       - fail2ban
+      - unattended-upgrades
     state: latest
+
+- name: autoclean period
+  lineinfile:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    line: 'APT::Periodic::AutocleanInterval "7";'
+
+- name: Start unattended upgrades
+  ansible.builtin.service:
+    name: unattended-upgrades
+    state: started
+    enabled: true
 
 - name: Remove default debian jail
   ansible.builtin.file:

@@ -62,6 +62,34 @@
         group: root
         mode: 0440
 
+    - name: WOL setup for main proxmox node
+      when: "has_gpu | default('no') == 'yes'"
+      block:
+        - name: Create service file
+          copy:
+            dest: /etc/systemd/system/wol.service
+            content: |
+              [Unit]
+              Description=Enable Wake-on-LAN
+              After=network-pre.target
+
+              [Service]
+              Type=oneshot
+              ExecStart=/usr/sbin/ethtool -s enp5s0 wol g
+
+              [Install]
+              WantedBy=multi-user.target
+
+        - name: Restart service wol on proxmox1
+          ansible.builtin.systemd_service:
+            state: restarted
+            enabled: true
+            daemon_reload: true
+            name: wol
+
+        # todo: to be able to wakonlan from the UI you can the also ron
+        # pvenode config set -wakeonlan <mac address>
+
     - name: GPU passthrough configuration
       when: "has_gpu | default('no') == 'yes'"
       block:

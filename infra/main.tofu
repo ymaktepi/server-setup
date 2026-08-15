@@ -7,6 +7,7 @@ resource "random_password" "container_root" {
   special          = true
   override_special = "_%@-"
 }
+
 terraform {
   backend "s3" {
     bucket       = "opentofu-state"
@@ -23,6 +24,40 @@ terraform {
     skip_credentials_validation = true
     use_path_style              = true
   }
+}
+
+data "proxmox_virtual_environment_nodes" "all" {}
+
+locals {
+  online_nodes = [
+    for i, name in data.proxmox_virtual_environment_nodes.all.names :
+    name if data.proxmox_virtual_environment_nodes.all.online[i]
+  ]
+
+  download_node = sort(local.online_nodes)[0]
+}
+
+# todo: looks like proxmox/dns issue
+#resource "proxmox_download_file" "debian_12_ct" {
+#  for_each = toset([
+#    for container in var.containers : container.image_name
+#  ])
+#  content_type = "vztmpl"
+#  datastore_id = "synology"
+#  node_name    = local.download_node
+#
+#  url = "https://download.proxmox.com/images/system/${each.key}"
+#}
+
+resource "proxmox_download_file" "vm_image" {
+  for_each = toset([for vm in var.vms : vm.image_file])
+
+  content_type = "import"
+  datastore_id = "synology"
+  node_name    = local.download_node
+
+  url       = "https://cloud.debian.org/images/cloud/bookworm/latest/${each.key}"
+  file_name = each.key
 }
 
 resource "proxmox_virtual_environment_container" "this" {

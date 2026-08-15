@@ -1,0 +1,20 @@
+vms = {
+  gpu = {
+    vmid       = 302
+    name       = "gpu"
+    node       = "proxmox"
+    image_file = "debian-12-generic-amd64.qcow2"
+
+    cores  = 4
+    memory = 16384
+
+    vlan         = 5
+    ipv4mode     = "static"
+    ipv4_address = "10.10.5.102/24"
+    ipv4_gateway = "10.10.5.1"
+
+    gpu       = true
+    disk_size = 100
+    state     = "started"
+  }
+}

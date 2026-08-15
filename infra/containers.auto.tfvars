@@ -234,10 +234,10 @@ containers = {
     node       = "proxmox"
     image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
 
-    cores  = 4
-    cpus   = 4
-    memory = 4096
-    disk   = 20
+    cores        = 4
+    cpus         = 4
+    memory       = 4096
+    disk         = 20
     datastore_id = "hdd-8tb-raid"
 
     vlan         = 5

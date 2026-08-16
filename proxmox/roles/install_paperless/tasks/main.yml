@@ -71,8 +71,8 @@
     opts: "user=paperless-pi,password={{paperless_pi_smb_password}},vers=2.0,file_mode=0777,dir_mode=0777"
     state: mounted
 
-- name: Create Docker Compose
-  copy:
+- name: Create Docker Ennv
+  template:
     src: docker-compose.env
     dest: '/opt/paperless/docker-compose.env'
     mode: 0644

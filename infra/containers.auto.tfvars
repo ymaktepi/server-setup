@@ -2,29 +2,27 @@ containers = {
   network_testing_default_vlan = {
     ctid       = 401
     node       = "proxmox4"
-    image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
+    image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
 
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
-    vlan         = 1
+    # fixme not tagged vlan
+    # vlan = 1
     ipv4mode     = "static"
     ipv4_address = "10.10.0.254/23"
     ipv4_gateway = "10.10.0.1"
-
   }
 
   network_testing_entertainment = {
     ctid       = 402
     node       = "proxmox4"
-    image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
+    image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
 
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 2
     ipv4mode     = "static"
@@ -36,12 +34,11 @@ containers = {
   network_testing_guest = {
     ctid       = 403
     node       = "proxmox4"
-    image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
+    image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
 
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 3
     ipv4mode     = "static"
@@ -53,12 +50,11 @@ containers = {
   network_testing_crusted = {
     ctid       = 404
     node       = "proxmox4"
-    image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
+    image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
 
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 4
     ipv4mode     = "static"
@@ -70,12 +66,11 @@ containers = {
   network_testing_dmz = {
     ctid       = 405
     node       = "proxmox4"
-    image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
+    image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
 
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 5
     ipv4mode     = "static"
@@ -91,7 +86,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 1
     ipv4mode     = "static"
@@ -107,7 +101,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 1
     ipv4mode     = "static"
@@ -123,7 +116,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 5
     ipv4mode     = "static"
@@ -139,7 +131,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 5
     ipv4mode     = "static"
@@ -155,7 +146,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 1
     ipv4mode     = "static"
@@ -180,7 +170,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 5
     ipv4mode     = "static"
@@ -196,7 +185,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 1
     ipv4mode     = "static"
@@ -295,7 +283,6 @@ containers = {
     cores  = 1
     cpus   = 1
     memory = 512
-    disk   = 4
 
     vlan         = 5
     ipv4mode     = "static"
@@ -321,7 +308,6 @@ containers = {
     cores  = 2
     cpus   = 2
     memory = 1024
-    disk   = 4
 
     vlan         = 5
     ipv4mode     = "static"

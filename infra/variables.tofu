@@ -49,6 +49,8 @@ variable "containers" {
     ctid       = number
     node       = string
     image_name = string
+    # whether to spawn the container or not
+    present = optional(bool, true)
 
     domain_name = optional(string, ".nico")
 
@@ -58,7 +60,8 @@ variable "containers" {
     disk         = optional(number, 4)
     datastore_id = optional(string, "m2-noraid")
 
-    vlan         = number
+    # omit to have not tagged values
+    vlan         = optional(number)
     ipv4mode     = optional(string, "static")
     ipv4_address = string
     ipv4_gateway = string

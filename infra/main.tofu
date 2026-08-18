@@ -65,7 +65,7 @@ resource "proxmox_download_file" "vm_image" {
 }
 
 resource "proxmox_virtual_environment_container" "this" {
-  for_each = var.containers
+  for_each = { for k, v in var.containers: k => v if v.present }
 
   node_name = each.value.node
   vm_id     = each.value.ctid

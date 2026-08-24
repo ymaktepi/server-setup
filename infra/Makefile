@@ -1,3 +1,5 @@
+.PHONY: plan apply core-plan core-apply compute-plan compute-apply login install
+
 login:
 	@echo echo 'either copy paste the following or run eval "$$(make login)"'
 	@echo export PROXMOX_VE_ENDPOINT=\"https://proxmox2.local.courgettes.club\"
@@ -9,3 +11,25 @@ login:
 
 install:
 	tofu init
+	tofu -chdir=core init
+	tofu -chdir=compute init
+
+plan:
+	$(MAKE) core-plan
+	$(MAKE) compute-plan
+
+apply:
+	$(MAKE) core-apply
+	$(MAKE) compute-apply
+
+core-plan:
+	tofu -chdir=core plan
+
+core-apply:
+	tofu -chdir=core apply
+
+compute-plan:
+	tofu -chdir=compute plan
+
+compute-apply:
+	tofu -chdir=compute apply

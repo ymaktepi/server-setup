@@ -1,30 +1,4 @@
-resource "random_password" "container_root" {
-  length           = 24
-  min_lower        = 2
-  min_upper        = 2
-  min_numeric      = 2
-  min_special      = 2
-  special          = true
-  override_special = "_%@-"
-}
 
-terraform {
-  backend "s3" {
-    bucket       = "opentofu-state"
-    key          = "homelab.tfstate"
-    region       = "garage"
-    use_lockfile = true
-
-    endpoints = {
-      s3 = "https://nas-2.nico"
-    }
-
-    insecure                    = true
-    skip_region_validation      = true
-    skip_credentials_validation = true
-    use_path_style              = true
-  }
-}
 
 data "proxmox_virtual_environment_nodes" "all" {}
 
@@ -52,231 +26,27 @@ locals {
 #
 #  url = "https://download.proxmox.com/images/system/${each.key}"
 #}
-
-resource "proxmox_download_file" "vm_image" {
-  for_each = toset([for vm in var.vms : vm.image_file])
-
-  content_type = "import"
-  datastore_id = "synology"
-  node_name    = local.download_node
-
-  url       = "https://cloud.debian.org/images/cloud/bookworm/latest/${each.key}"
-  file_name = each.key
-}
-
-resource "proxmox_virtual_environment_container" "this" {
-  for_each = { for k, v in var.containers: k => v if v.present }
-
-  node_name = each.value.node
-  vm_id     = each.value.ctid
-
-  description = "Managed by OpenTofu: ${each.key}"
-
-  tags = ["tofu-migrated"]
-
-  # This corresponds to item.unprivileged | default(true)
-  unprivileged = each.value.unprivileged
-
-  # Equivalent to Ansible onboot: true
-  start_on_boot = true
-
-  cpu {
-    # Equivalent to item.cores
-    cores = each.value.cores
-
-    # Closest bpg equivalent to item.cpus
-    limit = each.value.cpus
-  }
-
-  memory {
-    dedicated = each.value.memory
-    swap      = "512"
-  }
-
-  disk {
-    datastore_id = each.value.datastore_id
-    size         = each.value.disk
-  }
-
-  operating_system {
-    template_file_id = format(
-      "%s:vztmpl/%s",
-      var.cts_storage,
-      each.value.image_name
-    )
-
-    type = "debian"
-  }
-
-  initialization {
-    hostname = format(
-      "%s%s",
-      replace(each.key, "_", "-"),
-      each.value.domain_name
-    )
-
-    ip_config {
-      ipv4 {
-        address = each.value.ipv4_address
-        gateway = each.value.ipv4_gateway
-      }
-    }
-
-    user_account {
-      keys = [
-        trimspace(file(var.ansible_key_file))
-      ]
-
-      password = random_password.container_root.result
-    }
-  }
-
-  network_interface {
-    name    = "eth0"
-    bridge  = var.linux_bridge
-    vlan_id = each.value.vlan
-  }
-
-  dynamic "features" {
-    for_each = each.value.unprivileged ? [true] : []
-
-    content {
-      nesting = true
-    }
-  }
-
-  dynamic "mount_point" {
-    for_each = each.value.mounts
-
-    content {
-      path      = mount_point.value.path
-      volume    = mount_point.value.volume
-      size      = mount_point.value.size
-      read_only = mount_point.value.read_only
-      backup    = mount_point.value.backup
-    }
-  }
-
-  dynamic "mount_point" {
-    for_each = each.value.bind_mount == null ? [] : [each.value.bind_mount]
-
-    content {
-      path      = mount_point.value.target
-      volume    = mount_point.value.source
-      backup    = mount_point.value.backup
-      read_only = false
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      initialization,
-      operating_system
-    ]
-  }
-}
-
-# fixme
-#resource "proxmox_virtual_environment_vm" "this" {
-#  for_each = var.vms
 #
-#  node_name = each.value.node
-#  vm_id     = each.value.vmid
-#  name      = each.value.name
+#resource "proxmox_download_file" "vm_image" {
+#  for_each = toset([for vm in var.vms : vm.image_file])
 #
-#  description = "Managed by OpenTofu: ${each.key}"
-#  tags        = ["tofu-migrated"]
+#  content_type = "import"
+#  datastore_id = "synology"
+#  node_name    = local.download_node
+#  overwrite    = false
 #
-#  cpu {
-#    type    = "host"
-#    cores   = each.value.cores
-#    sockets = 1
-#  }
-#
-#  memory {
-#    dedicated = each.value.memory
-#    floating  = each.value.memory
-#  }
-#
-#  machine = each.value.gpu ? "q35" : null
-#
-#  scsi_hardware = "virtio-scsi-single"
-#
-#  agent {
-#    enabled = true
-#  }
-#
-#  vga {
-#    type = "serial0"
-#  }
-#
-#  serial_device {
-#    device = "socket"
-#  }
-#
-#  network_device {
-#    bridge   = var.linux_bridge
-#    model    = "virtio"
-#    vlan_id  = each.value.vlan
-#    firewall = true
-#  }
-#
-#  disk {
-#    interface    = "scsi0"
-#    datastore_id = "synology"
-#    import_from  = local.vm_image_ids[each.key]
-#
-#    file_format = "qcow2"
-#    size        = each.value.disk_size
-#    iothread    = true
-#  }
-#
-#  initialization {
-#    datastore_id = "synology"
-#    interface    = "ide2"
-#
-#    ip_config {
-#      ipv4 {
-#        address = each.value.ipv4mode == "static" ? each.value.ipv4_address : "dhcp"
-#
-#        gateway = each.value.ipv4mode == "static" ? each.value.ipv4_gateway : null
-#      }
-#    }
-#  }
-#
-#  boot_order = ["scsi0"]
-#
-#  operating_system {
-#    type = "l26"
-#  }
-#
-#  on_boot = false
-#
-#  # Optional GPU passthrough.
-#  dynamic "hostpci" {
-#    for_each = each.value.gpu ? [
-#      {
-#        device = "hostpci0"
-#        id     = "01:00.0"
-#        pcie   = true
-#        rombar = false
-#      },
-#      {
-#        device = "hostpci1"
-#        id     = "01:00.1"
-#        pcie   = true
-#        rombar = null
-#      }
-#    ] : []
-#
-#    content {
-#      device = hostpci.value.device
-#      id     = hostpci.value.id
-#      pcie   = hostpci.value.pcie
-#      rombar = hostpci.value.rombar
-#    }
-#  }
-#  lifecycle {
-#    ignore_changes = [initialization]
-#  }
+#  url       = "https://cloud.debian.org/images/cloud/bookworm/latest/${each.key}"
+#  file_name = each.key
 #}
+
+
+
+output "ansible_inventory" {
+  value = {
+    for name, container in proxmox_virtual_environment_container.this :
+    name => {
+      ansible_host = container.initialization[0].ip_config[0].ipv4[0].address
+      groups       = var.containers[name].ansible_groups
+    }
+  }
+}

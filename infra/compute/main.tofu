@@ -24,6 +24,9 @@ terraform {
     }
   }
 }
+module "proxmox" {
+  source = "../modules/proxmox"
+}
 module "containers" {
   source = "../modules/lxc"
   containers = {
@@ -41,6 +44,9 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.0.249/23"
       ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["rsync_backup"]
+
       mounts = [
         {
           path      = "/mnt/mounted-raid/"
@@ -66,6 +72,9 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.248/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["game_server"]
+
       mounts = [
         {
           path      = "/mnt/mounted-raid/"
@@ -92,6 +101,9 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.247/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["arr_server"]
+
       mounts = [
         {
           path      = "/mnt/mounted-raid/"
@@ -123,6 +135,9 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.246/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["nextcloud"]
+
       mounts = [
         {
           path      = "/mnt/mounted-raid/"

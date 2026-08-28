@@ -48,3 +48,4 @@
 - name: clear apt cache
   ansible.builtin.apt:
     clean: yes
+  failed_when: false

@@ -1,20 +1,4 @@
 
-
-data "proxmox_virtual_environment_nodes" "all" {}
-
-locals {
-  online_nodes = [
-    for i, name in data.proxmox_virtual_environment_nodes.all.names :
-    name if data.proxmox_virtual_environment_nodes.all.online[i]
-  ]
-  vm_image_ids = {
-    for name, vm in var.vms :
-    name => "synology:import/${vm.image_file}"
-  }
-
-  download_node = sort(local.online_nodes)[0]
-}
-
 # todo: looks like proxmox/dns issue
 #resource "proxmox_download_file" "debian_12_ct" {
 #  for_each = toset([
@@ -38,15 +22,3 @@ locals {
 #  url       = "https://cloud.debian.org/images/cloud/bookworm/latest/${each.key}"
 #  file_name = each.key
 #}
-
-
-
-output "ansible_inventory" {
-  value = {
-    for name, container in proxmox_virtual_environment_container.this :
-    name => {
-      ansible_host = container.initialization[0].ip_config[0].ipv4[0].address
-      groups       = var.containers[name].ansible_groups
-    }
-  }
-}

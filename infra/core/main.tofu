@@ -25,6 +25,10 @@ terraform {
   }
 }
 
+module "proxmox" {
+  source = "../modules/proxmox"
+}
+
 module "containers" {
   source = "../modules/lxc"
   containers = {
@@ -42,6 +46,13 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.0.254/23"
       ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["networkcheckers"]
+      ansible_vars = [
+        { key = "network_type", value = "default" },
+        { key = "reachable_urls", value = "https://10.10.2.254;https://10.10.3.254;https://10.10.4.254;https://10.10.5.254" },
+        { key = "unreachable_urls", value = "" },
+      ]
     }
 
     network_testing_entertainment = {
@@ -58,6 +69,12 @@ module "containers" {
       ipv4_address = "10.10.2.254/24"
       ipv4_gateway = "10.10.2.1"
 
+      ansible_groups = ["networkcheckers"]
+      ansible_vars = [
+        { key = "network_type", value = "entertainment" },
+        { key = "reachable_urls", value = "https://10.10.3.254" },
+        { key = "unreachable_urls", value = "https://10.10.0.254;https://10.10.4.254;https://10.10.5.254" },
+      ]
     }
 
     network_testing_guest = {
@@ -74,6 +91,12 @@ module "containers" {
       ipv4_address = "10.10.3.254/24"
       ipv4_gateway = "10.10.3.1"
 
+      ansible_groups = ["networkcheckers"]
+      ansible_vars = [
+        { key = "network_type", value = "guest" },
+        { key = "reachable_urls", value = "https://10.10.2.254" },
+        { key = "unreachable_urls", value = "https://10.10.0.254;https://10.10.4.254;https://10.10.5.254" },
+      ]
     }
 
     network_testing_crusted = {
@@ -90,6 +113,12 @@ module "containers" {
       ipv4_address = "10.10.4.254/24"
       ipv4_gateway = "10.10.4.1"
 
+      ansible_groups = ["networkcheckers"]
+      ansible_vars = [
+        { key = "network_type", value = "crusted" },
+        { key = "reachable_urls", value = "" },
+        { key = "unreachable_urls", value = "https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.5.254" },
+      ]
     }
 
     network_testing_dmz = {
@@ -105,6 +134,13 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.254/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["networkcheckers"]
+      ansible_vars = [
+        { key = "network_type", value = "dmz" },
+        { key = "reachable_urls", value = "" },
+        { key = "unreachable_urls", value = "https://10.10.0.254;https://10.10.2.254;https://10.10.3.254;https://10.10.4.254" },
+      ]
     }
 
     uptime_kuma = {
@@ -120,6 +156,8 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.0.253/23"
       ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["uptimekuma"]
     }
 
     traefik_default = {
@@ -135,6 +173,8 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.0.250/23"
       ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["traefik_default"]
     }
 
     traefik_dmz = {
@@ -150,6 +190,8 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.250/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["traefik_dmz"]
     }
 
     jumphost = {
@@ -165,6 +207,8 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.252/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["jumphost"]
     }
 
     websites = {
@@ -180,6 +224,8 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.249/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["websites"]
     }
 
     vpn = {
@@ -195,6 +241,8 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.0.248/23"
       ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["vpn"]
     }
 
     pocket = {
@@ -211,6 +259,9 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.100/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["pocket"]
+
       mounts = [
         {
           path      = "/mnt/mounted-raid/"
@@ -236,6 +287,9 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.103/24"
       ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["bear"]
+
       mounts = [
         {
           path      = "/mnt/mounted-raid/"

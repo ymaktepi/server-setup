@@ -25,3 +25,10 @@
     - install_jumphost_cts
     #- role: install_rathole
     #  rathole_mode: client
+
+- hosts: remote
+  gather_facts: false
+
+  roles:
+    - role: update_cts
+    - role: install_chromote

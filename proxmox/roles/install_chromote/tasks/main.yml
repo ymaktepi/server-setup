@@ -1,0 +1,70 @@
+- name: Download chromote deb
+  ansible.builtin.get_url:
+    url: https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
+    dest: /tmp/crd.deb
+    mode: '0440'
+
+- name: Install deb
+  apt:
+    deb: /tmp/crd.deb
+
+- name: Install x desktop
+  apt:
+    name:
+      - desktop-base
+      - xfce4
+      - xscreensaver
+      - sudo
+      - dbus-x11
+    state: latest
+
+- name: Ensure config exists
+  ansible.builtin.file:
+    path: /etc/chrome-remote-desktop-session
+    state: touch
+    mode: "0744"
+
+- name: Ensure config is in file
+  lineinfile:
+    path: /etc/chrome-remote-desktop-session
+    line: "exec /etc/X11/Xsession /usr/bin/xfce4-session"
+    state: present
+
+- name: Ensure Chrome Remote Desktop group exists
+  ansible.builtin.group:
+    name: chrome-remote-desktop
+    state: present
+
+- name: Create remote user
+  ansible.builtin.user:
+    name: "remote"
+    groups:
+      - chrome-remote-desktop
+    append: true
+    shell: /bin/bash
+    create_home: true
+
+- name: Grant remote user sudo access
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/remote"
+    content: "remote ALL=(ALL:ALL) NOPASSWD: ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "/usr/sbin/visudo -cf %s"
+
+- name: Ask for manual approval before running signup for CRD
+  ansible.builtin.pause:
+    prompt: "Type 'yes' if you want to register the Chrome Remote Desktop for this host, or Ctrl+C to skip the registering. Timeouts in 60 sec."
+    seconds: 60
+  register: pause_result
+
+- name: Open Chrome Remote Desktop onboarding page
+  when: pause_reosult.user_input | default('') | lower == "yes"
+  ansible.builtin.command:
+    cmd: open "https://remotedesktop.google.com/headless"
+  delegate_to: localhost
+  become: false
+
+- name: restart chrome-remote-desktop
+  service: name=chrome-remote-desktop@remote.service state=restarted

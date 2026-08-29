@@ -245,6 +245,23 @@ module "containers" {
       ansible_groups = ["vpn"]
     }
 
+    remote = {
+      ctid       = 413
+      node       = "proxmox3"
+      image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
+
+      cores  = 4
+      cpus   = 4
+      memory = 4096
+
+      vlan         = 1
+      ipv4mode     = "static"
+      ipv4_address = "10.10.0.246/23"
+      ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["remote"]
+    }
+
     pocket = {
       ctid        = 500
       node        = "proxmox2"

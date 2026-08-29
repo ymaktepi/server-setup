@@ -1,0 +1,12 @@
+- name: Check host connectivity
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ping host
+      ansible.builtin.ping:
+      ignore_unreachable: true
+      register: ping_result
+
+    - name: Remove unreachable host
+      ansible.builtin.meta: end_host
+      when: ping_result.unreachable | default(false)

@@ -183,12 +183,12 @@ http:
     uptime:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_uptimekuma']['ansible_host']}}"
+          - url: "https://{{hostvars['host_uptime_kuma']['ansible_host']}}"
         passHostHeader: true
     uptime-status:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_uptimekuma']['ansible_host']}}"
+          - url: "https://{{hostvars['host_uptime_kuma']['ansible_host']}}"
         passHostHeader: true
     jellyfin:
       loadBalancer:
@@ -198,27 +198,27 @@ http:
     nwCheckerDefault:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_network_checker_default']['ansible_host']}}"
+          - url: "https://{{hostvars['host_network_testing_default_vlan']['ansible_host']}}"
         passHostHeader: true
     nwCheckerEntertainment:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_network_checker_entertainment']['ansible_host']}}"
+          - url: "https://{{hostvars['host_network_testing_entertainment']['ansible_host']}}"
         passHostHeader: true
     nwCheckerGuest:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_network_checker_guest']['ansible_host']}}"
+          - url: "https://{{hostvars['host_network_testing_guest']['ansible_host']}}"
         passHostHeader: true
     nwCheckerCrusted:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_network_checker_cursted']['ansible_host']}}"
+          - url: "https://{{hostvars['host_network_testing_crusted']['ansible_host']}}"
         passHostHeader: true
     nwCheckerDMZ:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_network_checker_dmz']['ansible_host']}}"
+          - url: "https://{{hostvars['host_network_testing_dmz']['ansible_host']}}"
         passHostHeader: true
     proxmox1:
       loadBalancer:

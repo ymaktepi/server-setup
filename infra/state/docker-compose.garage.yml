@@ -1,0 +1,17 @@
+services:
+  garage:
+    image: dxflrs/garage:v2.3.0
+    #network_mode: "host"
+    restart: "unless-stopped"
+    container_name: garage
+
+    ports:
+      - "127.0.0.1:3900:3900"
+      - "127.0.0.1:3903:3903"
+
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - ./meta:/var/lib/garage/meta
+      - ./data:/var/lib/garage/data
+
+    command: /garage server

@@ -182,7 +182,7 @@ http:
     websites-pocket:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_vm_pocket']['ansible_host']}}"
+          - url: "https://{{hostvars['host_pocket']['ansible_host']}}"
         passHostHeader: true
     authelia:
       loadBalancer:

@@ -62,6 +62,7 @@ variable "containers" {
     gpu = optional(bool, false)
 
     ansible_groups = optional(list(string), [])
+    ansible_os     = optional(string, "debian")
     ansible_vars   = optional(list(object({ key = string, value = optional(string, "") })), [])
   }))
 }

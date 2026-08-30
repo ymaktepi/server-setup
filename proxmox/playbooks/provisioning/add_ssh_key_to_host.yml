@@ -1,3 +1,6 @@
+# run
+# ansible-playbook playbooks/provisioning/add_ssh_key_to_host.yml -e "ssh_copy_hosts=debian ssh_copy_filename=id_1pass.pub"
+
 - hosts: "{{ssh_copy_hosts}}"
   gather_facts: false
 

@@ -61,7 +61,7 @@ resource "proxmox_virtual_environment_container" "this" {
       each.value.image_name
     )
 
-    type = "debian"
+    type = each.value.ansible_os
   }
 
   initialization {

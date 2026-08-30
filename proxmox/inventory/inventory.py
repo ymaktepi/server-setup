@@ -50,7 +50,10 @@ def get_inventory() -> dict:
         groups = config.pop("groups", [])
         vars = config.pop("vars", {})
 
-        inventory["_meta"]["hostvars"][hostname] = config
+        inventory["_meta"]["hostvars"]["host_" + hostname] = {
+            **config,
+            **vars,
+        }
 
         for group in groups:
             if group not in inventory:
@@ -59,7 +62,6 @@ def get_inventory() -> dict:
                 }
 
             inventory[group]["hosts"].append("host_" + hostname)
-            inventory[group]["vars"] = vars
 
             if group not in inventory["all"]["children"]:
                 inventory["all"]["children"].append(group)

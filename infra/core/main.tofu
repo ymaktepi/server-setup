@@ -29,6 +29,11 @@ module "proxmox" {
   source = "../modules/proxmox"
 }
 
+variable "network_testing_memory" {
+  type    = number
+  default = 512
+}
+
 module "containers" {
   source = "../modules/lxc"
   containers = {
@@ -39,7 +44,7 @@ module "containers" {
 
       cores  = 1
       cpus   = 1
-      memory = 512
+      memory = var.network_testing_memory
 
       # fixme not tagged vlan
       # vlan = 1
@@ -62,7 +67,7 @@ module "containers" {
 
       cores  = 1
       cpus   = 1
-      memory = 512
+      memory = var.network_testing_memory
 
       vlan         = 2
       ipv4mode     = "static"
@@ -84,7 +89,7 @@ module "containers" {
 
       cores  = 1
       cpus   = 1
-      memory = 512
+      memory = var.network_testing_memory
 
       vlan         = 3
       ipv4mode     = "static"
@@ -106,7 +111,7 @@ module "containers" {
 
       cores  = 1
       cpus   = 1
-      memory = 512
+      memory = var.network_testing_memory
 
       vlan         = 4
       ipv4mode     = "static"
@@ -128,7 +133,7 @@ module "containers" {
 
       cores  = 1
       cpus   = 1
-      memory = 512
+      memory = var.network_testing_memory
 
       vlan         = 5
       ipv4mode     = "static"
@@ -174,7 +179,7 @@ module "containers" {
       ipv4_address = "10.10.0.250/23"
       ipv4_gateway = "10.10.0.1"
 
-      ansible_groups = ["traefik_default"]
+      ansible_groups = ["traefik_default", "traefik"]
     }
 
     traefik_dmz = {
@@ -191,7 +196,7 @@ module "containers" {
       ipv4_address = "10.10.5.250/24"
       ipv4_gateway = "10.10.5.1"
 
-      ansible_groups = ["traefik_dmz"]
+      ansible_groups = ["traefik_dmz", "traefik"]
     }
 
     jumphost = {

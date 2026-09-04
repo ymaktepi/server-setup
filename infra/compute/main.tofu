@@ -24,9 +24,9 @@ terraform {
     }
   }
 }
-module "proxmox" {
-  source = "../modules/proxmox"
-}
+#module "proxmox" {
+#  source = "../modules/proxmox"
+#}
 module "containers" {
   source = "../modules/lxc"
   containers = {

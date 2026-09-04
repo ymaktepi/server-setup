@@ -25,9 +25,9 @@ terraform {
   }
 }
 
-module "proxmox" {
-  source = "../modules/proxmox"
-}
+#module "proxmox" {
+#  source = "../modules/proxmox"
+#}
 
 variable "network_testing_memory" {
   type    = number
@@ -258,6 +258,7 @@ module "containers" {
       cores  = 4
       cpus   = 4
       memory = 4096
+      disk = 40
 
       vlan         = 1
       ipv4mode     = "static"

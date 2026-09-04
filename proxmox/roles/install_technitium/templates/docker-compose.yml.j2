@@ -1,0 +1,34 @@
+services:
+  technitium-dns:
+    image: technitium/dns-server:latest
+    container_name: technitium-dns
+    hostname: dns-server
+    restart: unless-stopped
+    ports:
+      # DNS standard ports
+      - "53:53/udp"
+      - "53:53/tcp"
+      # Web Console (HTTP)
+      - "127.0.0.1:5380:5380/tcp"
+      # Optional: Web Console (HTTPS)
+      # - "53443:53443/tcp"
+      # Optional: DNS-over-TLS (DoT) / DNS-over-QUIC (DoQ)
+      # - "853:853/tcp"
+      # - "853:853/udp"
+      # Optional: DNS-over-HTTPS (DoH)
+      # - "443:443/tcp"
+      # - "443:443/udp"
+      # Optional: DHCP Service
+      # - "67:67/udp"
+    environment:
+      - DNS_SERVER_DOMAIN={{dns_subdomain}}.local.courgettes.club
+      # Set an initial admin password (or leave unset to use default 'admin')
+      - DNS_SERVER_ADMIN_PASSWORD={{technitium_password}}
+      - DNS_SERVER_PREFER_IPV6=false
+      # Optional: Upstream forwarders (comma-separated)
+      - DNS_SERVER_FORWARDERS=1.1.1.1,8.8.8.8
+    volumes:
+      # Persistent storage for zones, blocklists, and settings
+      - ./config:/etc/dns
+    sysctls:
+      - net.ipv4.ip_local_port_range=1024 65000

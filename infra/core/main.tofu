@@ -268,6 +268,47 @@ module "containers" {
       ansible_groups = ["remote"]
     }
 
+
+    dns1 = {
+      ctid = 418
+      node = "proxmox2"
+      image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
+
+      cores  = 1
+      cpus   = 1
+      memory = 512
+
+      vlan         = 1
+      ipv4mode     = "static"
+      ipv4_address = "10.10.0.245/23"
+      ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["dns"]
+      ansible_vars = [
+        { key = "dns_subdomain", value = "dns1" }
+      ]
+    }
+
+    dns2 = {
+      ctid = 419
+      node = "proxmox2"
+      image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
+
+      cores  = 1
+      cpus   = 1
+      memory = 512
+
+      vlan         = 1
+      ipv4mode     = "static"
+      ipv4_address = "10.10.0.244/23"
+      ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["dns"]
+      ansible_vars = [
+        { key = "dns_subdomain", value = "dns2" }
+      ]
+    }
+
     pocket = {
       ctid        = 500
       node        = "proxmox2"

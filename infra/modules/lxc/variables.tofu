@@ -35,6 +35,9 @@ variable "containers" {
     disk         = optional(number, 4)
     datastore_id = optional(string, "m2-noraid")
 
+    environment_variables = optional(list(object({ key = string, value = string })), [])
+    entrypoint = optional(string, null)
+
     # omit to have not tagged values
     vlan         = optional(number)
     ipv4mode     = optional(string, "static")

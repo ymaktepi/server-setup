@@ -1,4 +1,4 @@
-.PHONY: plan apply core-plan core-apply compute-plan compute-apply login install
+.PHONY: plan apply core-plan core-apply compute-plan compute-apply login install bootstrap-apply bootstrap-plan bootstrap-destroy format
 
 login:
 	@echo echo 'either copy paste the following or run eval "$$(make login)"'
@@ -10,17 +10,34 @@ login:
 	@echo export AWS_SECRET_ACCESS_KEY=\"$$(op read 'op://infra/garage-opentofu-key/password')\"
 
 install:
-	tofu init
-	tofu -chdir=core init
-	tofu -chdir=compute init
+	tofu init -upgrade
+	tofu -chdir=core init -upgrade
+	tofu -chdir=compute init -upgrade
+	tofu -chdir=bootstrap init -upgrade
 
 plan:
+	$(MAKE) bootstrap-plan
 	$(MAKE) core-plan
 	$(MAKE) compute-plan
 
 apply:
+	$(MAKE) bootstrap-apply
 	$(MAKE) core-apply
 	$(MAKE) compute-apply
+
+format:
+	tofu -chdir=bootstrap fmt
+	tofu -chdir=core fmt
+	tofu -chdir=compute fmt
+
+bootstrap-plan:
+	tofu -chdir=bootstrap plan
+
+bootstrap-apply:
+	tofu -chdir=bootstrap apply
+
+bootstrap-destroy:
+	tofu -chdir=bootstrap destroy
 
 core-plan:
 	tofu -chdir=core plan

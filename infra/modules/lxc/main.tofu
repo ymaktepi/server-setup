@@ -64,7 +64,10 @@ resource "proxmox_virtual_environment_container" "this" {
     type = each.value.ansible_os
   }
 
+  environment_variables = { for v in each.value.environment_variables: v.key => v.value }
+
   initialization {
+    entrypoint = each.value.entrypoint
     hostname = format(
       "%s%s",
       replace(each.key, "_", "-"),

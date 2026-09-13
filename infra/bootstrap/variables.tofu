@@ -53,3 +53,21 @@ variable "technitium_forwarder_protocol" {
   type    = string
   default = "Tls"
 }
+
+# Extra hardcoded A records under var.technitium_zone, beyond the ones
+# auto-registered per-container by modules/lxc. e.g.:
+# [{ subdomain = "nas", ip = "10.10.0.10" }] -> nas.actual.courgettes.club
+variable "technitium_extra_records" {
+  type = list(object({
+    subdomain = string
+    ip        = string
+  }))
+  default = [
+    { subdomain = "nas-1", ip = "10.10.0.252" },
+    { subdomain = "nas-2", ip = "10.10.0.251" },
+    { subdomain = "proxmox1", ip = "10.10.0.100" },
+    { subdomain = "proxmox2", ip = "10.10.0.101" },
+    { subdomain = "proxmox3", ip = "10.10.0.103" },
+    { subdomain = "proxmox4", ip = "10.10.0.102" },
+  ]
+}

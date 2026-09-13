@@ -46,6 +46,7 @@ bootstrap-apply:
 		-exclude=technitium_zone.primary \
 		-exclude=technitium_server_settings.dns1_forwarders \
 		-exclude=technitium_server_settings.dns2_forwarders \
+		-exclude=technitium_record.extra \
 		-exclude=module.containers.technitium_record.containers
 	TF_VAR_technitium_api_token="$$(cat bootstrap/.technitium/dns1-token)" \
 	TF_VAR_technitium_api_token_dns2="$$(cat bootstrap/.technitium/dns2-token)" \

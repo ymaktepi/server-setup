@@ -478,6 +478,20 @@ resource "technitium_server_settings" "dns2_forwarders" {
   forwarder_protocol  = var.technitium_forwarder_protocol
 }
 
+# Extra hardcoded records (var.technitium_extra_records) - same pattern as
+# modules/lxc's per-container technitium_record resources. Only written to
+# dns1 (the Primary); dns2 picks them up via zone transfer like everything
+# else in this zone.
+resource "technitium_record" "extra" {
+  for_each = var.technitium_register_records ? { for r in var.technitium_extra_records : r.subdomain => r } : {}
+
+  zone  = var.technitium_zone
+  name  = "${each.value.subdomain}.${var.technitium_zone}"
+  type  = "A"
+  value = each.value.ip
+  ttl   = 3600
+}
+
 # technitium_zone_secondary gained a count argument (see comment above it).
 moved {
   from = terraform_data.technitium_zone_secondary

@@ -61,6 +61,10 @@ variable "technitium_default_variables" {
 resource "terraform_data" "technitium_template" {
   triggers_replace = [
     var.technitium_docker_image,
+    # Bump this whenever the build script below changes, so a rebuild is
+    # actually triggered - it's not otherwise reflected in any tracked
+    # attribute.
+    "build-script-v2",
   ]
 
   provisioner "local-exec" {
@@ -192,7 +196,8 @@ EOF
           systemd-sysv \
           ifupdown \
           openssh-server \
-          libicu72
+          libicu72 \
+          ca-certificates
 
         rm -rf "$DEBIAN_ROOT"/var/lib/apt/lists/*
 
@@ -399,6 +404,16 @@ provider "technitium" {
   skip_tls_verify = true
 }
 
+# Same shape as the default (dns1) provider above, and the same reason:
+# static literal IP, placeholder token until the real one (dns2's, not
+# dns1's) is fed back in as TF_VAR_technitium_api_token_dns2.
+provider "technitium" {
+  alias           = "dns2"
+  server_url      = "https://10.10.0.244"
+  api_token       = var.technitium_api_token_dns2 != "" ? var.technitium_api_token_dns2 : "placeholder"
+  skip_tls_verify = true
+}
+
 resource "technitium_zone" "primary" {
   count = var.technitium_register_records ? 1 : 0
 
@@ -440,6 +455,27 @@ resource "terraform_data" "technitium_zone_secondary" {
     }
     EOT
   }
+}
+
+# Server settings (forwarders included) aren't synced between nodes - we're
+# not using Technitium's clustering feature - so this needs applying to both
+# dns1 and dns2 independently. Only the fields set here get sent to the API
+# (verified against the provider's source: unset schema fields are dropped
+# from the request, not reset to zero-values), so this can't clobber other
+# settings baked in at image-build time (admin password, HTTPS, etc).
+resource "technitium_server_settings" "dns1_forwarders" {
+  count = var.technitium_register_records ? 1 : 0
+
+  forwarders          = var.technitium_forwarders
+  forwarder_protocol  = var.technitium_forwarder_protocol
+}
+
+resource "technitium_server_settings" "dns2_forwarders" {
+  provider = technitium.dns2
+  count    = var.technitium_register_records ? 1 : 0
+
+  forwarders          = var.technitium_forwarders
+  forwarder_protocol  = var.technitium_forwarder_protocol
 }
 
 # technitium_zone_secondary gained a count argument (see comment above it).
@@ -486,5 +522,10 @@ resource "terraform_data" "technitium_zone_secondary_resync" {
 
 output "technitium_api_token" {
   value     = data.local_file.technitium_api_token["dns1"].content
+  sensitive = true
+}
+
+output "technitium_api_token_dns2" {
+  value     = data.local_file.technitium_api_token["dns2"].content
   sensitive = true
 }

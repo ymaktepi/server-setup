@@ -44,15 +44,26 @@ bootstrap-plan:
 bootstrap-apply:
 	tofu -chdir=bootstrap apply -auto-approve \
 		-exclude=technitium_zone.primary \
+		-exclude=technitium_server_settings.dns1_forwarders \
+		-exclude=technitium_server_settings.dns2_forwarders \
 		-exclude=module.containers.technitium_record.containers
 	TF_VAR_technitium_api_token="$$(cat bootstrap/.technitium/dns1-token)" \
+	TF_VAR_technitium_api_token_dns2="$$(cat bootstrap/.technitium/dns2-token)" \
 		tofu -chdir=bootstrap apply -auto-approve \
 		-exclude=module.containers.technitium_record.containers
 	TF_VAR_technitium_api_token="$$(cat bootstrap/.technitium/dns1-token)" \
+	TF_VAR_technitium_api_token_dns2="$$(cat bootstrap/.technitium/dns2-token)" \
 		tofu -chdir=bootstrap apply -auto-approve
 
+# Destroying technitium_zone.primary/technitium_server_settings also needs
+# both providers configured (same reason as bootstrap-apply above), so both
+# tokens are required here too - read from the current state's own token
+# files rather than 1Password, since that value can go stale (a fresh
+# container gets a fresh token; nothing updates 1Password automatically).
 bootstrap-destroy:
-	tofu -chdir=bootstrap destroy
+	TF_VAR_technitium_api_token="$$(cat bootstrap/.technitium/dns1-token)" \
+	TF_VAR_technitium_api_token_dns2="$$(cat bootstrap/.technitium/dns2-token)" \
+		tofu -chdir=bootstrap destroy
 
 core-plan:
 	tofu -chdir=core plan

@@ -31,3 +31,25 @@ variable "technitium_register_records" {
   type    = bool
   default = true
 }
+
+# Same as technitium_api_token but for the dns2-aliased provider.
+variable "technitium_api_token_dns2" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+# Port included explicitly (DoT's 853) to match what Technitium's API
+# echoes back for Tls-protocol forwarders - the provider has a bug where it
+# doesn't reconcile a plain-IP input against the port-suffixed value the
+# server actually returns, causing an "inconsistent result after apply"
+# error otherwise.
+variable "technitium_forwarders" {
+  type    = list(string)
+  default = ["1.1.1.1:853", "1.0.0.1:853"] # Cloudflare
+}
+
+variable "technitium_forwarder_protocol" {
+  type    = string
+  default = "Tls"
+}

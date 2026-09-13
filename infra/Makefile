@@ -8,6 +8,7 @@ login:
 	@echo export TF_VAR_proxmox_insecure=\"false\"
 	@echo export AWS_ACCESS_KEY_ID=\"$$(op read 'op://infra/garage-opentofu-key/access_key_id')\"
 	@echo export AWS_SECRET_ACCESS_KEY=\"$$(op read 'op://infra/garage-opentofu-key/password')\"
+	@echo export TF_VAR_technitium_api_token=\'$$(op read 'op://infra/technitium-api-token/credential')\'
 
 install:
 	tofu init -upgrade
@@ -33,8 +34,22 @@ format:
 bootstrap-plan:
 	tofu -chdir=bootstrap plan
 
+# Technitium's provider unconditionally pings its target server during
+# configuration (no way to disable it), so it can't be configured until
+# dns1 actually exists and responds - see the comment above the "technitium"
+# provider in bootstrap/main.tofu for the full explanation. These 3 stages
+# handle that regardless of whether this is a from-scratch bootstrap or a
+# routine re-apply: on a routine apply each stage is just a "no changes"
+# no-op once the previous one has already converged.
 bootstrap-apply:
-	tofu -chdir=bootstrap apply
+	tofu -chdir=bootstrap apply -auto-approve \
+		-exclude=technitium_zone.primary \
+		-exclude=module.containers.technitium_record.containers
+	TF_VAR_technitium_api_token="$$(cat bootstrap/.technitium/dns1-token)" \
+		tofu -chdir=bootstrap apply -auto-approve \
+		-exclude=module.containers.technitium_record.containers
+	TF_VAR_technitium_api_token="$$(cat bootstrap/.technitium/dns1-token)" \
+		tofu -chdir=bootstrap apply -auto-approve
 
 bootstrap-destroy:
 	tofu -chdir=bootstrap destroy

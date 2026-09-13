@@ -22,6 +22,14 @@ terraform {
       source  = "bpg/proxmox"
       version = "~> 0.113.1"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.5"
+    }
+    technitium = {
+      source  = "darkhonor/technitium"
+      version = "~> 1.2"
+    }
   }
 }
 
@@ -232,6 +240,19 @@ resource "proxmox_virtual_environment_file" "technitium_template" {
 }
 module "containers" {
   source = "../modules/lxc"
+
+  technitium_zone = var.technitium_zone
+
+  # Plain passthrough - NOT threaded through technitium_zone.primary's id,
+  # because for_each can't depend on a value that's only known after apply
+  # (which .id genuinely is the first time the zone is created in the same
+  # apply as the records). On a from-scratch bootstrap, apply once with
+  # `-exclude=module.containers.technitium_record.containers` so the zone
+  # exists first, then apply normally - same two-stage shape as the API
+  # token/provider bootstrapping issue described below, just resolved with
+  # -exclude instead of a variable since threading isn't possible here.
+  technitium_register_records = var.technitium_register_records
+
   containers = {
 
     dns1 = {
@@ -276,4 +297,194 @@ module "containers" {
       ansible_os = "debian"
     }
   }
+}
+
+variable "technitium_zone" {
+  type    = string
+  default = "actual.courgettes.club"
+}
+
+locals {
+  # dns1 is the Primary for var.technitium_zone (accepts API record writes);
+  # dns2 is a Secondary (zone transfer from dns1).
+  technitium_instances = module.containers.ip_addresses
+}
+
+# Creates a non-expiring API token on each Technitium instance (using the
+# current admin password). dns1's token is what the "technitium" provider
+# below uses for everything (zone + records); dns2's is only needed for the
+# one local-exec call further down that the provider can't do itself. Retries
+# until each instance's HTTPS API is reachable, since the container has just
+# booted.
+resource "terraform_data" "technitium_api_token" {
+  for_each = local.technitium_instances
+
+  triggers_replace = [
+    each.value,
+  ]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+    set -euo pipefail
+
+    TOKEN_DIR="${path.root}/.technitium"
+    mkdir -p "$TOKEN_DIR"
+
+    for i in $(seq 1 30); do
+      RESP="$(curl -sk -m 5 -G "https://${each.value}/api/user/createToken" \
+        --data-urlencode "user=admin" \
+        --data-urlencode "pass=CHANGEME" \
+        --data-urlencode "tokenName=terraform" || true)"
+      TOKEN="$(printf '%s' "$RESP" | jq -r '.token // empty')"
+      if [ -n "$TOKEN" ]; then
+        printf '%s' "$TOKEN" > "$TOKEN_DIR/${each.key}-token"
+        exit 0
+      fi
+      sleep 2
+    done
+
+    echo "Failed to obtain Technitium API token for ${each.key} (${each.value})" >&2
+    printf '%s\n' "$${RESP:-}" >&2
+    exit 1
+    EOT
+  }
+}
+
+data "local_file" "technitium_api_token" {
+  for_each = local.technitium_instances
+
+  filename   = "${path.root}/.technitium/${each.key}-token"
+  depends_on = [terraform_data.technitium_api_token]
+}
+
+# server_url is the literal static IP configured on dns1 below, NOT
+# local.technitium_instances["dns1"] (module.containers.ip_addresses) - that
+# output is read back from the container resource's own attributes, so it's
+# "known after apply" (unresolved) until dns1 actually exists, which would
+# leave this provider block unconfigurable on a from-scratch apply.
+#
+# Same "provider blocks can't reference a same-apply resource/data source"
+# issue as before: data.local_file.technitium_api_token["dns1"].content is
+# only known after terraform_data.technitium_api_token runs, but the
+# provider needs a value upfront. So this reads from var.technitium_api_token
+# instead (blank on the very first apply - the placeholder keeps the
+# provider config valid), and technitium_zone.primary / modules/lxc's
+# technitium_record resources are skipped (via technitium_register_records)
+# until the real token from the output below is fed back in as
+# TF_VAR_technitium_api_token (same as core/compute consume it).
+#
+# On a genuinely from-scratch apply (empty state), this provider still
+# unconditionally pings the server during configuration with no way to skip
+# it (verified against the provider's source), and dns1 won't exist/respond
+# yet. Setting technitium_register_records=false alone is NOT enough to
+# avoid this - OpenTofu still configures (and pings) every declared provider
+# whose arguments are statically resolvable, regardless of whether any
+# resource's count/for_each ends up using it (confirmed empirically: this
+# still fails even with technitium_register_records=false). The actual fix
+# is -exclude, which skips building those resources into the plan/graph at
+# all:
+#
+#   1. tofu apply -exclude=technitium_zone.primary \
+#        -exclude=module.containers.technitium_record.containers
+#      (creates dns1/dns2 + API tokens only; the provider is never touched)
+#   2. export TF_VAR_technitium_api_token="$(cat .technitium/dns1-token)"
+#      tofu apply -exclude=module.containers.technitium_record.containers
+#      (dns1 now exists and responds, so the provider can configure; this
+#      creates the zone + secondary zone)
+#   3. tofu apply
+#      (creates the actual A records, now that the zone exists)
+provider "technitium" {
+  server_url      = "https://10.10.0.245"
+  api_token       = var.technitium_api_token != "" ? var.technitium_api_token : "placeholder"
+  skip_tls_verify = true
+}
+
+resource "technitium_zone" "primary" {
+  count = var.technitium_register_records ? 1 : 0
+
+  name = var.technitium_zone
+  type = "Primary"
+
+  # Scoped to dns2 specifically rather than a broad "Allow" - only dns2
+  # actually needs to pull this zone. notify ensures dns2 gets pushed new
+  # records immediately instead of waiting for its SOA refresh timer.
+  allow_transfer = [local.technitium_instances["dns2"]]
+  notify         = [local.technitium_instances["dns2"]]
+}
+
+# The technitium provider's zone resource has no way to set a Secondary
+# zone's primary server address (verified against its source - only name,
+# type and soa_serial_date_scheme are sent on create), so this one zone
+# stays a local-exec call. allow_transfer above is already in place by the
+# time this runs, so the initial transfer attempt succeeds immediately.
+resource "terraform_data" "technitium_zone_secondary" {
+  count = var.technitium_register_records ? 1 : 0
+
+  depends_on = [technitium_zone.primary]
+
+  provisioner "local-exec" {
+    environment = {
+      API_TOKEN = data.local_file.technitium_api_token["dns2"].content
+    }
+    command = <<-EOT
+    set -euo pipefail
+    RESP="$(curl -sk -m 10 -G "https://${local.technitium_instances["dns2"]}/api/zones/create" \
+      --data-urlencode "token=$API_TOKEN" \
+      --data-urlencode "zone=${var.technitium_zone}" \
+      --data-urlencode "type=Secondary" \
+      --data-urlencode "primaryNameServerAddresses=${local.technitium_instances["dns1"]}")"
+    printf '%s' "$RESP" | jq -e '.status == "ok"' > /dev/null || {
+      echo "Failed to create secondary zone ${var.technitium_zone} on dns2:" >&2
+      echo "$RESP" >&2
+      exit 1
+    }
+    EOT
+  }
+}
+
+# technitium_zone_secondary gained a count argument (see comment above it).
+moved {
+  from = terraform_data.technitium_zone_secondary
+  to   = terraform_data.technitium_zone_secondary[0]
+}
+
+# notify (set on technitium_zone.primary) only fires on a SOA-serial change
+# going forward - it doesn't retroactively push changes dns2 missed before
+# notify was configured, or before dns2 existed at all. Re-triggers whenever
+# the container map changes (name/IP added/removed/changed), which is a
+# reasonable proxy for "dns2 might be behind" without needing to hash the
+# actual DNS record set.
+resource "terraform_data" "technitium_zone_secondary_resync" {
+  count = var.technitium_register_records ? 1 : 0
+
+  triggers_replace = [
+    sha256(jsonencode(local.technitium_instances)),
+  ]
+
+  depends_on = [
+    terraform_data.technitium_zone_secondary,
+    module.containers,
+  ]
+
+  provisioner "local-exec" {
+    environment = {
+      API_TOKEN = data.local_file.technitium_api_token["dns2"].content
+    }
+    command = <<-EOT
+    set -euo pipefail
+    RESP="$(curl -sk -m 10 -G "https://${local.technitium_instances["dns2"]}/api/zones/resync" \
+      --data-urlencode "token=$API_TOKEN" \
+      --data-urlencode "zone=${var.technitium_zone}")"
+    printf '%s' "$RESP" | jq -e '.status == "ok"' > /dev/null || {
+      echo "Failed to resync secondary zone ${var.technitium_zone} on dns2:" >&2
+      echo "$RESP" >&2
+      exit 1
+    }
+    EOT
+  }
+}
+
+output "technitium_api_token" {
+  value     = data.local_file.technitium_api_token["dns1"].content
+  sensitive = true
 }

@@ -1,3 +1,10 @@
+output "ip_addresses" {
+  value = {
+    for name, container in proxmox_virtual_environment_container.this :
+    name => split("/", container.initialization[0].ip_config[0].ipv4[0].address)[0]
+  }
+}
+
 output "ansible_inventory" {
   value = {
     for name, container in proxmox_virtual_environment_container.this :

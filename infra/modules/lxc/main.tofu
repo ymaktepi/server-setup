@@ -8,6 +8,10 @@ terraform {
       source  = "opentofu/random"
       version = "~> 3.6"
     }
+    technitium = {
+      source  = "darkhonor/technitium"
+      version = "~> 1.2"
+    }
   }
 }
 
@@ -133,4 +137,14 @@ resource "proxmox_virtual_environment_container" "this" {
       operating_system
     ]
   }
+}
+
+resource "technitium_record" "containers" {
+  for_each = var.technitium_register_records ? proxmox_virtual_environment_container.this : {}
+
+  zone  = var.technitium_zone
+  name  = "${replace(each.key, "_", "-")}.${var.technitium_zone}"
+  type  = "A"
+  value = split("/", each.value.initialization[0].ip_config[0].ipv4[0].address)[0]
+  ttl   = 3600
 }

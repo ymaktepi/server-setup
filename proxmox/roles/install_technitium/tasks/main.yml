@@ -1,0 +1,37 @@
+- name: Create /opt/technitium/config directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/technitium/config
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose
+  template:
+    src: docker-compose.yml.j2
+    dest: '/opt/technitium/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Refresh docker
+  include_tasks: refresh_docker_compose.yml
+  vars:
+    compose_project_dir: /opt/technitium
+
+- name: Create nginx conf
+  template:
+    src: technitium-nginx.conf.j2
+    dest: '/etc/nginx/sites-available/technitium-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/technitium-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/technitium-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

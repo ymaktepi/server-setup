@@ -17,6 +17,23 @@ variable "ansible_key_file" {
   default = "~/.ssh/id_ecdsa.pub"
 }
 
+variable "technitium_zone" {
+  description = "Technitium DNS zone that managed containers get registered in"
+  type        = string
+  default     = "actual.courgettes.club"
+}
+
+variable "technitium_register_records" {
+  description = <<-EOT
+    Whether to create A records for these containers. Callers pass false to
+    skip DNS registration (e.g. bootstrap, on the very first apply, before
+    the Technitium zone/TSIG setup that dns1/dns2's own records depend on
+    exists yet) - see bootstrap/main.tofu.
+  EOT
+  type        = bool
+  default     = true
+}
+
 variable "containers" {
   description = "LXC containers to manage"
 
@@ -34,6 +51,9 @@ variable "containers" {
     memory       = number
     disk         = optional(number, 4)
     datastore_id = optional(string, "m2-noraid")
+
+    environment_variables = optional(list(object({ key = string, value = string })), [])
+    entrypoint = optional(string, null)
 
     # omit to have not tagged values
     vlan         = optional(number)

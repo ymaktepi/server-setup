@@ -6,7 +6,7 @@ terraform {
     use_lockfile = true
 
     endpoints = {
-      s3 = "https://nas-2.nico"
+      s3 = "https://10.10.0.251:8443"
     }
 
     insecure                    = true
@@ -20,14 +20,18 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.111"
+      version = "~> 0.113.1"
+    }
+    technitium = {
+      source  = "darkhonor/technitium"
+      version = "~> 1.2"
     }
   }
 }
 
-module "proxmox" {
-  source = "../modules/proxmox"
-}
+#module "proxmox" {
+#  source = "../modules/proxmox"
+#}
 
 variable "network_testing_memory" {
   type    = number
@@ -257,7 +261,8 @@ module "containers" {
 
       cores  = 4
       cpus   = 4
-      memory = 4096
+      memory = 8192
+      disk   = 40
 
       vlan         = 1
       ipv4mode     = "static"
@@ -266,6 +271,7 @@ module "containers" {
 
       ansible_groups = ["remote"]
     }
+
 
     pocket = {
       ctid        = 500

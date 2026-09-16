@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 TOFU_ROOT = Path(__file__).resolve().parent.parent.parent / "infra"
-STATES = ["core", "compute"]
+STATES = ["bootstrap", "core", "compute"]
 
 
 def tofu_output(state: str) -> dict:

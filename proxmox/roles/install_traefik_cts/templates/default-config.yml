@@ -48,7 +48,32 @@ http:
       rule: "Host(`synology2.local.courgettes.club`)"
       middlewares:
         - default-headers
+      tls: {}
       service: synology2
+    dns:
+      entryPoints:
+        - "https"
+      rule: "Host(`dns.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: dns
+    dns1:
+      entryPoints:
+        - "https"
+      rule: "Host(`dns1.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: dns1
+    dns2:
+      entryPoints:
+        - "https"
+      rule: "Host(`dns2.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: dns2
     uptime:
       entryPoints:
         - "https"
@@ -179,6 +204,22 @@ http:
       loadBalancer:
         servers:
           - url: "https://10.10.0.200:5001"
+        passHostHeader: true
+    dns:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_dns1']['ansible_host']}}"
+          - url: "https://{{hostvars['host_dns2']['ansible_host']}}"
+        passHostHeader: true
+    dns1:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_dns1']['ansible_host']}}"
+        passHostHeader: true
+    dns2:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_dns2']['ansible_host']}}"
         passHostHeader: true
     uptime:
       loadBalancer:

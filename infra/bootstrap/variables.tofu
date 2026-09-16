@@ -69,5 +69,6 @@ variable "technitium_extra_records" {
     { subdomain = "proxmox2", ip = "10.10.0.101" },
     { subdomain = "proxmox3", ip = "10.10.0.103" },
     { subdomain = "proxmox4", ip = "10.10.0.102" },
+    { subdomain = "minix", ip = "10.10.0.201" },
   ]
 }

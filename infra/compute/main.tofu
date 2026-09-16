@@ -6,7 +6,7 @@ terraform {
     use_lockfile = true
 
     endpoints = {
-      s3 = "https://nas-2.nico"
+      s3 = "https://10.10.0.251:8443"
     }
 
     insecure                    = true

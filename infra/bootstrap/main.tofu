@@ -6,7 +6,7 @@ terraform {
     use_lockfile = true
 
     endpoints = {
-      s3 = "https://nas-2.nico"
+      s3 = "https://10.10.0.251:8443"
     }
 
     insecure                    = true
@@ -466,16 +466,16 @@ resource "terraform_data" "technitium_zone_secondary" {
 resource "technitium_server_settings" "dns1_forwarders" {
   count = var.technitium_register_records ? 1 : 0
 
-  forwarders          = var.technitium_forwarders
-  forwarder_protocol  = var.technitium_forwarder_protocol
+  forwarders         = var.technitium_forwarders
+  forwarder_protocol = var.technitium_forwarder_protocol
 }
 
 resource "technitium_server_settings" "dns2_forwarders" {
   provider = technitium.dns2
   count    = var.technitium_register_records ? 1 : 0
 
-  forwarders          = var.technitium_forwarders
-  forwarder_protocol  = var.technitium_forwarder_protocol
+  forwarders         = var.technitium_forwarders
+  forwarder_protocol = var.technitium_forwarder_protocol
 }
 
 # Extra hardcoded records (var.technitium_extra_records) - same pattern as

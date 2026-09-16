@@ -46,7 +46,6 @@ variable "technitium_docker_image" {
 variable "technitium_default_variables" {
   type = list(object({ key = string, value = string }))
   default = [
-    { key = "DNS_SERVER_ADMIN_PASSWORD", value = "CHANGEME" },
     { key = "DNS_SERVER_WEB_SERVICE_ENABLE_HTTPS", value = "true" },
     { key = "DNS_SERVER_WEB_SERVICE_USE_SELF_SIGNED_CERT", value = "true" },
     { key = "DNS_SERVER_WEB_SERVICE_HTTP_TO_TLS_REDIRECT", value = "true" },
@@ -61,13 +60,19 @@ variable "technitium_default_variables" {
 resource "terraform_data" "technitium_template" {
   triggers_replace = [
     var.technitium_docker_image,
+    # The admin password is baked into the image at build time (see the
+    # entrypoint-script heredoc below), so changing it needs a rebuild too.
+    var.technitium_admin_password,
     # Bump this whenever the build script below changes, so a rebuild is
     # actually triggered - it's not otherwise reflected in any tracked
     # attribute.
-    "build-script-v2",
+    "build-script-v4",
   ]
 
   provisioner "local-exec" {
+    environment = {
+      ADMIN_PASSWORD = var.technitium_admin_password
+    }
     command = <<-EOT
     set -euo pipefail
 
@@ -82,6 +87,9 @@ resource "terraform_data" "technitium_template" {
       --privileged \
       --platform linux/amd64 \
       -v "$BUILD:/output" \
+      -e ADMIN_PASSWORD \
+      --dns 1.1.1.1 \
+      --dns 1.0.0.1 \
       oci-builder \
       bash -euxo pipefail -c '
 
@@ -140,6 +148,7 @@ set -eu
 HOST_PREFIX="\$(hostname -s)"
 
 export DNS_SERVER_DOMAIN="\$${HOST_PREFIX}.local.courgettes.club"
+export DNS_SERVER_ADMIN_PASSWORD="$ADMIN_PASSWORD"
 ${join("\n", [for v in var.technitium_default_variables : "export ${v.key}=${jsonencode(v.value)}"])}
 
 exec /usr/bin/dotnet \
@@ -329,6 +338,9 @@ resource "terraform_data" "technitium_api_token" {
   ]
 
   provisioner "local-exec" {
+    environment = {
+      ADMIN_PASSWORD = var.technitium_admin_password
+    }
     command = <<-EOT
     set -euo pipefail
 
@@ -338,7 +350,7 @@ resource "terraform_data" "technitium_api_token" {
     for i in $(seq 1 30); do
       RESP="$(curl -sk -m 5 -G "https://${each.value}/api/user/createToken" \
         --data-urlencode "user=admin" \
-        --data-urlencode "pass=CHANGEME" \
+        --data-urlencode "pass=$ADMIN_PASSWORD" \
         --data-urlencode "tokenName=terraform" || true)"
       TOKEN="$(printf '%s' "$RESP" | jq -r '.token // empty')"
       if [ -n "$TOKEN" ]; then
@@ -484,6 +496,14 @@ resource "technitium_server_settings" "dns2_forwarders" {
 # else in this zone.
 resource "technitium_record" "extra" {
   for_each = var.technitium_register_records ? { for r in var.technitium_extra_records : r.subdomain => r } : {}
+
+  # zone is just var.technitium_zone (a plain string), so it doesn't create
+  # an implicit dependency on the zone resource - needs an explicit
+  # depends_on or this can race the zone create on a from-scratch apply
+  # (confirmed: this broke on the first genuinely fresh bootstrap since this
+  # resource was added, while technitium_record.wildcard - which already
+  # had this fix - didn't).
+  depends_on = [technitium_zone.primary]
 
   zone  = var.technitium_zone
   name  = "${each.value.subdomain}.${var.technitium_zone}"

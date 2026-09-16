@@ -1,5 +1,6 @@
 variable "proxmox_endpoint" {
-  type = string
+  type    = string
+  default = "https://proxmox2.local.courgettes.club"
 }
 
 variable "proxmox_api_token" {
@@ -10,6 +11,14 @@ variable "proxmox_api_token" {
 variable "proxmox_insecure" {
   type    = bool
   default = false
+}
+
+# Baked into the LXC image at build time (see technitium_template's
+# entrypoint-script heredoc in main.tofu), not read at runtime - changing
+# this requires a rebuild + full dns1/dns2 recreation, not just a re-apply.
+variable "technitium_admin_password" {
+  type      = string
+  sensitive = true
 }
 
 # Blank on the very first apply (see the comment above the "technitium"

@@ -492,6 +492,69 @@ resource "technitium_record" "extra" {
   ttl   = 3600
 }
 
+# Static wildcard zones (var.technitium_wildcard_zones), e.g. *.local.
+# courgettes.club -> traefik_default. Each gets its own Primary zone (a
+# wildcard record needs to live in a zone that's actually authoritative for
+# that domain - it can't just be another record under var.technitium_zone)
+# plus a Secondary on dns2, same pattern as var.technitium_zone above. Note
+# this only covers the wildcard label itself, not the bare apex (e.g.
+# local.courgettes.club with no subdomain) - add an explicit record for that
+# too if it's ever needed.
+resource "technitium_zone" "wildcard" {
+  for_each = var.technitium_register_records ? var.technitium_wildcard_zones : {}
+
+  name = each.key
+  type = "Primary"
+
+  allow_transfer = [local.technitium_instances["dns2"]]
+  notify         = [local.technitium_instances["dns2"]]
+}
+
+resource "technitium_record" "wildcard" {
+  for_each = var.technitium_register_records ? var.technitium_wildcard_zones : {}
+
+  # zone is just each.key (a plain string), so it doesn't create an implicit
+  # dependency on the zone resource the way a resource-attribute reference
+  # would - needs an explicit depends_on or this could race the zone create.
+  depends_on = [technitium_zone.wildcard]
+
+  zone  = each.key
+  name  = "*.${each.key}"
+  type  = "A"
+  value = each.value
+  ttl   = 3600
+}
+
+# Same reasoning as technitium_zone_secondary above: the provider can't set
+# a Secondary zone's primary server address, so this stays local-exec.
+resource "terraform_data" "technitium_wildcard_zone_secondary" {
+  for_each = var.technitium_register_records ? var.technitium_wildcard_zones : {}
+
+  depends_on = [
+    technitium_zone.wildcard,
+    technitium_record.wildcard,
+  ]
+
+  provisioner "local-exec" {
+    environment = {
+      API_TOKEN = data.local_file.technitium_api_token["dns2"].content
+    }
+    command = <<-EOT
+    set -euo pipefail
+    RESP="$(curl -sk -m 10 -G "https://${local.technitium_instances["dns2"]}/api/zones/create" \
+      --data-urlencode "token=$API_TOKEN" \
+      --data-urlencode "zone=${each.key}" \
+      --data-urlencode "type=Secondary" \
+      --data-urlencode "primaryNameServerAddresses=${local.technitium_instances["dns1"]}")"
+    printf '%s' "$RESP" | jq -e '.status == "ok"' > /dev/null || {
+      echo "Failed to create secondary zone ${each.key} on dns2:" >&2
+      echo "$RESP" >&2
+      exit 1
+    }
+    EOT
+  }
+}
+
 # technitium_zone_secondary gained a count argument (see comment above it).
 moved {
   from = terraform_data.technitium_zone_secondary

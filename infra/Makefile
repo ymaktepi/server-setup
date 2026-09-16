@@ -44,6 +44,8 @@ bootstrap-plan:
 bootstrap-apply:
 	tofu -chdir=bootstrap apply -auto-approve \
 		-exclude=technitium_zone.primary \
+		-exclude=technitium_zone.wildcard \
+		-exclude=technitium_record.wildcard \
 		-exclude=technitium_server_settings.dns1_forwarders \
 		-exclude=technitium_server_settings.dns2_forwarders \
 		-exclude=technitium_record.extra \

@@ -72,3 +72,15 @@ variable "technitium_extra_records" {
     { subdomain = "minix", ip = "10.10.0.201" },
   ]
 }
+
+# Each key gets its own Primary zone with a *.<key> wildcard A record
+# pointing at the value (see the comment on technitium_zone.wildcard in
+# main.tofu for why this can't just be a record under var.technitium_zone).
+variable "technitium_wildcard_zones" {
+  type = map(string)
+  default = {
+    "local.courgettes.club"     = "10.10.0.250" # traefik_default
+    "local-dmz.courgettes.club" = "10.10.5.250" # traefik_dmz
+    "proxmox.local"             = "10.10.0.250" # traefik_default
+  }
+}

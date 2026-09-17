@@ -53,7 +53,7 @@ and actual access control happens on the VMs themselves.
 Tailscale is installed in an LXC in the Main VLAN, configured as an exit node. It's using userspace network routing (
 i.e. so you don't have to change the default settings for LXCs), publishes all the subnet routes in there (so that you
 can access all resources if you have access to Tailscale), and has keys expiry disabled - as expected for headless
-servers. See details in the [`install_tailscale_exit_node` role](proxmox/roles/install_tailscale_exit_node).
+servers. See details in the [`install_tailscale_exit_node` role](ansible/roles/install_tailscale_exit_node).
 
 ## Guest Manual
 
@@ -96,9 +96,9 @@ Regarding inbound internet:
     - `CNAME` your domain to `proxy.courgettes.club`
     - Ask for a base `nginx` config with self-signed certs to be installed.
     - Add your nginx reverse proxy config for each one of the websites.
-        - A sample can be found in `proxmox/roles/install_websites_cts/templates/nginx-reverse-proxy.conf`.
+        - A sample can be found in `ansible/roles/install_websites_cts/templates/nginx-reverse-proxy.conf`.
         - You only need to map the HTTPS service to your website.
-    - Add config to `proxmox/roles/install_traefik_cts/templates/dmz-config.yml`
+    - Add config to `ansible/roles/install_traefik_cts/templates/dmz-config.yml`
         - This will both map your domain to your website but also create a letsencrypt cert for it.
         - In this config you can also configure things like http->https redirections, www.domain.com to domain.com
           redirections, mapping multiple domains to the same website, ...

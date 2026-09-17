@@ -1,12 +1,17 @@
-# infra/
+# tofu/
 
 OpenTofu for the Proxmox homelab, split into three independent stacks
 (`bootstrap`, `core`, `compute` — see the repo-root `CLAUDE.md` for the
 architecture). This file covers secrets: they're managed with
 [`sops`](https://github.com/getsops/sops) + [`age`](https://github.com/FiloSottile/age),
-Every genuinely sensitive value lives in `infra/secrets.enc.yaml`, encrypted at rest, checked into git, and
+Every genuinely sensitive value lives in `tofu/secrets.enc.yaml`, encrypted at rest, checked into git, and
 decrypted on the fly per-command by `make` via `sops exec-env` — decryption
 needs only a local age private key, no external app or service.
+
+The same age identity and repo-root `.sops.yaml` config also cover
+`ansible/`'s secrets (`inventory/group_vars/all/vault.sops.yaml`) — one
+key, one config, two encrypted files. Everything below applies to both; see
+`../ansible/README.md` for the Ansible-specific half.
 
 ## Prerequisites
 
@@ -43,7 +48,7 @@ just work. There's no login step to run first.
 ## Editing secrets
 
 ```bash
-sops infra/secrets.enc.yaml
+sops tofu/secrets.enc.yaml
 ```
 
 Opens `$EDITOR` with the decrypted content; saving re-encrypts
@@ -56,14 +61,17 @@ it's available to every `make` target immediately, no other wiring needed.
 
 1. They generate their own key as above (`age-keygen ...`) and send you
    their **public** key.
-2. Add it to `infra/.sops.yaml`'s `key_groups` list.
-3. Re-wrap the existing file for the new recipient set (requires your own
+2. Add it to the repo-root `.sops.yaml`'s `key_groups` list (both
+   `creation_rules` entries share the same `key_groups`, so one edit covers
+   both files).
+3. Re-wrap each existing file for the new recipient set (requires your own
    key to still be a valid recipient):
    ```bash
-   sops updatekeys infra/secrets.enc.yaml
+   sops updatekeys tofu/secrets.enc.yaml
+   sops updatekeys ansible/inventory/group_vars/all/vault.sops.yaml
    ```
    This doesn't require re-typing any secret values — it just re-encrypts
-   the file's data key for the updated recipient list.
+   each file's data key for the updated recipient list.
 
 ## What's actually in `secrets.enc.yaml`
 

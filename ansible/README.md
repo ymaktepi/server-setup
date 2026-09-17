@@ -11,7 +11,27 @@ ansible all -m apt -a "upgrade=yes update_cache=yes cache_valid_time=86400" --be
 
 ## Password management
 
-Put the vault password inside `password_file`.
+Secrets are sops+age encrypted, sharing the same age identity and root-level
+`.sops.yaml` config as `tofu/`'s Terraform secrets — see
+[`../tofu/README.md`](../tofu/README.md) for one-time age key setup if you
+haven't already got `SOPS_AGE_KEY_FILE` exported.
+
+Once your key is a recipient, no extra step is needed to *run* playbooks: the
+`community.sops` vars plugin (enabled in `ansible.cfg`) decrypts
+`inventory/group_vars/all/vault.sops.yaml` transparently, the same way
+`ansible-vault` used to auto-decrypt `vault-file`. Every role/template still
+references secrets as plain `{{ variable_name }}`.
+
+To edit secrets: `sops inventory/group_vars/all/vault.sops.yaml` (opens
+`$EDITOR` with decrypted content, re-encrypts on save per `.sops.yaml`'s
+rule). To add a new recipient (new machine or collaborator): they generate
+their own age key and send you the *public* key, you add it to the
+repo-root `.sops.yaml`'s `key_groups`, then run `sops updatekeys
+inventory/group_vars/all/vault.sops.yaml` (and the same for
+`../tofu/secrets.enc.yaml`, since both files share that one `.sops.yaml`).
+
+This replaces the old `ansible-vault` + `password_file` setup (migrated;
+`vault-file` and `password_file` no longer exist).
 
 ## Inventory
 
@@ -102,24 +122,20 @@ iface vmbr0 inet static
         # to here
 ```
 
-Open the vault:
+Open the secrets file (see "Password management" above for the age/sops
+setup):
 
 ```bash
-ansible-vault create vault-file
+sops inventory/group_vars/all/vault.sops.yaml
 ```
 
-Write down your secrets inside the vault:
+Write down your secrets inside it (flat variable names, matched by
+`{{ variable_name }}` everywhere they're used):
 
 ```yaml
 api_user: ansible@pam
 api_token_name: ansible-token
 api_token: whatever
-```
-
-To edit the vault:
-
-```bash
-ansible-vault edit --vault-password-file password_file vault-file
 ```
 
 ### Update Proxmox: `pve/update_pve.yml`

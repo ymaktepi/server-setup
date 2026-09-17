@@ -3,3 +3,7 @@ creation_rules:
     key_groups:
       - age:
         - age14rtd2ct2zmz34mznk2grjqnjc5xpx4qj7jlzcz6gcttjz0zj6ygq4karew
+  - path_regex: group_vars/all/vault\.sops\.yaml$
+    key_groups:
+      - age:
+        - age14rtd2ct2zmz34mznk2grjqnjc5xpx4qj7jlzcz6gcttjz0zj6ygq4karew

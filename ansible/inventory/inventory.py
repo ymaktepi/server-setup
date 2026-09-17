@@ -1,18 +1,39 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import subprocess
 import sys
+from functools import lru_cache
 from pathlib import Path
 
-TOFU_ROOT = Path(__file__).resolve().parent.parent.parent / "infra"
+TOFU_ROOT = Path(__file__).resolve().parent.parent.parent / "tofu"
 STATES = ["bootstrap", "core", "compute"]
+
+
+@lru_cache(maxsize=1)
+def backend_env() -> dict:
+    # `tofu output` needs AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY for the S3
+    # (Garage) state backend. Ansible invokes this script as its own
+    # subprocess, so it never inherits credentials the way `make` targets
+    # do via `sops exec-env` - decrypt them here instead. Requires
+    # SOPS_AGE_KEY_FILE to already be set (same prerequisite documented in
+    # tofu/README.md and ansible/README.md).
+    result = subprocess.run(
+        ["sops", "-d", "--output-type", "json", str(TOFU_ROOT / "secrets.enc.yaml")],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    secrets = json.loads(result.stdout)
+    return {**os.environ, **secrets}
 
 
 def tofu_output(state: str) -> dict:
     result = subprocess.run(
         ["tofu", "output", "-json", "ansible_inventory"],
         cwd=TOFU_ROOT / state,
+        env=backend_env(),
         capture_output=True,
         text=True,
         check=True,

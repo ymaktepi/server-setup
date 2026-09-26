@@ -1,7 +1,5 @@
 # Subnets/gateways match the network_testing_* containers in core/main.tofu,
-# which probe the isolation between these VLANs. `name` must match the
-# controller's existing network name exactly: the import blocks in
-# imports.tofu look networks up by it.
+# which probe the isolation between these VLANs.
 locals {
   networks = {
     default = {

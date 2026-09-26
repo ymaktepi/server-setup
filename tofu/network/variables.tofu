@@ -18,3 +18,9 @@ variable "unifi_site" {
   type    = string
   default = "default"
 }
+
+# Keyed like local.wlans (wlans.tofu). Set in secrets.enc.yaml as a JSON map.
+variable "unifi_wlan_passphrases" {
+  type      = map(string)
+  sensitive = true
+}

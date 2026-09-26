@@ -1,4 +1,4 @@
-.PHONY: plan apply core-plan core-apply compute-plan compute-apply install bootstrap-apply bootstrap-plan bootstrap-destroy format
+.PHONY: plan apply core-plan core-apply compute-plan compute-apply network-plan network-apply install bootstrap-apply bootstrap-plan bootstrap-destroy format
 
 SOPS_SECRETS := secrets.enc.yaml
 SOPS_EXEC    := sops exec-env $(SOPS_SECRETS)
@@ -17,6 +17,7 @@ install:
 	$(SOPS_EXEC) "tofu -chdir=core init -upgrade"
 	$(SOPS_EXEC) "tofu -chdir=compute init -upgrade"
 	$(SOPS_EXEC) "tofu -chdir=bootstrap init -upgrade"
+	$(SOPS_EXEC) "tofu -chdir=network init -upgrade"
 
 plan:
 	$(MAKE) bootstrap-plan
@@ -32,6 +33,7 @@ format:
 	tofu -chdir=bootstrap fmt
 	tofu -chdir=core fmt
 	tofu -chdir=compute fmt
+	tofu -chdir=network fmt
 
 bootstrap-plan:
 	$(SOPS_EXEC) "tofu -chdir=bootstrap plan"
@@ -53,3 +55,11 @@ compute-plan:
 
 compute-apply:
 	$(SOPS_EXEC) "tofu -chdir=compute apply"
+
+# Deliberately left out of the top-level plan/apply: a bad apply here can cut
+# off access to everything else (including the state backend).
+network-plan:
+	$(SOPS_EXEC) "tofu -chdir=network plan"
+
+network-apply:
+	$(SOPS_EXEC) "tofu -chdir=network apply"

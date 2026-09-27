@@ -19,11 +19,11 @@ Since `ansible-playbook` runs this script as its own subprocess (not through `ma
 
 ## tofu/ (OpenTofu stacks)
 
-Four **independent** OpenTofu root modules, each with its own state (Garage/S3-compatible backend, bucket `opentofu-state`, addressed by IP:port rather than hostname to avoid a circular dependency on the DNS this repo itself manages):
+Independent OpenTofu root modules, each with its own state (Garage/S3-compatible backend, bucket `opentofu-state`, addressed by IP:port rather than hostname to avoid a circular dependency on the DNS this repo itself manages):
 
 - **`bootstrap/`** — self-contained: builds a custom Debian LXC template (debootstraps a rootfs, grafts in the `technitium/dns-server` Docker image's files, installs systemd/networking/ssh) because the `bpg/proxmox` provider's native OCI-container support can't override entrypoint/env vars. Deploys it as `dns1`/`dns2` (Technitium DNS), and owns the `actual.courgettes.club` zone: primary on dns1, secondary (zone transfer) on dns2, Cloudflare DoT forwarders, plus any extra hardcoded records (`var.technitium_extra_records`).
 - **`core/`** and **`compute/`** — plain container definitions for other services (Traefik, jumphost, arr stack, Nextcloud, etc.). No special bootstrapping concerns.
-- **`network/`** — the existing UniFi setup (VLANs, WLANs, firewall, etc.) via the `ubiquiti-community/unifi` provider, adopted into state via temporary `import` blocks (removed once applied — add new ones the same way, then delete them after the apply). Sits *below* the other stacks (they live on its VLANs), so it addresses the controller by IP and depends on nothing else here. That IP is `10.10.2.1`, not `10.10.0.1`: when working remotely over Tailscale from another site that also uses `10.10.0.0/23`, `10.10.0.1` is that site's own router (macOS pins the local gateway with a `/32` route), so API calls there silently hit the wrong controller — use any other VLAN gateway address for ad-hoc API calls too. Not part of the top-level `make plan`/`make apply`.
+- **`network-<site>/`** (currently `network-bole/`) — UniFi config per physical site (VLANs, WLANs, firewall, DHCP reservations, etc.) via the `ubiquiti-community/unifi` provider. Each site's UDM is its own controller, so each gets its own stack, state and API key (`TF_VAR_unifi_<site>_api_key` — `sops exec-env` hands every stack every secret, so the names must differ). What must be identical across sites (network names/VLANs/zones, SSIDs, generic firewall policies, settings) lives in **`modules/unifi_site`**; each stack passes its own addressing, reservations, port forwards and host-specific policies, and keeps its WANs. Existing controller config is adopted into state via temporary `import` blocks (removed once applied). Sits *below* the other stacks (they live on its VLANs), so it addresses the controller by IP and depends on nothing else here. Bole's controller is `10.10.2.1`, not `10.10.0.1`: when working remotely over Tailscale from another site that also uses `10.10.0.0/23`, `10.10.0.1` is that site's own router (macOS pins the local gateway with a `/32` route), so API calls there silently hit the wrong controller — use any other VLAN gateway address for ad-hoc API calls too. Not part of the top-level `make plan`/`make apply`.
 
 `bootstrap`, `core` and `compute` share **`modules/lxc`**, the reusable container abstraction (`proxmox_virtual_environment_container` + DNS record registration). Its `containers` input is a map keyed by container name; each value's schema is in `modules/lxc/variables.tofu`. Hostnames are derived as `replace(name, "_", "-") + domain_name` (default `domain_name = ".nico"`). DNS names use the same dash-replacement under `actual.courgettes.club` via `technitium_record` resources (the `darkhonor/technitium` provider), gated by `technitium_register_records` and skipped entirely when that's false.
 
@@ -43,15 +43,15 @@ make bootstrap-destroy
 make bootstrap-plan
 make core-plan / make core-apply
 make compute-plan / make compute-apply
-make network-plan / make network-apply   # UniFi; not chained into make plan/apply
+make network-bole-plan / make network-bole-apply   # UniFi (one pair per site); not chained into make plan/apply
 make plan / make apply   # runs all three stacks in sequence
-make format              # tofu fmt across all four stacks
-make install             # tofu init -upgrade across all four stacks
+make format              # tofu fmt across all stacks + modules
+make install             # tofu init -upgrade across all stacks
 ```
 
 Every target above is wrapped in `$(SOPS_EXEC)` (`sops exec-env secrets.enc.yaml ...`) in the Makefile, which decrypts `tofu/secrets.enc.yaml` into environment variables (`TF_VAR_*`, `AWS_*`) for that one command. `sops exec-env`'s "command to run" must be passed as a single argument — splitting it across multiple argv entries hits a real sops parsing bug (`error: missing file to decrypt`) — which is why every Makefile recipe quotes its command as one string.
 
-`core` and `compute` run this homelab's actual production workloads, and `network` is the live network everything (including the state backend) depends on — don't run `core-apply`/`compute-apply`/`network-apply` (or the top-level `make apply`/`make plan`, which chain all three) without the user's explicit go-ahead for that specific action, even though `bootstrap-apply`/`bootstrap-destroy` are fine to run routinely.
+`core` and `compute` run this homelab's actual production workloads, and the `network-<site>` stacks are the live networks everything (including the state backend) depends on — don't run `core-apply`/`compute-apply`/`network-<site>-apply` (or the top-level `make apply`/`make plan`, which chain all three) without the user's explicit go-ahead for that specific action, even though `bootstrap-apply`/`bootstrap-destroy` are fine to run routinely.
 
 ## ansible/ (Ansible)
 

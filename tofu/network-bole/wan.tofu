@@ -69,7 +69,7 @@ resource "unifi_wan" "fallback" {
     pd_size_auto        = false
     wan_delegation_type = "single_network"
   }
-  single_network_lan = unifi_network.this["default"].id
+  single_network_lan = module.site.network_ids["default"]
 
   dns = {
     preference      = "manual"

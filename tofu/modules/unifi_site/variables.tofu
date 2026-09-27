@@ -89,16 +89,16 @@ variable "vpn_lockdown" {
 variable "vpn_inbound_allow" {
   description = <<-EOT
     Flows the other site may open into this one (Vpn -> zone). IPv4, one
-    protocol and port list each. See vpn.tofu for the ordering caveat when
-    adding entries later.
+    protocol each. dst_ips = null matches the whole zone, ports = null any
+    port (protocol = "all" for everything).
   EOT
   type = map(object({
     name     = string
     src_ips  = list(string)
     zone     = optional(string, "Internal")
-    dst_ips  = list(string)
+    dst_ips  = optional(list(string))
     protocol = optional(string, "tcp")
-    ports    = string
+    ports    = optional(string)
   }))
   default = {}
 }

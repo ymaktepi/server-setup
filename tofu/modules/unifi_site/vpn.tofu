@@ -9,10 +9,13 @@
 resource "unifi_firewall_policy" "vpn_allow" {
   for_each = var.vpn_inbound_allow
 
-  name                 = each.value.name
-  action               = "ALLOW"
-  protocol             = each.value.protocol
-  create_allow_respond = true
+  name     = each.value.name
+  action   = "ALLOW"
+  protocol = each.value.protocol
+  # The controller refuses a respond rule towards the gateway itself
+  # (FirewallPolicyCreateRespondTrafficPolicyNotAllowed); Gateway -> Vpn is
+  # allowed by its defaults anyway.
+  create_allow_respond = each.value.zone != "Gateway"
 
   source = {
     zone_id         = local.zone_ids["Vpn"]
@@ -21,9 +24,9 @@ resource "unifi_firewall_policy" "vpn_allow" {
   }
   destination = {
     zone_id            = local.zone_ids[each.value.zone]
-    matching_target    = "IP"
+    matching_target    = each.value.dst_ips == null ? "ANY" : "IP"
     ips                = each.value.dst_ips
-    port_matching_type = "SPECIFIC"
+    port_matching_type = each.value.ports == null ? "ANY" : "SPECIFIC"
     port               = each.value.ports
   }
 }

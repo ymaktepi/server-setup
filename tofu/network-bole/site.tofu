@@ -33,6 +33,11 @@ module "site" {
     synology_nic2  = { mac = "90:09:d0:56:92:12", fixed_ip = "10.10.0.251", dns = "nas-2.nico" } # Garage S3 (tofu state backend)
     synology_nic1  = { mac = "90:09:d0:56:92:11", fixed_ip = "10.10.0.252", dns = "nas-1.nico" }
 
+    # This laptop, fixed at .20/.21 on both sites so the other site's VPN
+    # allows can match it.
+    laptop_wifi     = { mac = "56:73:7b:48:30:24", name = "Laptop (Wi-Fi)", fixed_ip = "10.10.0.20" }    # macOS private MAC for "Appa"
+    laptop_ethernet = { mac = "50:a0:30:0f:75:7b", name = "Laptop (Ethernet)", fixed_ip = "10.10.0.21" } # USB LAN adapter
+
     # --- Crusted (10.10.4.0/24) ---
     mystrom_main   = { mac = "b4:8a:0a:b5:33:00", name = "mystrom main", fixed_ip = "10.10.4.48" }
     mystrom_pc     = { mac = "08:3a:8d:94:3e:4c", name = "msytrom PC", fixed_ip = "10.10.4.54" }
@@ -49,6 +54,33 @@ module "site" {
   # VPN into Internal/Dmz/Gateway/Hotspot is blocked.
   vpn_lockdown = true
   vpn_inbound_allow = {
+    # The laptop, when at the other site: everything here except gateway SSH
+    # (the gateway only on 443, for the UniFi UI/API). Its reservations there
+    # keep it on these addresses (Wi-Fi uses macOS's per-SSID private MAC -
+    # "Private Wi-Fi address" must stay Fixed, not Rotating, for Appa).
+    laptop_internal = {
+      name     = "Allow Laptop (Internal)"
+      src_ips  = ["10.20.0.20", "10.20.0.21"] # laptop Wi-Fi, Ethernet
+      protocol = "all"
+    }
+    laptop_dmz = {
+      name     = "Allow Laptop (Dmz)"
+      src_ips  = ["10.20.0.20", "10.20.0.21"]
+      zone     = "Dmz"
+      protocol = "all"
+    }
+    laptop_restricted = {
+      name     = "Allow Laptop (Restricted)"
+      src_ips  = ["10.20.0.20", "10.20.0.21"]
+      zone     = "Restricted"
+      protocol = "all"
+    }
+    laptop_gateway = {
+      name    = "Allow Laptop (Gateway UI)"
+      src_ips = ["10.20.0.20", "10.20.0.21"]
+      zone    = "Gateway"
+      ports   = "443"
+    }
     salon_printer_to_nas = {
       name    = "Allow Salon Printer to NAS"
       src_ips = ["10.20.1.125"]                # Salon: brother_printer (scan to FTP)

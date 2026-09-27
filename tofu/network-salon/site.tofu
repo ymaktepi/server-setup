@@ -28,6 +28,11 @@ module "site" {
     sarah_nas  = { mac = "00:11:32:3d:1f:48", name = "sarah-nas", fixed_ip = "10.20.0.200", dns = "nas.sarah" }
     prusa_mini = { mac = "08:3a:8d:ce:16:db", fixed_ip = "10.20.3.195", dns = "prusa.nico" }
 
+    # This laptop, fixed at .20/.21 on both sites so the other site's VPN
+    # allows can match it.
+    laptop_wifi     = { mac = "56:73:7b:48:30:24", name = "Laptop (Wi-Fi)", fixed_ip = "10.20.0.20" }    # macOS private MAC for "Appa"
+    laptop_ethernet = { mac = "50:a0:30:0f:75:7b", name = "Laptop (Ethernet)", fixed_ip = "10.20.0.21" } # USB LAN adapter
+
     # Fixed so Bole's VPN rules can match them (network-bole/site.tofu).
     brother_printer = { mac = "f0:a6:54:88:db:a9", name = "Brother Printer", fixed_ip = "10.20.1.125" } # scans to Bole's NAS
     samsung_tv      = { mac = "84:c0:ef:c0:5b:42", fixed_ip = "10.20.2.237" }                           # Entertainment
@@ -43,6 +48,33 @@ module "site" {
   # rules in firewall_policies.tofu.
   vpn_lockdown = true
   vpn_inbound_allow = {
+    # The laptop, when at the other site: everything here except gateway SSH
+    # (the gateway only on 443, for the UniFi UI/API). Its reservations there
+    # keep it on these addresses (Wi-Fi uses macOS's per-SSID private MAC -
+    # "Private Wi-Fi address" must stay Fixed, not Rotating, for Appa).
+    laptop_internal = {
+      name     = "Allow Laptop (Internal)"
+      src_ips  = ["10.10.0.20", "10.10.0.21"] # laptop Wi-Fi, Ethernet
+      protocol = "all"
+    }
+    laptop_dmz = {
+      name     = "Allow Laptop (Dmz)"
+      src_ips  = ["10.10.0.20", "10.10.0.21"]
+      zone     = "Dmz"
+      protocol = "all"
+    }
+    laptop_restricted = {
+      name     = "Allow Laptop (Restricted)"
+      src_ips  = ["10.10.0.20", "10.10.0.21"]
+      zone     = "Restricted"
+      protocol = "all"
+    }
+    laptop_gateway = {
+      name    = "Allow Laptop (Gateway UI)"
+      src_ips = ["10.10.0.20", "10.10.0.21"]
+      zone    = "Gateway"
+      ports   = "443"
+    }
     bole_traefik_to_ha = {
       name    = "Allow Bole Traefik to Home Assistant"
       src_ips = ["10.10.0.250"] # Bole: traefik_default

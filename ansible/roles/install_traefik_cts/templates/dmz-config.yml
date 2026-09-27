@@ -148,6 +148,7 @@ http:
         - "https"
       middlewares:
         - default-headers
+        - uptime-kuma-host
       service: status
       tls:
         certResolver: letsencrypt
@@ -194,13 +195,23 @@ http:
         servers:
           # assumes "lldap" is a valid domain (i.e. inside the same docker network)
           - url: http://lldap:17170
+    # Straight to Uptime Kuma's nginx, not via traefik_default: the firewall
+    # only lets this Traefik reach that one container (tofu:
+    # network-bole/firewall_policies.tofu), since traefik_default fronts every
+    # internal UI. Host is set to what Kuma saw when this went through
+    # traefik_default (uptime-kuma-host), in case a status page is mapped to it.
     status:
       loadBalancer:
         servers:
-          - url: "https://uptime-status.local.courgettes.club"
-        passHostHeader: false
+          - url: "https://{{hostvars['host_uptime_kuma']['ansible_host']}}"
+        passHostHeader: true
   #endregion
   middlewares:
+    uptime-kuma-host:
+      headers:
+        customRequestHeaders:
+          Host: "uptime-status.local.courgettes.club"
+
     traefik-auth:
       basicAuth:
         users:

@@ -1,8 +1,8 @@
 # tofu/
 
-OpenTofu for the Proxmox homelab, split into three independent stacks
-(`bootstrap`, `core`, `compute` — see the repo-root `CLAUDE.md` for the
-architecture). This file covers secrets: they're managed with
+OpenTofu for the homelab, split into independent stacks (`bootstrap`,
+`core`, `compute` for the Proxmox side, `network-bole` / `network-salon` for
+the two UniFi sites — see the repo-root `CLAUDE.md` for the architecture). This file covers secrets: they're managed with
 [`sops`](https://github.com/getsops/sops) + [`age`](https://github.com/FiloSottile/age),
 Every genuinely sensitive value lives in `tofu/secrets.enc.yaml`, encrypted at rest, checked into git, and
 decrypted on the fly per-command by `make` via `sops exec-env` — decryption

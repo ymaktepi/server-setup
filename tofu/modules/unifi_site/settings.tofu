@@ -5,8 +5,8 @@
 # Deliberately NOT managed (stay manual in the UI):
 # - usg: the provider sends the whole group, so every unset toggle (ALG
 #   modules, offloads, SYN cookies...) would be pushed as false. Its geo-IP
-#   fields also don't reach this controller, which keeps country blocking
-#   (RU,BR,CN ingress) in a separate usg_geo setting.
+#   fields also don't reach these controllers, which keep country blocking
+#   in a separate usg_geo setting.
 # - ips: same whole-group write, and the provider has no fields for ad
 #   blocking or per-network DNS filters, which would risk wiping them.
 resource "unifi_setting" "this" {
@@ -33,11 +33,7 @@ resource "unifi_setting" "this" {
   # The custom querier switch isn't exposed by the provider; it's preserved
   # because this group is read-modify-written.
   igmp_snooping = {
-    enabled = true
-    network_ids = [
-      unifi_network.this["entertainment"].id,
-      unifi_network.this["guest"].id,
-      unifi_network.this["crusted"].id,
-    ]
+    enabled     = true
+    network_ids = [for k in var.igmp_snooping_networks : unifi_network.this[k].id if contains(keys(var.networks), k)]
   }
 }

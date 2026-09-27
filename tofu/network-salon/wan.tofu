@@ -1,13 +1,14 @@
-# The two uplinks. Only "10gb link" (WAN2) is in use; the 1gb WAN is kept
-# disabled as a manual fallback. Both are in the built-in External firewall
-# zone, which the controller assigns on its own (see zones.tofu).
+# Salon's uplinks, behind the ISP (Wingo) router. Only "10gb link" (WAN2) is
+# in use; the 1gb WAN is kept disabled as a manual fallback.
 
 resource "unifi_wan" "primary" {
   name         = "10gb link"
   networkgroup = "WAN2"
   enabled      = true
 
-  setting_preference      = "manual"
+  # This (factory-reset) controller forces "auto" and ignores "manual" - the
+  # manual DNS/IPv6 settings below are applied regardless.
+  setting_preference      = "auto"
   ipv6_setting_preference = "manual"
 
   type    = "dhcp"
@@ -20,19 +21,21 @@ resource "unifi_wan" "primary" {
     cos                 = 0
     pd_size             = 56
     pd_size_auto        = true
-    wan_delegation_type = "pd" # delegated prefix feeds the DMZ network's IPv6 (networks.tofu)
+    wan_delegation_type = "pd"
   }
 
-  # dns2 (.244) then dns1 (.245), the Technitium servers from bootstrap/.
-  # Literal IPs rather than a cross-stack reference: this stack mustn't
-  # depend on bootstrap's state.
+  # The gateway's own DNS stays public: its queries would reach Bole from the
+  # tunnel address (192.168.2.1), which Bole doesn't allow. Clients get Bole's
+  # Technitium servers via DHCP instead (site.tofu: dhcp_dns_servers).
   dns = {
     preference      = "manual"
-    primary         = "10.10.0.244"
-    secondary       = "10.10.0.245"
+    primary         = "1.1.1.1"
+    secondary       = "8.8.8.8"
     ipv6_preference = "auto"
   }
 
+  # Must stay weighted: the controller requires at least one weighted WAN
+  # (api.err.MissingWeightedWanNetwork), and the fallback is failover-only.
   load_balance = {
     type              = "weighted"
     weight            = 50
@@ -60,7 +63,9 @@ resource "unifi_wan" "fallback" {
   networkgroup = "WAN"
   enabled      = false
 
-  setting_preference      = "manual"
+  # This (factory-reset) controller forces "auto" and ignores "manual" - the
+  # manual DNS/IPv6 settings below are applied regardless.
+  setting_preference      = "auto"
   ipv6_setting_preference = "manual"
 
   type = "dhcp"
@@ -69,7 +74,8 @@ resource "unifi_wan" "fallback" {
     pd_size_auto        = false
     wan_delegation_type = "single_network"
   }
-  single_network_lan = unifi_network.this["default"].id
+  # No single_network_lan: this controller drops it while the WAN's IPv6 is
+  # disabled (and it's unplugged anyway).
 
   dns = {
     preference      = "manual"

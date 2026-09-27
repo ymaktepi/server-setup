@@ -192,7 +192,7 @@ http:
     homeAssistant:
       loadBalancer:
         servers:
-          - url: "https://10.10.0.11:8123"
+          - url: "https://10.20.0.11:8123" # Salon, over the site-to-site VPN
         passHostHeader: true
     synology:
       loadBalancer:

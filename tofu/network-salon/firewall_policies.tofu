@@ -28,3 +28,27 @@ resource "unifi_firewall_policy" "tv_to_traefik_default" {
     port               = "80,443"
   }
 }
+
+# DNS to Bole's Technitium servers (handed out by DHCP) over the tunnel.
+# Restricted/Dmz -> Vpn is blocked by the controller's defaults; Internal is
+# allowed already.
+resource "unifi_firewall_policy" "dns_to_bole" {
+  for_each = toset(["Restricted", "Dmz"])
+
+  name                 = "Allow DNS to Bole"
+  action               = "ALLOW"
+  protocol             = "tcp_udp"
+  create_allow_respond = true
+
+  source = {
+    zone_id         = local.zone_ids[each.value]
+    matching_target = "ANY"
+  }
+  destination = {
+    zone_id            = local.zone_ids["Vpn"]
+    matching_target    = "IP"
+    ips                = ["10.10.0.245", "10.10.0.244"] # Bole: dns1, dns2
+    port_matching_type = "SPECIFIC"
+    port               = "53"
+  }
+}

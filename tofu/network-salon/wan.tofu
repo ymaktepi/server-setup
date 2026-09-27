@@ -6,7 +6,9 @@ resource "unifi_wan" "primary" {
   networkgroup = "WAN2"
   enabled      = true
 
-  setting_preference      = "manual"
+  # This (factory-reset) controller forces "auto" and ignores "manual" - the
+  # manual DNS/IPv6 settings below are applied regardless.
+  setting_preference      = "auto"
   ipv6_setting_preference = "manual"
 
   type    = "dhcp"
@@ -22,19 +24,18 @@ resource "unifi_wan" "primary" {
     wan_delegation_type = "pd"
   }
 
-  # Bole's Technitium servers (dns1 .245, dns2 .244) over the site-to-site
-  # VPN, so Salon resolves the same internal names (*.local.courgettes.club,
-  # *.nico, ...). Salon's clients keep using their local gateway as resolver.
-  # Trade-off: if the tunnel is down, Salon has no DNS at all. Deliberately no
-  # public fallback here - mixing resolvers that disagree about internal names
-  # gets NXDOMAINs cached. Allowed in by Bole's vpn_inbound_allow.
+  # The gateway's own DNS stays public: its queries would reach Bole from the
+  # tunnel address (192.168.2.1), which Bole doesn't allow. Clients get Bole's
+  # Technitium servers via DHCP instead (site.tofu: dhcp_dns_servers).
   dns = {
     preference      = "manual"
-    primary         = "10.10.0.245"
-    secondary       = "10.10.0.244"
+    primary         = "1.1.1.1"
+    secondary       = "8.8.8.8"
     ipv6_preference = "auto"
   }
 
+  # Must stay weighted: the controller requires at least one weighted WAN
+  # (api.err.MissingWeightedWanNetwork), and the fallback is failover-only.
   load_balance = {
     type              = "weighted"
     weight            = 50
@@ -62,7 +63,9 @@ resource "unifi_wan" "fallback" {
   networkgroup = "WAN"
   enabled      = false
 
-  setting_preference      = "manual"
+  # This (factory-reset) controller forces "auto" and ignores "manual" - the
+  # manual DNS/IPv6 settings below are applied regardless.
+  setting_preference      = "auto"
   ipv6_setting_preference = "manual"
 
   type = "dhcp"
@@ -71,7 +74,8 @@ resource "unifi_wan" "fallback" {
     pd_size_auto        = false
     wan_delegation_type = "single_network"
   }
-  single_network_lan = module.site.network_ids["default"]
+  # No single_network_lan: this controller drops it while the WAN's IPv6 is
+  # disabled (and it's unplugged anyway).
 
   dns = {
     preference      = "manual"

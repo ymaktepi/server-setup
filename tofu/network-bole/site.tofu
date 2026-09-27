@@ -16,7 +16,7 @@ module "site" {
       subnet            = "10.10.5.1/24"
       dhcp_start        = "10.10.5.6"
       dhcp_stop         = "10.10.5.254"
-      ipv6_pd_interface = "wan2" # only network with IPv6 (prefix delegation from the 10gb WAN)
+      ipv6_pd_interface = "wan" # only network with IPv6 (prefix delegation from the 10gb WAN1)
     }
   }
 
@@ -43,13 +43,19 @@ module "site" {
   }
 
   # Only these Salon devices may open connections in over the VPN.
+  # Routes into the Site Magic tunnel (Site Magic doesn't install them itself).
+  # peer_name is the tunnel entry's name here: Salon's gateway name when the
+  # connection was made ("UDR7"), not its current one - update it if Site
+  # Magic is ever re-created.
+  site_to_site = { peer_name = "UDR7", remote_cidrs = ["10.20.0.0/16"] }
+
   vpn_lockdown = true
   vpn_inbound_allow = {
     salon_printer_to_nas = {
       name    = "Allow Salon Printer to NAS"
-      src_ips = ["10.20.1.125"]                # Salon: brother_printer (scan to SMB)
+      src_ips = ["10.20.1.125"]                # Salon: brother_printer (scan to FTP)
       dst_ips = ["10.10.0.251", "10.10.0.252"] # synology_nic2, synology_nic1
-      ports   = "445"
+      ports   = "21,55536-55899"               # FTP control + DSM's default passive data range
     }
     salon_dns = {
       name     = "Allow Salon DNS"
@@ -57,6 +63,12 @@ module "site" {
       dst_ips  = ["10.10.0.245", "10.10.0.244"] # bootstrap: dns1, dns2
       protocol = "tcp_udp"
       ports    = "53"
+    }
+    salon_default_to_traefik = {
+      name    = "Allow Salon Default to Traefik"
+      src_ips = ["10.20.0.0/23"] # Salon's trusted Default network (not Guest/Entertainment/Crusted)
+      dst_ips = ["10.10.0.250"]  # core: traefik_default - fronts all internal web UIs
+      ports   = "80,443"
     }
     salon_tv_to_traefik = {
       name    = "Allow Salon TV to Traefik"
@@ -66,9 +78,9 @@ module "site" {
     }
   }
 
-  # Inbound into the DMZ on the 10gb uplink. Targets are core/compute
+  # Inbound into the DMZ on the 10gb uplink (WAN1). Targets are core/compute
   # containers, as literal IPs since this stack mustn't depend on their state.
-  port_forward_wan_interface = "wan2"
+  port_forward_wan_interface = "wan"
   port_forwards = {
     ssh_jumphost       = { name = "ssh-jumphost", wan_port = "2222", fwd_ip = "10.10.5.252", fwd_port = "22", logging = true }             # core: jumphost
     http_https_traefik = { name = "http-https-traefik", wan_port = "80,443", fwd_ip = "10.10.5.250", fwd_port = "80,443", logging = true } # core: traefik_dmz

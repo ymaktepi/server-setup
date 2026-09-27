@@ -102,3 +102,22 @@ variable "vpn_inbound_allow" {
   }))
   default = {}
 }
+
+variable "site_to_site" {
+  description = <<-EOT
+    Routes to the other site over its Site Magic tunnel. peer_name is the
+    tunnel's network entry on this controller (named after the remote
+    gateway); remote_cidrs are routed into it. null = no routes.
+  EOT
+  type = object({
+    peer_name    = string
+    remote_cidrs = list(string)
+  })
+  default = null
+}
+
+variable "dhcp_dns_servers" {
+  description = "DNS servers handed out by DHCP on every network at this site. null = the gateway (default)."
+  type        = list(string)
+  default     = null
+}

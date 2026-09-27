@@ -15,10 +15,12 @@ locals {
 resource "unifi_network" "this" {
   for_each = local.networks
 
-  name             = each.value.name
-  vlan             = each.value.vlan
-  subnet           = each.value.subnet
-  firewall_zone_id = unifi_firewall_zone.this[each.value.zone].id
+  # Zone membership is set on the zone (zones.tofu), not here: controllers
+  # set up fresh ignore firewall_zone_id on network create/update and keep new
+  # networks in Internal. Left unset, the provider doesn't send it at all.
+  name   = each.value.name
+  vlan   = each.value.vlan
+  subnet = each.value.subnet
 
   auto_scale         = false
   setting_preference = "manual"
@@ -31,5 +33,7 @@ resource "unifi_network" "this" {
     start             = each.value.dhcp_start
     stop              = each.value.dhcp_stop
     conflict_checking = true
+    dns_enabled       = var.dhcp_dns_servers != null
+    dns_servers       = var.dhcp_dns_servers
   }
 }

@@ -13,6 +13,13 @@ module "site" {
 
   wlan_passphrases = var.unifi_wlan_passphrases
 
+  # Bole's Technitium servers over the site-to-site tunnel, handed straight to
+  # clients (their 10.20.x sources are allowed in by Bole's "Allow Salon DNS";
+  # Restricted/Dmz need the outbound allows in firewall_policies.tofu). The
+  # gateway itself keeps public DNS (wan.tofu). If the tunnel is down, Salon's
+  # clients have no DNS.
+  dhcp_dns_servers = ["10.10.0.245", "10.10.0.244"] # bootstrap: dns1, dns2
+
   # Salon sits behind the Wingo router (its WAN is on 192.168.0.0/24).
   upstream_lan = { name = "Wingo", cidr = "192.168.0.0/16" }
 
@@ -27,6 +34,11 @@ module "site" {
   }
 
   # Only Bole's traefik_default may open connections in over the VPN.
+  # Routes into the Site Magic tunnel (Site Magic doesn't install them itself).
+  # peer_name is the tunnel entry's name here (Bole's gateway name when the
+  # connection was made) - update it if Site Magic is ever re-created.
+  site_to_site = { peer_name = "Bole-Router", remote_cidrs = ["10.10.0.0/16"] }
+
   vpn_lockdown = true
   vpn_inbound_allow = {
     bole_traefik_to_ha = {

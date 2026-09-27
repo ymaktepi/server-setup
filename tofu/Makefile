@@ -1,4 +1,4 @@
-.PHONY: plan apply core-plan core-apply compute-plan compute-apply network-bole-plan network-bole-apply install bootstrap-apply bootstrap-plan bootstrap-destroy format
+.PHONY: plan apply core-plan core-apply compute-plan compute-apply network-bole-plan network-bole-apply network-salon-plan network-salon-apply install bootstrap-apply bootstrap-plan bootstrap-destroy format
 
 SOPS_SECRETS := secrets.enc.yaml
 SOPS_EXEC    := sops exec-env $(SOPS_SECRETS)
@@ -18,6 +18,7 @@ install:
 	$(SOPS_EXEC) "tofu -chdir=compute init -upgrade"
 	$(SOPS_EXEC) "tofu -chdir=bootstrap init -upgrade"
 	$(SOPS_EXEC) "tofu -chdir=network-bole init -upgrade"
+	$(SOPS_EXEC) "tofu -chdir=network-salon init -upgrade"
 
 plan:
 	$(MAKE) bootstrap-plan
@@ -34,6 +35,7 @@ format:
 	tofu -chdir=core fmt
 	tofu -chdir=compute fmt
 	tofu -chdir=network-bole fmt
+	tofu -chdir=network-salon fmt
 	tofu fmt -recursive modules
 
 bootstrap-plan:
@@ -65,3 +67,9 @@ network-bole-plan:
 
 network-bole-apply:
 	$(SOPS_EXEC) "tofu -chdir=network-bole apply"
+
+network-salon-plan:
+	$(SOPS_EXEC) "tofu -chdir=network-salon plan"
+
+network-salon-apply:
+	$(SOPS_EXEC) "tofu -chdir=network-salon apply"

@@ -28,23 +28,42 @@ module "site" {
   clients = {
     # --- Default (10.10.0.0/23) ---
     netgear_switch = { mac = "54:07:7d:1d:fa:d1", name = "Netgear GS108Ev4", fixed_ip = "10.10.0.99", dns = "netgear.nico" }
-    nico_pi        = { mac = "2c:cf:67:30:48:c5", name = "nico-pi", fixed_ip = "10.10.0.11", dns = "pi.nico" }
     proxmox1       = { mac = "74:56:3c:e6:6c:bd", fixed_ip = "10.10.0.100", dns = "proxmox.nico" }
     proxmox2       = { mac = "98:fa:9b:82:61:fb", name = "proxmox2", fixed_ip = "10.10.0.101", dns = "node2.nico" }
     proxmox3       = { mac = "f8:75:a4:9b:85:fa", name = "proxmox3", fixed_ip = "10.10.0.103", dns = "node3.nico" }
     pbs            = { mac = "98:fa:9b:82:6a:43", name = "pbs", fixed_ip = "10.10.0.105", dns = "pbs.nico" }
-    sarah_nas      = { mac = "00:11:32:3d:1f:48", name = "sarah-nas", fixed_ip = "10.10.0.200", dns = "nas.sarah" }
     minix          = { mac = "a0:1e:0b:14:af:39", fixed_ip = "10.10.0.201", dns = "minix.nico" }
     synology_nic2  = { mac = "90:09:d0:56:92:12", fixed_ip = "10.10.0.251", dns = "nas-2.nico" } # Garage S3 (tofu state backend)
     synology_nic1  = { mac = "90:09:d0:56:92:11", fixed_ip = "10.10.0.252", dns = "nas-1.nico" }
-
-    # --- Guest (10.10.3.0/24) ---
-    prusa_mini = { mac = "08:3a:8d:ce:16:db", fixed_ip = "10.10.3.195", dns = "prusa.nico" }
 
     # --- Crusted (10.10.4.0/24) ---
     mystrom_main   = { mac = "b4:8a:0a:b5:33:00", name = "mystrom main", fixed_ip = "10.10.4.48" }
     mystrom_pc     = { mac = "08:3a:8d:94:3e:4c", name = "msytrom PC", fixed_ip = "10.10.4.54" }
     mystrom_server = { mac = "c8:f0:9e:be:12:10", name = "mystrom server", fixed_ip = "10.10.4.103" }
+  }
+
+  # Only these Salon devices may open connections in over the VPN.
+  vpn_lockdown = true
+  vpn_inbound_allow = {
+    salon_printer_to_nas = {
+      name    = "Allow Salon Printer to NAS"
+      src_ips = ["10.20.1.125"]                # Salon: brother_printer (scan to SMB)
+      dst_ips = ["10.10.0.251", "10.10.0.252"] # synology_nic2, synology_nic1
+      ports   = "445"
+    }
+    salon_dns = {
+      name     = "Allow Salon DNS"
+      src_ips  = ["10.20.0.0/16"]               # Salon's gateway forwards its clients' queries
+      dst_ips  = ["10.10.0.245", "10.10.0.244"] # bootstrap: dns1, dns2
+      protocol = "tcp_udp"
+      ports    = "53"
+    }
+    salon_tv_to_traefik = {
+      name    = "Allow Salon TV to Traefik"
+      src_ips = ["10.20.2.237"] # Salon: samsung_tv
+      dst_ips = ["10.10.0.250"] # core: traefik_default
+      ports   = "80,443"
+    }
   }
 
   # Inbound into the DMZ on the 10gb uplink. Targets are core/compute

@@ -1,7 +1,6 @@
-# Any of the gateway's VLAN addresses reaches the same controller. Not
-# 10.10.0.1: a remote site on the same 10.10.0.0/23 (reaching this one over
-# Tailscale) has its own router at that address, and macOS pins the local
-# gateway with a /32 route, so requests would hit the wrong router.
+# Any of the gateway's VLAN addresses reaches the same controller. 10.10.2.1
+# rather than 10.10.0.1 dates from when Salon still used 10.10.x too (its own
+# router was then also 10.10.0.1); either works now.
 variable "unifi_api_url" {
   type        = string
   description = "Controller URL, without the /api path (e.g. https://<gateway-ip>)."

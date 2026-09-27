@@ -2,12 +2,9 @@
 #
 # ORDERING: the provider can't set a policy's position - the controller
 # appends each new policy to the end of its zone pair, and the first match
-# wins. The block policies depend on everything that must precede them, so on
-# a single apply they're created last. An allow added LATER lands after the
-# block and never matches: apply it with
-#   -replace='module.site.unifi_firewall_policy.vpn_block["Internal"]'
-# (and the other affected zones) so the block is recreated behind it, or move
-# it up in the UniFi UI.
+# wins. So the blocks must always be the newest policies: they depend on
+# everything that has to precede them, and are re-created (replace_triggered_by)
+# whenever an allow is added or changed, which puts them back behind it.
 
 resource "unifi_firewall_policy" "vpn_allow" {
   for_each = var.vpn_inbound_allow
@@ -58,6 +55,10 @@ resource "unifi_firewall_policy" "vpn_block" {
     unifi_firewall_policy.vpn_allow,
     unifi_firewall_policy.vpn_to_internal_return,
   ]
+
+  lifecycle {
+    replace_triggered_by = [unifi_firewall_policy.vpn_allow]
+  }
 
   name       = "Block VPN Traffic"
   action     = "BLOCK"

@@ -20,8 +20,8 @@ module "site" {
   # clients have no DNS.
   dhcp_dns_servers = ["10.10.0.245", "10.10.0.244"] # bootstrap: dns1, dns2
 
-  # Salon sits behind the Wingo router (its WAN is on 192.168.0.0/24).
-  upstream_lan = { name = "Wingo", cidr = "192.168.0.0/16" }
+  # Salon sits behind the Wingo router; its WAN is on that router's LAN.
+  upstream_lan = { name = "Wingo", cidr = "192.168.0.0/24" }
 
   clients = {
     nico_pi    = { mac = "2c:cf:67:30:48:c5", name = "nico-pi", fixed_ip = "10.20.0.11", dns = "pi.nico" } # Home Assistant
@@ -33,12 +33,14 @@ module "site" {
     samsung_tv      = { mac = "84:c0:ef:c0:5b:42", fixed_ip = "10.20.2.237" }                           # Entertainment
   }
 
-  # Only Bole's traefik_default may open connections in over the VPN.
   # Routes into the Site Magic tunnel (Site Magic doesn't install them itself).
   # peer_name is the tunnel entry's name here (Bole's gateway name when the
   # connection was made) - update it if Site Magic is ever re-created.
   site_to_site = { peer_name = "Bole-Router", remote_cidrs = ["10.10.0.0/16"] }
 
+  # Only Bole's traefik_default may open connections in over the VPN (to Home
+  # Assistant). Salon -> Bole is governed by Bole's allows plus the outbound
+  # rules in firewall_policies.tofu.
   vpn_lockdown = true
   vpn_inbound_allow = {
     bole_traefik_to_ha = {

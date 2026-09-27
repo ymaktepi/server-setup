@@ -8,9 +8,9 @@ resource "unifi_device" "salon_switch" {
   mac  = "f4:e2:c6:51:f7:db"
   name = "Salon-Switch-4-PoE"
 
-  # On a fresh controller the provider adopts the (factory-reset) switch.
-  # Never forget it just because it leaves tofu (the provider defaults to true).
-  allow_adoption    = true
+  # Never forget the device just because it leaves tofu (the provider
+  # defaults to true). Adopt new devices in the UI and import them by MAC:
+  # the provider's own adoption timed out mid-way on this controller.
   forget_on_destroy = false
 
   port_override {

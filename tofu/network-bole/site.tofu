@@ -22,9 +22,6 @@ module "site" {
 
   wlan_passphrases = var.unifi_wlan_passphrases
 
-  # Inherited from the Salon backup; Salon still sits behind the Wingo router.
-  upstream_lan = { name = "Wingo", cidr = "192.168.0.0/16" }
-
   clients = {
     # --- Default (10.10.0.0/23) ---
     netgear_switch = { mac = "54:07:7d:1d:fa:d1", name = "Netgear GS108Ev4", fixed_ip = "10.10.0.99", dns = "netgear.nico" }
@@ -42,13 +39,14 @@ module "site" {
     mystrom_server = { mac = "c8:f0:9e:be:12:10", name = "mystrom server", fixed_ip = "10.10.4.103" }
   }
 
-  # Only these Salon devices may open connections in over the VPN.
   # Routes into the Site Magic tunnel (Site Magic doesn't install them itself).
   # peer_name is the tunnel entry's name here: Salon's gateway name when the
   # connection was made ("UDR7"), not its current one - update it if Site
   # Magic is ever re-created.
   site_to_site = { peer_name = "UDR7", remote_cidrs = ["10.20.0.0/16"] }
 
+  # What Salon may open towards Bole over the tunnel; everything else from the
+  # VPN into Internal/Dmz/Gateway/Hotspot is blocked.
   vpn_lockdown = true
   vpn_inbound_allow = {
     salon_printer_to_nas = {
@@ -59,7 +57,7 @@ module "site" {
     }
     salon_dns = {
       name     = "Allow Salon DNS"
-      src_ips  = ["10.20.0.0/16"]               # Salon's gateway forwards its clients' queries
+      src_ips  = ["10.20.0.0/16"]               # Salon's clients get dns1/dns2 via DHCP (network-salon)
       dst_ips  = ["10.10.0.245", "10.10.0.244"] # bootstrap: dns1, dns2
       protocol = "tcp_udp"
       ports    = "53"

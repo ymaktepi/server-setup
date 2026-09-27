@@ -105,9 +105,12 @@ variable "vpn_inbound_allow" {
 
 variable "site_to_site" {
   description = <<-EOT
-    Routes to the other site over its Site Magic tunnel. peer_name is the
-    tunnel's network entry on this controller (named after the remote
-    gateway); remote_cidrs are routed into it. null = no routes.
+    Routes to the other site over its Site Magic tunnel; remote_cidrs are
+    routed into it. peer_name is the name of the tunnel's network entry on
+    this controller: the remote gateway's name at the time the connection was
+    made. It is NOT updated when that gateway is renamed, and re-creating the
+    Site Magic connection renames it - the lookup then fails at plan time.
+    null = no routes.
   EOT
   type = object({
     peer_name    = string

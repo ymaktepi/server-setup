@@ -8,9 +8,11 @@ locals {
   zone_ids = module.site.zone_ids
 }
 
+# The DMZ Traefik serves status.courgettes.club from Uptime Kuma. Only that
+# container: traefik_default would give it every internal UI by Host header.
 resource "unifi_firewall_policy" "dmz_allow_traefik_forward" {
   name                 = "Allow Traefik Forward"
-  description          = "forward status website"
+  description          = "status website (Uptime Kuma only)"
   action               = "ALLOW"
   protocol             = "tcp"
   create_allow_respond = true
@@ -23,7 +25,7 @@ resource "unifi_firewall_policy" "dmz_allow_traefik_forward" {
   destination = {
     zone_id            = local.zone_ids["Internal"]
     matching_target    = "IP"
-    ips                = ["10.10.0.250"] # core: traefik_default
+    ips                = ["10.10.0.253"] # core: uptime_kuma (nginx)
     port_matching_type = "SPECIFIC"
     port               = "443"
   }

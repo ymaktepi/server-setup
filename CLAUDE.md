@@ -33,6 +33,15 @@ Independent OpenTofu root modules, each with its own state (Garage/S3-compatible
 
 The `darkhonor/technitium` provider unconditionally pings its target server during configuration (no way to disable it), and OpenTofu configures every declared provider whose arguments are statically resolvable regardless of whether any resource's `count`/`for_each` actually uses it — so it can't be configured until dns1/dns2 exist and respond. `make bootstrap-apply` handles this with three `tofu apply` calls using `-exclude` (see the Makefile and the comment above the `provider "technitium"` block in `bootstrap/main.tofu`): containers+tokens first, then the zone/settings (once dns1/dns2 respond), then the actual DNS records. Each stage is a no-op on a routine re-apply. `make bootstrap-destroy` needs the same two API tokens for the same reason.
 
+### UniFi sites (`network-<site>`): how they're linked, and known gotchas
+
+- **Sites.** Bole (`10.10.x`) hosts the Proxmox cluster, the DMZ, dns1/dns2 and Garage (the tofu state backend); Salon (`10.20.x`) has no custom infra. Both use the same VLAN IDs, network names, zones and SSIDs from `modules/unifi_site`.
+- **Site-to-site.** UniFi Site Magic (set up in Site Manager, not in tofu) provides the WireGuard tunnel, but on these controllers it never installs routes for the remote subnets. `modules/unifi_site/site_to_site.tofu` adds them as static routes into the tunnel's network entry, looked up by name — the remote gateway's name *when the connection was made* (`UDR7` on Bole, `Bole-Router` on Salon); re-creating Site Magic renames it and breaks the lookup.
+- **VPN lockdown.** UniFi's default lets VPN traffic into Internal/Dmz/Gateway. `vpn.tofu` blocks it except `vpn_inbound_allow` (per site). Policies can't be ordered through the provider — the controller appends new ones — so the block policies are re-created (`replace_triggered_by`) whenever an allow changes, to stay behind it.
+- **Salon's DNS comes from Bole.** Salon's DHCP hands out dns1/dns2 over the tunnel (Salon's gateway itself uses public DNS). If the tunnel is down, Salon's clients have no DNS.
+- **tofu needs Tailscale.** Garage (and Bole's controller) are only reachable over Tailscale, not through the site-to-site tunnel (blocked by the lockdown). From Salon, `make network-*` fails with an S3 timeout while Tailscale is off.
+- **Controller quirks hit so far:** zone membership only sticks when set on the zone (`network_ids`), not via a network's `firewall_zone_id`; at least one WAN must be weighted and failover priorities must be unique at every step of an apply; a network's IPv6 prefix delegation needs its WAN to already be DHCPv6 (may take a second apply); a factory-reset controller forces WAN `setting_preference = "auto"` and needs the zone-based firewall enabled in the UI before tofu can manage zones.
+
 ### Commands
 
 ```bash

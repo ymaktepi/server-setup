@@ -7,24 +7,28 @@ locals {
       network    = "default"
       bands      = ["2g", "5g"]
       no2ghz_oui = false
+      wpa3       = true
     }
     momo = {
       name       = "Momo"
       network    = "entertainment"
       bands      = ["2g", "5g"]
       no2ghz_oui = true
+      wpa3       = false
     }
     zuko = {
       name       = "Zuko"
       network    = "guest"
       bands      = ["2g", "5g"]
       no2ghz_oui = true
+      wpa3       = true
     }
     admiral_zhao = {
       name       = "AdmiralZhao"
       network    = "crusted"
       bands      = ["2g"] # IoT devices, 2.4 GHz only
       no2ghz_oui = true
+      wpa3       = false
     }
   }
 
@@ -57,11 +61,15 @@ resource "unifi_wlan" "this" {
   # update). Pinned to match the APs' device-level setting.
   bandsteering_mode = "off"
 
-  security     = "wpapsk"
-  wpa_mode     = "wpa2"
-  wpa_enc      = "ccmp"
-  pmf_mode     = "disabled"
-  wpa3_support = false
+  # WPA2/WPA3 transition with optional management-frame protection where
+  # every client copes; WPA2-only (PMF off) on the SSIDs with older TVs,
+  # soundbars and IoT gear (wpa3 = false in the catalogue).
+  security        = "wpapsk"
+  wpa_mode        = "wpa2"
+  wpa_enc         = "ccmp"
+  pmf_mode        = each.value.wpa3 ? "optional" : "disabled"
+  wpa3_support    = each.value.wpa3
+  wpa3_transition = each.value.wpa3
 
   no2ghz_oui        = each.value.no2ghz_oui # 5 GHz-capable clients kept off 2.4 GHz
   group_rekey       = 0

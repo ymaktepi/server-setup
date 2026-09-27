@@ -18,18 +18,18 @@ resource "unifi_wan" "primary" {
   }
   dhcpv6 = {
     cos                 = 0
-    pd_size             = 56
-    pd_size_auto        = true
+    pd_size             = 48
+    pd_size_auto        = false
     wan_delegation_type = "pd" # delegated prefix feeds the DMZ network's IPv6 (networks.tofu)
   }
 
-  # dns2 (.244) then dns1 (.245), the Technitium servers from bootstrap/.
+  # dns1 (.245) then dns2 (.244), the Technitium servers from bootstrap/.
   # Literal IPs rather than a cross-stack reference: this stack mustn't
   # depend on bootstrap's state.
   dns = {
     preference      = "manual"
-    primary         = "10.10.0.244"
-    secondary       = "10.10.0.245"
+    primary         = "10.10.0.245"
+    secondary       = "10.10.0.244"
     ipv6_preference = "auto"
   }
 

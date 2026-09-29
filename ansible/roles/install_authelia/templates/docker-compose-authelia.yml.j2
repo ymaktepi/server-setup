@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik
+      - auth
     expose:
       - "9091"
     volumes:
@@ -18,4 +19,6 @@ services:
 
 networks:
   traefik:
+    external: true
+  auth:
     external: true

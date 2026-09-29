@@ -11,13 +11,29 @@ storage:
 
 session:
   secret: !file /secrets/session_secret
-  name: authelia_session
+  # not the default authelia_session: browsers still hold that one for the
+  # bare courgettes.club (the old cookie domain) and send it alongside, which
+  # makes Authelia read the stale session and loop back to the login page
+  name: authelia_sso_session
   same_site: lax
   expiration: 1h
   inactivity: 5m
+  # One cookie per scope, never the bare courgettes.club: a cookie is sent to
+  # every host under its domain, and most of those (nextcloud, websites...)
+  # have no business seeing an Authelia session.
   cookies:
-    - domain: courgettes.club
-      authelia_url: 'https://auth.courgettes.club'
+    # public portal (users reset/change their password here) and any public
+    # protected app, as <app>.sso.courgettes.club
+    - domain: sso.courgettes.club
+      authelia_url: 'https://sso.courgettes.club'
+    # internal portal (LAN only) for *.local-dmz apps, e.g. LLDAP
+    - domain: local-dmz.courgettes.club
+      authelia_url: 'https://auth.local-dmz.courgettes.club'
+
+regulation:
+  max_retries: 3
+  find_time: 10m
+  ban_time: 1h
 
 authentication_backend:
   ldap:
@@ -26,6 +42,13 @@ authentication_backend:
     base_dn: 'DC=courgettes,DC=club'
     user: 'UID=authelia,OU=people,DC=courgettes,DC=club'
     password: "{{ authelia_ldap_bind_password }}"
+
+# Users set their own passwords through Authelia (reset by email, or change
+# from the settings page), so this is the only place strength is enforced.
+password_policy:
+  zxcvbn:
+    enabled: true
+    min_score: 3
 
 totp:
   issuer: courgettes.club
@@ -37,15 +60,15 @@ totp:
 access_control:
   default_policy: deny
   rules:
+    # LLDAP's UI is admin-only (and LAN-only, see Traefik's lldap router);
+    # users manage their password through Authelia instead.
     - domain:
-        - 'auth.courgettes.club'
+        - 'lldap.local-dmz.courgettes.club'
+      # TODO: back to two_factor once admin has an email (2FA enrolment
+      # sends a one-time code to it)
       policy: one_factor
-    - domain:
-        - 'lldap.courgettes.club'
-      policy: two_factor
       subject:
-        - "group:lldap-users"
-        - "user:admin"
+        - "group:lldap_admin"
 
 notifier:
   disable_startup_check: false

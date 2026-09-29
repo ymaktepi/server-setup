@@ -123,8 +123,9 @@ http:
       tls:
         certresolver: infomaniak
       service: gpu
+    # Public portal: password reset/change for users, login for *.sso apps.
     authelia:
-      rule: "Host(`auth.courgettes.club`)"
+      rule: "Host(`sso.courgettes.club`)"
       entryPoints:
         - "https"
       service: authelia
@@ -132,16 +133,28 @@ http:
         - default-headers
       tls:
         certResolver: letsencrypt
+    # Internal portal for *.local-dmz apps (its own cookie scope).
+    authelia-internal:
+      rule: "Host(`auth.local-dmz.courgettes.club`)"
+      entryPoints:
+        - "https"
+      service: authelia
+      middlewares:
+        - admin-lan-only
+        - default-headers
+      tls:
+        certResolver: infomaniak
     lldap:
-      rule: "Host(`lldap.courgettes.club`)"
+      rule: "Host(`lldap.local-dmz.courgettes.club`)"
       entryPoints:
         - "https"
       middlewares:
+        - admin-lan-only
         - default-headers
         - authelia@file
       service: lldap
       tls:
-        certResolver: letsencrypt
+        certResolver: infomaniak
     status:
       rule: "Host(`status.courgettes.club`)"
       entryPoints:
@@ -218,7 +231,7 @@ http:
           - "admin:{{traefik_basic_auth}}"
 
     localipwhitelist:
-      ipWhiteList:
+      ipAllowList:
         sourceRange:
           - "10.10.0.0/23"
 
@@ -240,9 +253,18 @@ http:
         regex: "^https:?://airhorn.courgettes.club"
         replacement: "https://airhorn.wav.courgettes.club"
 
+    # Admin UIs: Bole's Main LAN, plus the laptop when at Salon (arrives
+    # un-NATed over site-to-site; same IPs as network-bole's vpn_inbound_allow).
+    admin-lan-only:
+      ipAllowList:
+        sourceRange:
+          - "10.10.0.0/23"
+          - "10.20.0.20/32"
+          - "10.20.0.21/32"
+
     local-only:
-      ipwhitelist:
-        sourcerange: "10.10.0.0/23,10.10.2.0/24,10.10.5.0/24"
+      ipAllowList:
+        sourceRange: "10.10.0.0/23,10.10.2.0/24,10.10.5.0/24"
 
     default-headers:
       headers:
@@ -260,7 +282,8 @@ http:
     authelia:
       forwardAuth:
         # assumes "authelia" is a valid domain (i.e. inside the same docker network)
-        address: http://authelia:9091/api/verify?rd=https://auth.courgettes.club
+        # the portal to redirect to comes from the matching session cookie
+        address: http://authelia:9091/api/authz/forward-auth
         trustForwardHeader: true
         authResponseHeaders:
           - Remote-User

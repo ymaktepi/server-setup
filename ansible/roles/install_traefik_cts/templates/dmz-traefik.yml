@@ -1,6 +1,7 @@
 api:
   dashboard: true
-  debug: true
+accessLog:
+  format: json
 entryPoints:
   http:
     address: ":80"

@@ -32,7 +32,7 @@
     dest: '/opt/traefik/docker-compose.yml'
     owner: root
     group: root
-    mode: 0644
+    mode: 0600
 
 - name: Create Config
   template:
@@ -40,7 +40,7 @@
     dest: '/opt/traefik/data/config.yml'
     owner: root
     group: root
-    mode: 0644
+    mode: 0600
 
 - name: Create Traefik
   template:
@@ -48,7 +48,7 @@
     dest: '/opt/traefik/data/traefik.yml'
     owner: root
     group: root
-    mode: 0644
+    mode: 0600
 
 
 - name: Refresh docker

@@ -4,15 +4,13 @@ authelia_groups:
 
 # list of the users to be created in authelia
 #
+# Only service accounts get a `password` here: bootstrap.sh re-sets it on
+# every run, so a password on a real user would overwrite whatever they chose.
+# Real users get none and set their own through Authelia's "reset password"
+# (an email to their address), so their password is never known to us.
 authelia_users:
   - id: authelia
     email: authelia@courgettes.club
     password: '{{ authelia_ldap_bind_password }}'
     groups:
       - lldap_password_manager
-  - id: test
-    email: testldap@courgettes.club
-    password: testtest
-    displayName: "Test User"
-    groups:
-      - lldap-users

@@ -6,13 +6,13 @@
 
 - name: Create directories if they do not exist
   ansible.builtin.file:
-    path: "{{item}}"
+    path: "{{item.path}}"
     state: directory
-    mode: '0755'
+    mode: "{{item.mode}}"
   loop:
-    - /opt/lldap/data
-    - /opt/lldap/bootstrap/user-configs
-    - /opt/lldap/bootstrap/group-configs
+    - { path: /opt/lldap/data, mode: '0700' }
+    - { path: /opt/lldap/bootstrap/user-configs, mode: '0700' }
+    - { path: /opt/lldap/bootstrap/group-configs, mode: '0755' }
 
 - name: Create Docker Compose for lldap
   template:
@@ -20,7 +20,8 @@
     dest: '/opt/lldap/docker-compose.yml'
     owner: root
     group: root
-    mode: 0644
+    # holds the admin password, JWT secret and key seed
+    mode: 0600
 
 - name: list existing files in user-configs and group-configs
   ansible.builtin.find:
@@ -45,7 +46,7 @@
     dest: '/opt/lldap/bootstrap/user-configs/user-{{item.id}}.json'
     owner: root
     group: root
-    mode: 0644
+    mode: 0600
     content: '{{ item | to_json }}'
   loop: "{{authelia_users}}"
 
@@ -64,6 +65,7 @@
     compose_project_dir: /opt/lldap
 
 - name: Run bootstrap for lldap
+  no_log: true
   community.docker.docker_compose_v2_exec:
     project_src: "/opt/lldap"
     service: lldap
@@ -76,6 +78,18 @@
   ansible.builtin.debug:
     var: result.stdout
 
+# The user configs carry passwords; they're only needed while bootstrap.sh runs.
+- name: Remove user configs (passwords) after bootstrap
+  ansible.builtin.file:
+    path: /opt/lldap/bootstrap/user-configs
+    state: absent
+
+- name: Recreate empty user-configs directory
+  ansible.builtin.file:
+    path: /opt/lldap/bootstrap/user-configs
+    state: directory
+    mode: '0700'
+
 - name: Create /opt/authelia directory if it does not exist
   ansible.builtin.file:
     path: /opt/authelia
@@ -86,7 +100,7 @@
   ansible.builtin.file:
     path: /opt/authelia/data
     state: directory
-    mode: '0755'
+    mode: '0700'
 
 - name: Create Docker Compose for authelia
   template:
@@ -102,13 +116,8 @@
     dest: '/opt/authelia/data/configuration.yml'
     owner: root
     group: root
-    mode: 0644
-
-- name: Create /opt/authelia/secrets directory if it does not exist
-  ansible.builtin.file:
-    path: /opt/authelia/secrets
-    state: directory
-    mode: '0755'
+    # holds the LDAP bind and SMTP passwords
+    mode: 0600
 
 - name: Ensure Authelia secrets directory exists
   file:
@@ -133,9 +142,12 @@
 
 - name: Ensure secrets have correct permissions
   file:
-    path: /opt/authelia/secrets
-    recurse: yes
+    path: "/opt/authelia/secrets/{{ item }}"
     mode: '0600'
+  loop:
+    - jwt_secret
+    - session_secret
+    - storage_key
 
 - name: Refresh docker for authelia
   include_tasks: refresh_docker_compose.yml

@@ -2,13 +2,16 @@ services:
   lldap:
     container_name: lldap
     hostname: lldap
-    image: lldap/lldap:stable
+    image: lldap/lldap:v0.6
     restart: unless-stopped
     volumes:
       #- ./secrets:/secrets
       - ./data:/data
       - ./bootstrap:/bootstrap
     networks:
+      # LDAP (3890) is for Authelia only, over the private `auth` network.
+      # `traefik` is only for the web UI (17170), routed LAN-only.
+      - auth
       - traefik
     environment:
       - UID=0
@@ -24,3 +27,7 @@ services:
 networks:
   traefik:
     external: true
+  # Authelia <-> LLDAP only; internal = no route out of this network
+  auth:
+    name: auth
+    internal: true

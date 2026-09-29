@@ -1,8 +1,13 @@
 services:
   traefik:
-    image: traefik:latest
+    image: traefik:v3.7
     container_name: traefik
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "5"
     security_opt:
       - no-new-privileges:true
     networks:
@@ -14,7 +19,6 @@ services:
       - INFOMANIAK_ACCESS_TOKEN={{infomaniak_api_token}}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data/traefik.yml:/traefik.yml:ro
       - ./data/acme.json:/acme.json
       - ./data/acme-letsencrypt.json:/acme-letsencrypt.json

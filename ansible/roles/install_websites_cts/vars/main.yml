@@ -23,3 +23,7 @@ website_hosts:
     filename: install_headscale.yml
     port: 8080
     host: headscale.courgettes.club
+  - name: IT Tools
+    filename: install_it_tools.yml
+    port: 8007
+    host: it-tools.courgettes.club

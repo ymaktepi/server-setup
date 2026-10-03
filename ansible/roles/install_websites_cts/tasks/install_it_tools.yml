@@ -1,0 +1,17 @@
+- name: Create /opt/it-tools directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/it-tools
+    state: directory
+    mode: '0755'
+
+- name: Create Docker Compose for it-tools
+  template:
+    src: docker-compose-it-tools.yml
+    dest: '/opt/it-tools/docker-compose.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Run `docker-compose up` for it-tools
+  community.docker.docker_compose_v2:
+    project_src: /opt/it-tools

@@ -1,0 +1,7 @@
+services:
+  it-tools:
+    container_name: it-tools
+    image: sharevb/it-tools:2026.9.27
+    restart: always
+    ports:
+      - "127.0.0.1:8007:8080" # image runs nginx unprivileged on 8080

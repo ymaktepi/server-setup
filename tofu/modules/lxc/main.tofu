@@ -68,7 +68,7 @@ resource "proxmox_virtual_environment_container" "this" {
     type = each.value.ansible_os
   }
 
-  environment_variables = { for v in each.value.environment_variables: v.key => v.value }
+  environment_variables = { for v in each.value.environment_variables : v.key => v.value }
 
   initialization {
     entrypoint = each.value.entrypoint
@@ -95,9 +95,10 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   network_interface {
-    name    = "eth0"
-    bridge  = var.linux_bridge
-    vlan_id = each.value.vlan
+    name     = "eth0"
+    bridge   = var.linux_bridge
+    vlan_id  = each.value.vlan
+    firewall = each.value.firewall != null
   }
 
   dynamic "features" {
@@ -147,4 +148,65 @@ resource "technitium_record" "containers" {
   type  = "A"
   value = split("/", each.value.initialization[0].ip_config[0].ipv4[0].address)[0]
   ttl   = 3600
+}
+
+# --- Firewall (only for containers with a `firewall` block) ------------------
+
+locals {
+  firewalled = {
+    for k, c in proxmox_virtual_environment_container.this : k => c
+    if var.containers[k].firewall != null
+  }
+}
+
+resource "proxmox_virtual_environment_firewall_options" "this" {
+  for_each = local.firewalled
+
+  node_name    = each.value.node_name
+  container_id = each.value.vm_id
+
+  enabled       = var.containers[each.key].firewall.enabled
+  input_policy  = var.containers[each.key].firewall.input_policy
+  output_policy = var.containers[each.key].firewall.output_policy
+  log_level_in  = var.containers[each.key].firewall.log_level_in
+  log_level_out = var.containers[each.key].firewall.log_level_out
+
+  # anti-spoofing: the container may only send from its own MAC and its
+  # configured IP (so it can't pose as e.g. traefik_dmz to an allowlist)
+  macfilter = true
+  ipfilter  = true
+  dhcp      = var.containers[each.key].ipv4mode == "dhcp"
+  ndp       = true  # IPv6 neighbour discovery
+  radv      = false # containers have no business sending router adverts
+
+  # rules first: enabling the firewall (default input DROP) before they
+  # exist would cut the container off until the next apply step
+  depends_on = [proxmox_virtual_environment_firewall_rules.this]
+}
+
+resource "proxmox_virtual_environment_firewall_rules" "this" {
+  for_each = {
+    for k, c in local.firewalled : k => c
+    if length(var.containers[k].firewall.rules) > 0
+  }
+
+  node_name    = each.value.node_name
+  container_id = each.value.vm_id
+
+  dynamic "rule" {
+    for_each = var.containers[each.key].firewall.rules
+
+    content {
+      type    = rule.value.type
+      action  = rule.value.action
+      source  = rule.value.source
+      dest    = rule.value.dest
+      proto   = rule.value.proto
+      dport   = rule.value.dport
+      macro   = rule.value.macro
+      comment = rule.value.comment
+      log     = rule.value.log
+      iface   = "net0"
+    }
+  }
 }

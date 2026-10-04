@@ -53,7 +53,7 @@ variable "containers" {
     datastore_id = optional(string, "m2-noraid")
 
     environment_variables = optional(list(object({ key = string, value = string })), [])
-    entrypoint = optional(string, null)
+    entrypoint            = optional(string, null)
 
     # omit to have not tagged values
     vlan         = optional(number)
@@ -77,6 +77,30 @@ variable "containers" {
       backup = optional(bool, false)
     }))
 
+    # Proxmox firewall for this container (enforced on the host's bridge, so
+    # the container can't turn it off). null = no firewall, as before.
+    # Rules apply in order; replies to allowed traffic are let back in
+    # automatically (conntrack). Only takes effect while the cluster-wide
+    # firewall is enabled (core/firewall.tofu).
+    firewall = optional(object({
+      enabled       = optional(bool, true)
+      input_policy  = optional(string, "DROP")
+      output_policy = optional(string, "ACCEPT")
+      log_level_in  = optional(string, "nolog")
+      log_level_out = optional(string, "nolog")
+      rules = optional(list(object({
+        type    = string # "in" or "out"
+        action  = optional(string, "ACCEPT")
+        source  = optional(string)
+        dest    = optional(string)
+        proto   = optional(string)
+        dport   = optional(string)
+        macro   = optional(string) # e.g. "Ping", "SSH" - see PVE firewall macros
+        comment = optional(string)
+        log     = optional(string)
+      })), [])
+    }))
+
     vpn = optional(bool, false)
 
     gpu = optional(bool, false)
@@ -85,4 +109,15 @@ variable "containers" {
     ansible_os     = optional(string, "debian")
     ansible_vars   = optional(list(object({ key = string, value = optional(string, "") })), [])
   }))
+
+  validation {
+    condition = alltrue(flatten([
+      for c in var.containers : c.firewall == null ? [] : concat(
+        [contains(["ACCEPT", "DROP", "REJECT"], c.firewall.input_policy)],
+        [contains(["ACCEPT", "DROP", "REJECT"], c.firewall.output_policy)],
+        [for r in c.firewall.rules : contains(["in", "out"], r.type) && contains(["ACCEPT", "DROP", "REJECT"], r.action)],
+      )
+    ]))
+    error_message = "firewall: policies and rule actions must be ACCEPT, DROP or REJECT; rule type must be \"in\" or \"out\"."
+  }
 }

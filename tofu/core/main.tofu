@@ -33,6 +33,14 @@ terraform {
 #  source = "../modules/proxmox"
 #}
 
+# Shared sources for container firewall rules (modules/lxc `firewall`).
+locals {
+  # Ansible/admin SSH: Bole Default (incl. the Tailscale vpn node) and the
+  # laptop at Salon (same IPs as network-bole's vpn_inbound_allow)
+  fw_admin = "10.10.0.0/23,10.20.0.20,10.20.0.21"
+  fw_dmz   = "10.10.5.0/24"
+}
+
 variable "network_testing_memory" {
   type    = number
   default = 512
@@ -200,6 +208,20 @@ module "containers" {
       ipv4_address = "10.10.5.250/24"
       ipv4_gateway = "10.10.5.1"
 
+      # Internet-facing: 80/443 from anywhere. Outbound into the DMZ only to
+      # its backends (dmz-config.yml services); a compromised Traefik can't
+      # probe the rest of the DMZ. Internet/other VLANs left to UniFi.
+      firewall = {
+        rules = [
+          { type = "in", proto = "tcp", dport = "80,443", comment = "web (port forward + LAN)" },
+          { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
+          { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+          # websites, arr_server, gpu, nextcloud, pocket
+          { type = "out", proto = "tcp", dport = "443", dest = "10.10.5.249,10.10.5.247,10.10.5.102,10.10.5.246,10.10.5.100", comment = "backends" },
+          { type = "out", action = "DROP", dest = local.fw_dmz, comment = "rest of the DMZ" },
+        ]
+      }
+
       ansible_groups = ["traefik_dmz", "traefik"]
     }
 
@@ -217,6 +239,17 @@ module "containers" {
       ipv4_address = "10.10.5.252/24"
       ipv4_gateway = "10.10.5.1"
 
+      # SSH from anywhere (WAN 2222 -> 22); onward only SSH into the DMZ
+      # (the jump itself), nothing else there.
+      firewall = {
+        rules = [
+          { type = "in", macro = "SSH", comment = "SSH (port forward + LAN)" },
+          { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+          { type = "out", macro = "SSH", dest = local.fw_dmz, comment = "jump targets" },
+          { type = "out", action = "DROP", dest = local.fw_dmz, comment = "rest of the DMZ" },
+        ]
+      }
+
       ansible_groups = ["jumphost"]
     }
 
@@ -233,6 +266,16 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.249/24"
       ipv4_gateway = "10.10.5.1"
+
+      # Only Traefik serves it; everything else in the DMZ (game server,
+      # jumphost...) is cut off, which UniFi can't do within one VLAN.
+      firewall = {
+        rules = [
+          { type = "in", proto = "tcp", dport = "443", source = "10.10.5.250", comment = "core: traefik_dmz" },
+          { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
+          { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+        ]
+      }
 
       ansible_groups = ["websites"]
     }

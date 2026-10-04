@@ -27,7 +27,7 @@ Independent OpenTofu root modules, each with its own state (Garage/S3-compatible
 
 `bootstrap`, `core` and `compute` share **`modules/lxc`**, the reusable container abstraction (`proxmox_virtual_environment_container` + DNS record registration). Its `containers` input is a map keyed by container name; each value's schema is in `modules/lxc/variables.tofu`. Hostnames are derived as `replace(name, "_", "-") + domain_name` (default `domain_name = ".nico"`). DNS names use the same dash-replacement under `actual.courgettes.club` via `technitium_record` resources (the `darkhonor/technitium` provider), gated by `technitium_register_records` and skipped entirely when that's false.
 
-`modules/vms` exists but is currently unused/commented out everywhere.
+`modules/vms` is the VM counterpart (`proxmox_virtual_environment_vm` + DNS record + the same `ansible_inventory` shape); `compute` uses it for the `gpu` VM (PCIe passthrough). New VMs boot from a cloud image the module downloads itself (`images`, pinned dated build + checksum, onto `synology`'s `import` content) with a generated cloud-init user-data snippet (`cloud-init.yaml.tftpl`, uploaded over the provider's SSH): hostname, the `ansible` user + key, guest agent. Cloud-init only runs on first boot; the VM ignores later changes to either. `compute`'s `ansible_inventory` output merges both modules.
 
 ### Known gotcha: `bootstrap-apply` is 3 stages, not 1
 

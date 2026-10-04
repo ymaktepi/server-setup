@@ -124,10 +124,13 @@
   failed_when: false
   become: yes
 
+# Match the Runtimes line only: toolkit >= 1.18 also makes `docker info` list
+# CDI devices (cdi: nvidia.com/gpu=...), which a bare grep "nvidia" takes for
+# a configured runtime.
 - name: Check if Docker runtime is already configured for NVIDIA
   when: nvidia_runtime_available.rc == 0
   ansible.builtin.shell: |
-    docker info 2>/dev/null | grep -q "nvidia" || echo "not_configured"
+    docker info 2>/dev/null | grep -qE '^ *Runtimes:.*\bnvidia\b' || echo "not_configured"
   register: docker_nvidia_check
   changed_when: false
   failed_when: false

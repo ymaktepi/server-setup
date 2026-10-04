@@ -27,7 +27,7 @@ Independent OpenTofu root modules, each with its own state (Garage/S3-compatible
 
 `bootstrap`, `core` and `compute` share **`modules/lxc`**, the reusable container abstraction (`proxmox_virtual_environment_container` + DNS record registration). Its `containers` input is a map keyed by container name; each value's schema is in `modules/lxc/variables.tofu`. Hostnames are derived as `replace(name, "_", "-") + domain_name` (default `domain_name = ".nico"`). DNS names use the same dash-replacement under `actual.courgettes.club` via `technitium_record` resources (the `darkhonor/technitium` provider), gated by `technitium_register_records` and skipped entirely when that's false.
 
-`modules/vms` exists but is currently unused/commented out everywhere.
+`modules/vms` is the VM counterpart (`proxmox_virtual_environment_vm` + DNS record + the same `ansible_inventory` shape); `compute` uses it for the `gpu` VM (PCIe passthrough). New VMs boot from a cloud image the module downloads itself (`images`, pinned dated build + checksum, onto `synology`'s `import` content) with a generated cloud-init user-data snippet (`cloud-init.yaml.tftpl`, uploaded over the provider's SSH): hostname, the `ansible` user + key, guest agent. Cloud-init only runs on first boot; the VM ignores later changes to either. `compute`'s `ansible_inventory` output merges both modules.
 
 ### Known gotcha: `bootstrap-apply` is 3 stages, not 1
 
@@ -69,14 +69,13 @@ cd ansible
 export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"   # same age identity as tofu/'s Terraform secrets
 ansible pvenodes -m ping                              # sanity-check connectivity to the 4 Proxmox nodes
 ansible-playbook playbooks/pve/pve_onboard.yml -e 'ansible_user=root'   # one-time: create the ansible user on a fresh node
-ansible-playbook playbooks/provisioning/build_cts.yml  # create/start/stop LXCs from variable_files/cts (legacy path — most new containers go through tofu/ now)
 ansible-playbook playbooks/update/update_<service>_cts.yml
 ansible-playbook playbooks/update_all.yml              # every update playbook, for VMs, CTs and Proxmox nodes
 ```
 
 Secrets live in `inventory/group_vars/all/vault.sops.yaml`, sops-encrypted (same root-level `.sops.yaml`/age recipient as `tofu/secrets.enc.yaml` — one shared config covers both). The `community.sops` vars plugin (enabled via `ansible.cfg`'s `vars_plugins_enabled`) decrypts it transparently at vars-loading time, exactly like the `ansible-vault`-encrypted `vault-file` it replaced — so every role/template still references secrets as plain `{{ variable_name }}`, no `lookup('env', ...)` involved. `ansible.cfg` points `inventory=./inventory/` (both the static `.conf` and the dynamic `.py` script are merged).
 
-`roles/install_*` are per-service installers (arr, nextcloud, traefik, jumphost, k3s, technitium, etc.) invoked by the `update/update_*_cts.yml` playbooks against the Terraform-sourced inventory groups.
+Ansible doesn't create containers or VMs anymore — OpenTofu does (`modules/lxc`, `modules/vms`); Ansible only installs software inside them. `roles/install_*` are per-service installers (arr, nextcloud, traefik, jumphost, k3s, technitium, etc.) invoked by the `update/update_*_cts.yml` playbooks against the Terraform-sourced inventory groups.
 
 ## Network conventions
 

@@ -175,3 +175,70 @@ module "containers" {
     }
   }
 }
+# The GPU on node `proxmox`, as cluster resource mappings: an API token may
+# only pass through mapped devices (see modules/vms `hostpci`). IDs from
+# `pvesh get /nodes/proxmox/hardware/pci`.
+resource "proxmox_hardware_mapping_pci" "gpu" {
+  name    = "gpu"
+  comment = "RTX 3060 (gpu VM)"
+  map = [{
+    node         = "proxmox"
+    path         = "0000:01:00.0"
+    id           = "10de:2504"
+    subsystem_id = "1458:40e2"
+    iommu_group  = 8
+  }]
+}
+
+resource "proxmox_hardware_mapping_pci" "gpu_audio" {
+  name    = "gpu-audio"
+  comment = "RTX 3060 HDMI audio (gpu VM)"
+  map = [{
+    node         = "proxmox"
+    path         = "0000:01:00.1"
+    id           = "10de:228e"
+    subsystem_id = "1458:40e2"
+    iommu_group  = 8
+  }]
+}
+
+module "vms" {
+  source = "../modules/vms"
+
+  images = {
+    debian12 = {
+      url      = "https://cloud.debian.org/images/cloud/bookworm/20260923-2610/debian-12-generic-amd64-20260923-2610.qcow2"
+      checksum = "b789a983661b93ae280dcebbcecc425e7a05f15ab4a60d08e0bf130759a4f84dd26de39bd0e77e33b3f513910e5c5e84bdb335324b5138b4c43a0899a1733455"
+    }
+  }
+
+  vms = {
+    gpu = {
+      vmid = 302
+      node = "proxmox" # the node with the GPU
+
+      cores        = 4
+      memory       = 16384
+      disk_size    = 100
+      datastore_id = "m2-noraid"
+      image        = "debian12"
+
+      started = true
+      on_boot = false
+
+      machine = "q35"
+      hostpci = [
+        { mapping = proxmox_hardware_mapping_pci.gpu.name, rombar = false },
+        { mapping = proxmox_hardware_mapping_pci.gpu_audio.name },
+      ]
+
+      vlan         = 5
+      ipv4mode     = "static"
+      ipv4_address = "10.10.5.102/24"
+      ipv4_gateway = "10.10.5.1"
+
+      ansible_groups = ["gpu"]
+      ansible_vars   = [{ key = "ansible_user", value = "ansible" }]
+    }
+  }
+}

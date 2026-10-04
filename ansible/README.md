@@ -49,17 +49,12 @@ Only contains the proxmox host for now.
 - `pve/pve_mounts.yml` - Configure CIFS mounts for LXC shares
 - `pve/update_pve.yml` - Update Proxmox packages and install dependencies
 
-### provisioning/ - VM and container creation
+### provisioning/
 
-- `provisioning/build_vms.yml` - Create VMs from cloud-init images
-- `provisioning/build_cts.yml` - Create LXC containers
 - `provisioning/add_ssh_key_to_host.yml` - Copy SSH key to hosts
 
-> Note: when running `build_*` playbooks, we currently need to:
-> - Create a new entry in the vm or ct list, `state: new`.
-> - Run the `build_*` playbook, which _creates_ the vm/ct.
-> - Set the state to `started`.
-> - Run the playbook again, which _starts_ the vm/ct.
+Containers and VMs themselves are created by OpenTofu (`../tofu/`, modules
+`lxc` and `vms`); these playbooks only install software inside them.
 
 ### update/ - Update specific containers
 
@@ -153,20 +148,6 @@ Configure CIFS mounts for LXC shares.
 ```bash
 ansible-playbook playbooks/pve/pve_mounts.yml
 ```
-
-### Build VMs: `provisioning/build_vms.yml`
-
-```bash
-ansible-playbook playbooks/provisioning/build_vms.yml
-```
-
-### Build Containers: `provisioning/build_cts.yml`
-
-```bash
-ansible-playbook playbooks/provisioning/build_cts.yml
-```
-
-Also used to delete/start/stop cts. To do so, change the state in the variable_files/cts.
 
 ### Update Containers: `update/update_*_cts.yml`
 

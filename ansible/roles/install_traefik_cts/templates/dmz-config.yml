@@ -271,9 +271,15 @@ http:
           - "10.20.0.20/32"
           - "10.20.0.21/32"
 
+    # Bole Default, Entertainment, DMZ, plus the laptop at Salon (arrives
+    # un-NATed over site-to-site; same IPs as admin-lan-only)
     local-only:
       ipAllowList:
-        sourceRange: "10.10.0.0/23,10.10.2.0/24,10.10.5.0/24"
+        sourceRange:
+          - "10.10.0.0/23"
+          - "10.10.2.0/24"
+          - "10.10.5.0/24"
+          - "10.20.0.0/23"
 
     default-headers:
       headers:

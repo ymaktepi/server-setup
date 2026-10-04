@@ -69,14 +69,13 @@ cd ansible
 export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"   # same age identity as tofu/'s Terraform secrets
 ansible pvenodes -m ping                              # sanity-check connectivity to the 4 Proxmox nodes
 ansible-playbook playbooks/pve/pve_onboard.yml -e 'ansible_user=root'   # one-time: create the ansible user on a fresh node
-ansible-playbook playbooks/provisioning/build_cts.yml  # create/start/stop LXCs from variable_files/cts (legacy path — most new containers go through tofu/ now)
 ansible-playbook playbooks/update/update_<service>_cts.yml
 ansible-playbook playbooks/update_all.yml              # every update playbook, for VMs, CTs and Proxmox nodes
 ```
 
 Secrets live in `inventory/group_vars/all/vault.sops.yaml`, sops-encrypted (same root-level `.sops.yaml`/age recipient as `tofu/secrets.enc.yaml` — one shared config covers both). The `community.sops` vars plugin (enabled via `ansible.cfg`'s `vars_plugins_enabled`) decrypts it transparently at vars-loading time, exactly like the `ansible-vault`-encrypted `vault-file` it replaced — so every role/template still references secrets as plain `{{ variable_name }}`, no `lookup('env', ...)` involved. `ansible.cfg` points `inventory=./inventory/` (both the static `.conf` and the dynamic `.py` script are merged).
 
-`roles/install_*` are per-service installers (arr, nextcloud, traefik, jumphost, k3s, technitium, etc.) invoked by the `update/update_*_cts.yml` playbooks against the Terraform-sourced inventory groups.
+Ansible doesn't create containers or VMs anymore — OpenTofu does (`modules/lxc`, `modules/vms`); Ansible only installs software inside them. `roles/install_*` are per-service installers (arr, nextcloud, traefik, jumphost, k3s, technitium, etc.) invoked by the `update/update_*_cts.yml` playbooks against the Terraform-sourced inventory groups.
 
 ## Network conventions
 

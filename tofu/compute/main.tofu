@@ -31,6 +31,13 @@ terraform {
 #module "proxmox" {
 #  source = "../modules/proxmox"
 #}
+# Shared sources for container firewall rules (modules/lxc `firewall`);
+# same values as core's.
+locals {
+  fw_admin = "10.10.0.0/23,10.20.0.20,10.20.0.21" # Bole Default + laptop at Salon
+  fw_dmz   = "10.10.5.0/24"
+}
+
 module "containers" {
   source = "../modules/lxc"
   containers = {
@@ -76,6 +83,20 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.5.248/24"
       ipv4_gateway = "10.10.5.1"
+
+      # Game ports from anywhere; Factorio's RCON (27015/tcp) from Default
+      # only, even though the port forward exposes it. Nothing into the DMZ.
+      firewall = {
+        rules = [
+          { type = "in", proto = "udp", dport = "34197", comment = "factorio" },
+          { type = "in", proto = "tcp", dport = "27015", source = "10.10.0.0/23", comment = "factorio RCON" },
+          { type = "in", proto = "tcp", dport = "7777", comment = "satisfactory" },
+          { type = "in", proto = "udp", dport = "7777", comment = "satisfactory" },
+          { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
+          { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+          { type = "out", action = "DROP", dest = local.fw_dmz, comment = "rest of the DMZ" },
+        ]
+      }
 
       ansible_groups = ["game_server"]
 

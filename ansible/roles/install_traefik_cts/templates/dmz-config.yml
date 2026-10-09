@@ -124,7 +124,7 @@ http:
     gpu:
       entryPoints:
         - "https"
-      rule: "Host(`ollama.local-dmz.courgettes.club`) || Host(`tabby.local-dmz.courgettes.club`)"
+      rule: "Host(`ollama.local-dmz.courgettes.club`) || Host(`tabby.local-dmz.courgettes.club`) || Host(`strata.local-dmz.courgettes.club`)"
       middlewares:
         - local-only
         - default-headers

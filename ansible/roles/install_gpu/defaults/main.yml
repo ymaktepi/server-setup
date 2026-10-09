@@ -1,0 +1,2 @@
+# Strata's image is built on CUDA 13.0, which needs driver 580 or newer
+nvidia_driver_min_major: 580

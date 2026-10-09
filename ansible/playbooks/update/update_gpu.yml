@@ -10,6 +10,7 @@
     - install_gpu
     - install_ollama
     - install_tabby
+    - install_strata
 
 - hosts:
     - pvenodes[0]

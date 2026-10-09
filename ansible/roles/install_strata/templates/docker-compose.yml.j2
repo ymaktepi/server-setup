@@ -1,0 +1,28 @@
+services:
+  strata:
+    image: strata:{{ strata_version }}
+    container_name: strata
+    restart: always
+    ports:
+      - "127.0.0.1:{{ strata_port }}:8080"
+    volumes:
+      - strata_data:/data
+    runtime: nvidia
+    # Strata locks part of the experts in RAM for the GPU
+    ulimits:
+      memlock: -1
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # setup choices, recorded in /data/config on the first start
+      # (changing them later needs REINSTALL=1 for one start)
+      - FAMILY={{ strata_family }}
+      - MODEL={{ strata_model }}
+      - CONTEXT={{ strata_context }}
+      - VISION=no
+      # nginx forwards the public Host; Strata refuses unknown names (DNS rebinding)
+      - STRATA_ALLOWED_HOSTS=strata.local-dmz.courgettes.club
+
+volumes:
+  strata_data:
+    name: strata_data

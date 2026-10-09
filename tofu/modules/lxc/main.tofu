@@ -37,8 +37,8 @@ resource "proxmox_virtual_environment_container" "this" {
   # This corresponds to item.unprivileged | default(true)
   unprivileged = each.value.unprivileged
 
-  # Equivalent to Ansible onboot: true
-  start_on_boot = true
+  started       = each.value.started
+  start_on_boot = each.value.started
 
   cpu {
     # Equivalent to item.cores

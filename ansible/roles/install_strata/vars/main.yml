@@ -1,0 +1,11 @@
+# https://github.com/Niko1221/Strata — no published image, so it's built from this tag
+strata_version: v0.1.39
+# 48 GB of RAM: IQ2_XS is the recommended full-expert size (docs/MODELS.md)
+strata_family: qwen
+strata_model: IQ2_XS
+# setup's default for a card under 14 GB of VRAM (RTX 3060: 12 GB)
+strata_context: 32768
+# compile the engine for the RTX 3060 (Ampere, sm_86) only: much faster build
+strata_cuda_architectures: "86"
+# tabby already holds 8080 on the host
+strata_port: 8081

@@ -1,0 +1,58 @@
+- name: Create /opt/strata directory
+  ansible.builtin.file:
+    path: /opt/strata
+    state: directory
+    mode: '0755'
+
+- name: Checkout Strata sources
+  ansible.builtin.git:
+    repo: https://github.com/Niko1221/Strata.git
+    dest: /opt/strata/src
+    version: '{{ strata_version }}'
+    depth: 1
+
+- name: Create Docker Compose for Strata
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: '/opt/strata/docker-compose.yml'
+    mode: '0666'
+
+# No published image. Tagged with strata_version, so only a version bump
+# rebuilds; the build compiles the CUDA engine (tens of minutes).
+- name: Build Strata image
+  community.docker.docker_image_build:
+    name: strata
+    tag: '{{ strata_version }}'
+    path: /opt/strata/src
+    args:
+      CUDA_ARCHITECTURES: '{{ strata_cuda_architectures }}'
+      BUILD_VISION: '0'
+    rebuild: never
+
+# The first start downloads the ~76 GB model before the port opens, so there's
+# no wait_for here.
+- name: Start Docker Compose for Strata
+  community.docker.docker_compose_v2:
+    project_src: /opt/strata
+    pull: never
+    build: never
+    state: present
+
+- name: Create nginx conf
+  template:
+    src: strata-nginx.conf
+    dest: '/etc/nginx/sites-available/strata-nginx.conf'
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Create a symbolic link for nginx conf
+  ansible.builtin.file:
+    src: '/etc/nginx/sites-available/strata-nginx.conf'
+    dest: '/etc/nginx/sites-enabled/strata-nginx.conf'
+    owner: root
+    group: root
+    state: link
+
+- name: restart nginx
+  service: name=nginx state=restarted

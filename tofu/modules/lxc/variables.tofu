@@ -43,6 +43,8 @@ variable "containers" {
     image_name = string
     # whether to spawn the container or not
     present = optional(bool, true)
+    # whether it runs (and starts on boot); false keeps it, stopped
+    started = optional(bool, true)
 
     domain_name = optional(string, ".nico")
 

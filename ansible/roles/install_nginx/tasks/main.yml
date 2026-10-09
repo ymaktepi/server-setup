@@ -10,11 +10,13 @@
   register: ssl_file
 
 - name: Create SSL self signed certificate
-  when: not ssl_file.stat.exists
+  # an empty dhparam.pem is a generation that got interrupted
+  when: not ssl_file.stat.exists or ssl_file.stat.size == 0
   ansible.builtin.shell: |
     # following tutorial here: https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-20-04-1
     openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/C=CH/ST=Neuch/L=Neuch/O=Courgettes/OU=CourgettesIT/CN={{ansible_host}}/CN={{courgettes_subdomain}}.{{root_domain}}"
-    openssl dhparam -out /etc/nginx/dhparam.pem 4096
+    # via a temp file: this takes minutes, and an interrupted run must not leave a file behind
+    openssl dhparam -out /etc/nginx/dhparam.pem.tmp 4096 && mv /etc/nginx/dhparam.pem.tmp /etc/nginx/dhparam.pem
 
 - name: Create nginx snippet ssl conf
   copy:

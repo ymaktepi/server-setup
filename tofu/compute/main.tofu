@@ -73,6 +73,8 @@ module "containers" {
       ctid       = 414
       node       = "proxmox"
       image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
+      # stopped for now: node `proxmox` can't hold it next to the 48 GB gpu VM
+      started = false
 
       cores  = 6
       cpus   = 4
@@ -217,9 +219,9 @@ module "vms" {
       vmid = 302
       node = "proxmox" # the node with the GPU
 
-      cores        = 4
-      memory       = 16384
-      disk_size    = 100
+      cores        = 8
+      memory       = 49152 # Strata's IQ2_XS: ~35.5 GB of experts in RAM + ~10 GB headroom
+      disk_size    = 200   # Strata: ~76 GB of model files + its CUDA build image
       datastore_id = "m2-noraid"
       image        = "debian12"
 

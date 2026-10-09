@@ -13,16 +13,45 @@
     state: present
     update_cache: yes
 
-- name: Add non-free and non-free-firmware repositories
+# Debian 12 ships driver 535; Strata's CUDA 13 image needs >= 580, so the driver
+# comes from NVIDIA's own Debian 12 repository instead.
+- name: Get installed NVIDIA driver version
+  ansible.builtin.shell: nvidia-smi --query-gpu=driver_version --format=csv,noheader
+  register: nvidia_driver_version
+  changed_when: false
+  failed_when: false
+
+- name: Decide whether the NVIDIA driver needs installing or upgrading
+  ansible.builtin.set_fact:
+    nvidia_driver_outdated: "{{ nvidia_driver_version.rc != 0 or (nvidia_driver_version.stdout.split('.')[0] | int) < nvidia_driver_min_major }}"
+
+- name: Remove Debian's non-free repository (its older driver must not mix with NVIDIA's)
   apt_repository:
     repo: "deb http://deb.debian.org/debian/ bookworm contrib non-free non-free-firmware"
-    state: present
+    state: absent
     update_cache: yes
 
-- name: Install NVIDIA driver
+- name: Install NVIDIA's CUDA repository keyring
   apt:
-    name: nvidia-driver
+    deb: https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb
     state: present
+
+- name: Purge Debian's NVIDIA driver
+  when: nvidia_driver_outdated
+  apt:
+    name:
+      - nvidia-driver
+      - nvidia-kernel-dkms
+    state: absent
+    purge: yes
+    autoremove: yes
+
+# open kernel modules: NVIDIA's recommended flavour for Turing and newer (RTX 3060 is Ampere)
+- name: Install NVIDIA driver
+  when: nvidia_driver_outdated
+  apt:
+    name: nvidia-open
+    state: latest
     update_cache: yes
 
 - name: Reboot VM to load NVIDIA driver
@@ -38,10 +67,10 @@
     timeout: 300
 
 - name: Verify NVIDIA driver installation
-  ansible.builtin.shell: nvidia-smi
+  ansible.builtin.shell: nvidia-smi --query-gpu=driver_version --format=csv,noheader
   register: nvidia_smi_check
   changed_when: false
-  failed_when: nvidia_smi_check.rc != 0
+  failed_when: nvidia_smi_check.rc != 0 or (nvidia_smi_check.stdout.split('.')[0] | int) < nvidia_driver_min_major
 
 - name: Check if nvidia-container-toolkit is installed
   ansible.builtin.command: which nvidia-container-runtime

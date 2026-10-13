@@ -12,6 +12,8 @@ entryPoints:
           scheme: https
   https:
     address: ":443"
+  ldaps:
+    address: ":636"
 serversTransport:
   insecureSkipVerify: true
 providers:

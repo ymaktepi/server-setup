@@ -30,3 +30,26 @@ resource "unifi_firewall_policy" "dmz_allow_traefik_forward" {
     port               = "443"
   }
 }
+
+# The DMZ Traefik serves jellyfin.courgettes.club from minix's nginx. That
+# nginx also fronts paperless, but only lets traefik_default reach it.
+resource "unifi_firewall_policy" "dmz_allow_traefik_jellyfin" {
+  name                 = "Allow Traefik Jellyfin"
+  description          = "jellyfin website (minix nginx)"
+  action               = "ALLOW"
+  protocol             = "tcp"
+  create_allow_respond = true
+
+  source = {
+    zone_id         = local.zone_ids["Dmz"]
+    matching_target = "IP"
+    ips             = ["10.10.5.250"] # core: traefik_dmz
+  }
+  destination = {
+    zone_id            = local.zone_ids["Internal"]
+    matching_target    = "IP"
+    ips                = ["10.10.0.201"] # minix (site.tofu reservation)
+    port_matching_type = "SPECIFIC"
+    port               = "443"
+  }
+}

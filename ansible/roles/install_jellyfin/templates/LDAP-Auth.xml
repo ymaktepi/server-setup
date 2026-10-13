@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Managed by ansible (install_jellyfin); changes made in the UI get overwritten. -->
+<PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!-- LDAPS via the DMZ Traefik, which forwards to lldap (install_authelia) -->
+  <LdapServer>ldap.local-dmz.courgettes.club</LdapServer>
+  <LdapPort>636</LdapPort>
+  <UseSsl>true</UseSsl>
+  <UseStartTls>false</UseStartTls>
+  <SkipSslVerify>false</SkipSslVerify>
+  <LdapBindUser>uid=jellyfin,ou=people,dc=courgettes,dc=club</LdapBindUser>
+  <LdapBindPassword>{{ jellyfin_ldap_bind_password }}</LdapBindPassword>
+  <LdapBaseDn>ou=people,dc=courgettes,dc=club</LdapBaseDn>
+  <!-- only members of jellyfin_users can log in; jellyfin_admins become admins -->
+  <LdapSearchFilter>(memberOf=cn=jellyfin_users,ou=groups,dc=courgettes,dc=club)</LdapSearchFilter>
+  <LdapAdminBaseDn>ou=people,dc=courgettes,dc=club</LdapAdminBaseDn>
+  <LdapAdminFilter>(memberOf=cn=jellyfin_admins,ou=groups,dc=courgettes,dc=club)</LdapAdminFilter>
+  <EnableLdapAdminFilterMemberUid>false</EnableLdapAdminFilterMemberUid>
+  <LdapSearchAttributes>uid, mail</LdapSearchAttributes>
+  <LdapUsernameAttribute>uid</LdapUsernameAttribute>
+  <LdapPasswordAttribute>userPassword</LdapPasswordAttribute>
+  <EnableCaseInsensitiveUsername>true</EnableCaseInsensitiveUsername>
+  <CreateUsersFromLdap>true</CreateUsersFromLdap>
+  <EnableAllFolders>true</EnableAllFolders>
+  <EnabledFolders />
+  <!-- passwords live in lldap and are changed through Authelia -->
+  <AllowPassChange>false</AllowPassChange>
+  <PasswordResetUrl>https://sso.courgettes.club/reset-password/step1</PasswordResetUrl>
+  <LdapProfileImageAttribute>jpegphoto</LdapProfileImageAttribute>
+  <LdapProfileImageFormat>Default</LdapProfileImageFormat>
+</PluginConfiguration>

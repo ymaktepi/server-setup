@@ -164,6 +164,17 @@ http:
       service: lldap
       tls:
         certResolver: infomaniak
+    # Public: login is LDAP (lldap, jellyfin_users only) inside Jellyfin
+    # itself; no Authelia in front, the TV/mobile apps can't do it.
+    jellyfin:
+      rule: "Host(`jellyfin.courgettes.club`)"
+      entryPoints:
+        - "https"
+      middlewares:
+        - default-headers
+      service: jellyfin
+      tls:
+        certResolver: letsencrypt
     status:
       rule: "Host(`status.courgettes.club`)"
       entryPoints:
@@ -217,6 +228,13 @@ http:
         servers:
           # assumes "lldap" is a valid domain (i.e. inside the same docker network)
           - url: http://lldap:17170
+    # minix's nginx, which knows jellyfin.courgettes.club as a server_name.
+    # Reachable from here thanks to a UniFi policy (tofu: network-bole/firewall_policies.tofu).
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_minix']['ansible_host']}}"
+        passHostHeader: true
     # Straight to Uptime Kuma's nginx, not via traefik_default: the firewall
     # only lets this Traefik reach that one container (tofu:
     # network-bole/firewall_policies.tofu), since traefik_default fronts every
@@ -305,3 +323,27 @@ http:
           - Remote-Groups
           - Remote-Email
           - Remote-Name
+
+# LDAPS for Jellyfin's LDAP plugin: TLS ends here (wildcard cert), plain LDAP
+# to lldap over the traefik docker network. Only Jellyfin's host may connect.
+tcp:
+  routers:
+    lldap-ldaps:
+      entryPoints:
+        - "ldaps"
+      rule: "HostSNI(`ldap.local-dmz.courgettes.club`)"
+      middlewares:
+        - ldap-clients
+      service: lldap-ldap
+      tls:
+        certResolver: infomaniak
+  services:
+    lldap-ldap:
+      loadBalancer:
+        servers:
+          - address: "lldap:3890"
+  middlewares:
+    ldap-clients:
+      ipAllowList:
+        sourceRange:
+          - "{{hostvars['host_minix']['ansible_host']}}/32" # jellyfin

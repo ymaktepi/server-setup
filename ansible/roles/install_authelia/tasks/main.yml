@@ -50,6 +50,26 @@
     content: '{{ item | to_json }}'
   loop: "{{authelia_users}}"
 
+# Checked separately: the task below is no_log, so its error would be hidden.
+- name: Check every lldap user has an email in the vault
+  ansible.builtin.assert:
+    that: missing | length == 0
+    fail_msg: "No lldap_user_emails entry in the vault for: {{ missing | join(', ') }}"
+    quiet: true
+  vars:
+    missing: "{{ lldap_users | map(attribute='id') | difference(lldap_user_emails.keys()) }}"
+
+- name: Create user configs for lldap (people, emails from the vault)
+  # hide logs because of emails
+  no_log: true
+  copy:
+    dest: '/opt/lldap/bootstrap/user-configs/user-{{item.id}}.json'
+    owner: root
+    group: root
+    mode: 0600
+    content: "{{ item | combine({'email': lldap_user_emails[item.id]}) | to_json }}"
+  loop: "{{lldap_users}}"
+
 - name: Create group config for lldap
   copy:
     dest: '/opt/lldap/bootstrap/group-configs/group-{{item.name}}.json'
@@ -71,6 +91,8 @@
     service: lldap
     env:
       LLDAP_ADMIN_PASSWORD: "{{ lldap_admin_password }}"
+      # memberships follow the user configs; other users/groups are untouched
+      DO_CLEANUP_GROUP_MEMBERSHIP: "true"
     command: "./bootstrap.sh"
   register: result
 

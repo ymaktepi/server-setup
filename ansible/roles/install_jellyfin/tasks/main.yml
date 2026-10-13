@@ -37,6 +37,24 @@
     dest: '/opt/jellyfin/.env'
     mode: '0644'
 
+# The LDAP Authentication plugin itself is installed once from the UI
+# (Dashboard > Plugins > Catalog); this only manages its settings, which it
+# reads at startup - hence before the restart below.
+- name: Create /opt/jellyfin/config/data/plugins/configurations
+  ansible.builtin.file:
+    path: /opt/jellyfin/config/data/plugins/configurations
+    state: directory
+    mode: '0755'
+
+- name: Create LDAP plugin config
+  template:
+    src: LDAP-Auth.xml
+    dest: '/opt/jellyfin/config/data/plugins/configurations/LDAP-Auth.xml'
+    owner: root
+    group: root
+    # holds the LDAP bind password
+    mode: '0600'
+
 - name: Run `docker-compose up` for jellyfin stack
   become: true
   become_method: sudo
@@ -53,7 +71,8 @@
     group: root
     mode: 0777
   vars:
-    server_name: "jellyfin.local.courgettes.club"
+    # the public name arrives through the DMZ Traefik
+    server_name: "jellyfin.local.courgettes.club jellyfin.courgettes.club"
     container_port: "8096"
 
 - name: Create a symbolic link for nginx conf for jellyfin dmz

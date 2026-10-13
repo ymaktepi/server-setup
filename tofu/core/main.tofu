@@ -214,6 +214,7 @@ module "containers" {
       firewall = {
         rules = [
           { type = "in", proto = "tcp", dport = "80,443", comment = "web (port forward + LAN)" },
+          { type = "in", proto = "tcp", dport = "636", source = "10.10.0.201", comment = "LDAPS -> lldap, for jellyfin (minix)" },
           { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
           # websites, arr_server, gpu, nextcloud, pocket

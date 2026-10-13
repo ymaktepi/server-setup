@@ -1,6 +1,9 @@
 # list of the groups to be created in Authelia, only need the "name" field
 authelia_groups:
   - name: lldap-users
+  # Jellyfin's LDAP plugin only lets in members of these (search/admin filters)
+  - name: jellyfin_users
+  - name: jellyfin_admins
 
 # list of the users to be created in authelia
 #
@@ -14,3 +17,32 @@ authelia_users:
     password: '{{ authelia_ldap_bind_password }}'
     groups:
       - lldap_password_manager
+  # Jellyfin's LDAP plugin bind account: can read the directory, nothing else
+  - id: jellyfin
+    email: jellyfin@courgettes.club
+    password: '{{ jellyfin_ldap_bind_password }}'
+    groups:
+      - lldap_strict_readonly
+
+# Real people. Their emails are kept out of git: each id must have an entry in
+# the vault's `lldap_user_emails` map (`sops edit` vault.sops.yaml), e.g.
+#   lldap_user_emails:
+#     alice: alice@example.com
+# No `password` here (see above): they set it through Authelia's reset.
+# Group memberships are enforced: a group removed here is removed in lldap on
+# the next run (DO_CLEANUP_GROUP_MEMBERSHIP). Users missing from both lists are
+# left alone, never deleted.
+lldap_users:
+#  - id: alice
+#    displayName: Alice
+#    groups:
+#      - jellyfin_users
+  - id: ymaktepi
+    displayName: Ymaktepi
+    groups:
+      - jellyfin_users
+      - jellyfin_admins
+  - id: lulu
+    displayName: Lulu
+    groups:
+      - jellyfin_users

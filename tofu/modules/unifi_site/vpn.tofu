@@ -4,7 +4,8 @@
 # appends each new policy to the end of its zone pair, and the first match
 # wins. So the blocks must always be the newest policies: they depend on
 # everything that has to precede them, and are re-created (replace_triggered_by)
-# whenever an allow is added or changed, which puts them back behind it.
+# whenever an allow or return rule is added or changed, which puts them back
+# behind it.
 
 resource "unifi_firewall_policy" "vpn_allow" {
   for_each = var.vpn_inbound_allow
@@ -31,10 +32,18 @@ resource "unifi_firewall_policy" "vpn_allow" {
   }
 }
 
-# Replies to connections this site's Internal network opened towards the
-# other site (Internal -> Vpn is allowed by the controller's defaults).
-resource "unifi_firewall_policy" "vpn_to_internal_return" {
-  count = var.vpn_lockdown ? 1 : 0
+locals {
+  vpn_blocked_zones = var.vpn_lockdown ? toset(["Internal", "Dmz", "Gateway", "Hotspot"]) : toset([])
+}
+
+# Replies to connections this site opened towards the other site, for every
+# zone the lockdown blocks. Needed explicitly: the controller's own respond
+# rules (create_allow_respond, and the ones it generates for outbound allows
+# like "Allow DNS to Bole") get positions after all user policies, i.e. after
+# vpn_block - without these, e.g. DNS replies to Crusted (Dmz zone) are
+# dropped.
+resource "unifi_firewall_policy" "vpn_return" {
+  for_each = local.vpn_blocked_zones
 
   name                  = "Allow VPN Return Traffic"
   action                = "ALLOW"
@@ -46,21 +55,29 @@ resource "unifi_firewall_policy" "vpn_to_internal_return" {
     matching_target = "ANY"
   }
   destination = {
-    zone_id         = local.zone_ids["Internal"]
+    zone_id         = local.zone_ids[each.value]
     matching_target = "ANY"
   }
 }
 
+moved {
+  from = unifi_firewall_policy.vpn_to_internal_return[0]
+  to   = unifi_firewall_policy.vpn_return["Internal"]
+}
+
 resource "unifi_firewall_policy" "vpn_block" {
-  for_each = var.vpn_lockdown ? toset(["Internal", "Dmz", "Gateway", "Hotspot"]) : toset([])
+  for_each = local.vpn_blocked_zones
 
   depends_on = [
     unifi_firewall_policy.vpn_allow,
-    unifi_firewall_policy.vpn_to_internal_return,
+    unifi_firewall_policy.vpn_return,
   ]
 
   lifecycle {
-    replace_triggered_by = [unifi_firewall_policy.vpn_allow]
+    replace_triggered_by = [
+      unifi_firewall_policy.vpn_allow,
+      unifi_firewall_policy.vpn_return,
+    ]
   }
 
   name       = "Block VPN Traffic"

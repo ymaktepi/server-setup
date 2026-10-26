@@ -1,0 +1,66 @@
+- name: Create directories if they do not exist
+  ansible.builtin.file:
+    path: "{{item.path}}"
+    state: directory
+    mode: "{{item.mode}}"
+  loop:
+    - { path: /opt/netbird, mode: '0755' }
+    - { path: /opt/netbird/data, mode: '0700' }
+    - { path: /opt/netbird/secrets, mode: '0700' }
+
+# Generated once on the host, like Authelia's. The store key must survive:
+# without it the sqlite store can't be decrypted.
+- name: Generate secrets if missing
+  # the store key keeps its base64 padding (Go's StdEncoding wants it)
+  shell: "umask 077 && openssl rand -base64 32 > /opt/netbird/secrets/{{ item }}"
+  args:
+    creates: "/opt/netbird/secrets/{{ item }}"
+  loop:
+    - relay_auth_secret
+    - store_encryption_key
+    - session_cookie_key
+
+- name: Read secrets
+  no_log: true
+  slurp:
+    src: "/opt/netbird/secrets/{{ item }}"
+  loop:
+    - relay_auth_secret
+    - store_encryption_key
+    - session_cookie_key
+  register: netbird_secrets
+
+- name: Create config for netbird-server
+  no_log: true
+  template:
+    src: config.yaml.j2
+    dest: /opt/netbird/config.yaml
+    owner: root
+    group: root
+    # holds the secrets above and the owner's password
+    mode: 0600
+  vars:
+    netbird_relay_auth_secret: "{{ netbird_secrets.results[0].content | b64decode | trim }}"
+    netbird_store_encryption_key: "{{ netbird_secrets.results[1].content | b64decode | trim }}"
+    netbird_session_cookie_key: "{{ netbird_secrets.results[2].content | b64decode | trim }}"
+
+- name: Create dashboard env
+  template:
+    src: dashboard.env.j2
+    dest: /opt/netbird/dashboard.env
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create Docker Compose for netbird
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/netbird/docker-compose.yml
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Refresh docker for netbird
+  include_tasks: refresh_docker_compose.yml
+  vars:
+    compose_project_dir: /opt/netbird

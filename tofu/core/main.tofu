@@ -214,7 +214,6 @@ module "containers" {
       firewall = {
         rules = [
           { type = "in", proto = "tcp", dport = "80,443", comment = "web (port forward + LAN)" },
-          { type = "in", proto = "tcp", dport = "636", source = "10.10.0.201", comment = "LDAPS -> lldap, for jellyfin (minix)" },
           { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
           # websites, arr_server, gpu, nextcloud, pocket
@@ -294,6 +293,10 @@ module "containers" {
       ipv4mode     = "static"
       ipv4_address = "10.10.0.248/23"
       ipv4_gateway = "10.10.0.1"
+
+      # NetBird routing peer / exit node: needs a kernel interface (Tailscale
+      # gets by in userspace mode, NetBird's netstack mode can't route)
+      devices = ["/dev/net/tun"]
 
       ansible_groups = ["vpn"]
     }

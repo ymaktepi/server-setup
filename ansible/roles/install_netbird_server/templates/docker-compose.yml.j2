@@ -1,0 +1,38 @@
+services:
+  dashboard:
+    image: {{ netbird_dashboard_image }}
+    container_name: netbird-dashboard
+    restart: unless-stopped
+    networks:
+      - traefik
+    env_file:
+      - ./dashboard.env
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "2"
+
+  # management + signal + relay + STUN + embedded IdP
+  netbird-server:
+    image: {{ netbird_server_image }}
+    container_name: netbird-server
+    restart: unless-stopped
+    networks:
+      - traefik
+    ports:
+      # STUN can't go through Traefik; open it in the VPS firewall too
+      - {{ netbird_stun_port }}:{{ netbird_stun_port }}/udp
+    volumes:
+      - ./data:/var/lib/netbird
+      - ./config.yaml:/etc/netbird/config.yaml:ro
+    command: ["--config", "/etc/netbird/config.yaml"]
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "2"
+
+networks:
+  traefik:
+    external: true

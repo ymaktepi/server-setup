@@ -1,0 +1,38 @@
+services:
+  traefik:
+    image: traefik:v3.7
+    container_name: traefik
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "5"
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      traefik:
+        # fixed: netbird-server trusts X-Forwarded-For from this address only
+        # (reverseProxy.trustedHTTPProxies in its config.yaml)
+        ipv4_address: 172.30.0.10
+    ports:
+      - 80:80
+      - 443:443
+      - 636:636 # LDAPS -> lldap, mesh addresses only, see the tcp section of config.yml
+    environment:
+      - INFOMANIAK_ACCESS_TOKEN={{infomaniak_api_token}}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data/traefik.yml:/traefik.yml:ro
+      - ./data/acme.json:/acme.json
+      - ./data/config.yml:/config.yml:ro
+
+# explicit network: authelia, lldap and netbird join it by name, so their
+# container names are valid hostnames from here
+networks:
+  traefik:
+    name: traefik
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

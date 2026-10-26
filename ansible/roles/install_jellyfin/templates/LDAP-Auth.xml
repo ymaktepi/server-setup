@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Managed by ansible (install_jellyfin); changes made in the UI get overwritten. -->
 <PluginConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <!-- LDAPS via the DMZ Traefik, which forwards to lldap (install_authelia) -->
-  <LdapServer>ldap.local-dmz.courgettes.club</LdapServer>
+  <!-- LDAPS via the VPS's Traefik, which forwards to lldap (install_authelia),
+       over NetBird: the name resolves to the VPS's mesh address on this host
+       only (tofu/netbird, dns zone "ldap") -->
+  <LdapServer>ldap.sso.courgettes.club</LdapServer>
   <LdapPort>636</LdapPort>
   <UseSsl>true</UseSsl>
   <UseStartTls>false</UseStartTls>

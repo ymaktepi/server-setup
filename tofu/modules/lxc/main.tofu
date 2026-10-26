@@ -132,6 +132,14 @@ resource "proxmox_virtual_environment_container" "this" {
     }
   }
 
+  dynamic "device_passthrough" {
+    for_each = each.value.devices
+
+    content {
+      path = device_passthrough.value
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       initialization,

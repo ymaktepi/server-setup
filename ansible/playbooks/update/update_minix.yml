@@ -9,6 +9,8 @@
     - install_docker_debian
     - role: install_nginx
       courgettes_subdomain: "minix"
+    - role: install_netbird_client
+      netbird_setup_key_name: jellyfin
     - install_jellyfin
     - install_paperless
     - role: install_kiosk

@@ -89,3 +89,11 @@ it's available to every `make` target immediately, no other wiring needed.
   (`bootstrap-destroy` + `bootstrap-apply`).
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` — Garage (S3-compatible)
   credentials for the OpenTofu state backend itself.
+- `TF_VAR_netbird_token` — token of a NetBird service user (Admin role),
+  created in the dashboard by the owner account. Used by `netbird` only.
+- `TF_VAR_netbird_authelia_client_secret` — plaintext secret of the `netbird`
+  OIDC client in Authelia (whose config only holds its pbkdf2 digest, the
+  ansible vault's `authelia_oidc_netbird_client_secret_digest`).
+
+The NetBird setup as a whole, including its manual steps, is described in the
+root [README](../README.md#netbird-and-sso-vps).

@@ -34,8 +34,15 @@ authelia_mail_password: ENC[AES256_GCM,data:CwcquKaayC2dz71TDWG4FQ==,iv:2rN7LCD+
 secret_salt: ENC[AES256_GCM,data:OdnMZlUCnCkNxL2I1AiZBcISx7gqq/sZj4CbiCX8+KMBKY5LTC3QmDpe/ElhyBqmHxebxg==,iv:AYtZslXf5X+iDnI9CiincmJgmlURFW2KNJFx8Ageh7s=,tag:04aa0512zdeBsGZDIBYgHQ==,type:str]
 jellyfin_ldap_bind_password: ENC[AES256_GCM,data:gYUkqDfhJL4AU+AmxRmdBQTAyo3atpX404iwkPLrPEYfM22k9U+RBN3yYm7NOi5tw3oTwfTgSxBjTG38vcBYDg==,iv:2LtFBFXkxIc1a8gIUpPJ4rVYSWOlG09x+BxQ/EgpFJw=,tag:RXNUmUoyoqED+XklTGcLUQ==,type:str]
 lldap_user_emails:
-    ymaktepi: ENC[AES256_GCM,data:jF+Fakga/jFfpatl/L5V3Ii2Yxwzh5Ul,iv:jUK5NFdPT3wwAh2xySJVyxR8pl0oxrI3ShE3YxWCi88=,tag:JEen1VrJ7KpSw9xS++peiQ==,type:str]
-    lulu: ENC[AES256_GCM,data:CyPn1kKajKMtKN0FBDOQ2+6qruk=,iv:T2Qb+pzeDPBuQwBeZ31DjZ0gYcyOJORbuuZPj/8BW18=,tag:VYZlKhkNnGPuoPrSga5zbg==,type:str]
+    ymaktepi: ENC[AES256_GCM,data:Rnv5pIKQUH50JpEgosgHu3XETzwV,iv:ElzG3Rxsaew/XhEQT6SxD0I+G4dMHeKmw5QR4DDcEJk=,tag:Gf8pwcATWA5NwDHq249eyQ==,type:str]
+    lulu: ENC[AES256_GCM,data:L4Us+JRuS2vAXOP5s6sd+N4=,iv:JQ1PObghYaTvSzHBqjQh5An08q/9Eo6s/f9pBpXhFHc=,tag:wrNQcUlZ2z697jZ1w5ifaQ==,type:str]
+netbird_owner_email: ENC[AES256_GCM,data:+qJvth5UUPlgS2oz1nA8gGSDViU=,iv:KWV3STbRf/Wc4F+mbhM3ivVMtqzj7a42hRKcpCl9R3U=,tag:JnKa5+4pfZh+lrK3JaYneQ==,type:str]
+netbird_owner_password_hash: ENC[AES256_GCM,data:nyZ5nwV/1vXl3Nt4b5Ex46MvXs0AppFl6HXfEMbW2tBPHiJMqJCEwylUm0D9Uxb/M6HHOsFRj1FQOiH5,iv:KjRNSqx9NiTwI6klz7Sz7EvEVgsHkG3GMceQX2qMWg4=,tag:k6cvBZoIdCVGLTHw03+1pg==,type:str]
+authelia_oidc_netbird_client_secret_digest: ENC[AES256_GCM,data:VC2SN/acOGg+OqVp6evKTHZlpcDnyv5gGqFyrW70CmWWrDNUyUAKpliKsAXfBprMsklVfkV4k+vasNzaBK0bfxMr0oVW8CJRy9GvM80lfzDL44nqQjaR7pa7B7oVBZR1Q/fQOzVKJ8nAopHHzwqAiaxOUm0CmFTRAiFnfWau+LNecOI=,iv:8MP1706p/EQcU6HJjrj/47Pbpa0vjFg+n0EAIGmv794=,tag:rxV3cWjwa1KTlN5ka3JRHg==,type:str]
+netbird_setup_keys:
+    vps: ENC[AES256_GCM,data:AgNCQ6kXeA+HzmM6lSUeq/kU5FFuL/a1/QEJspzCXWZpI3my,iv:FLAQ2Vhti4PaVK3GsL6l4KRG7DTLNBX0n52t+/FJaKg=,tag:J9MB5waOjrH05kRHxCbqhA==,type:str]
+    home_router: ENC[AES256_GCM,data:C/MMbRyEyT8htTR3oiNznMgBJFHkJsG29tHsbeklm2CvO+vL,iv:HylVmQ/7oR5beg2FKF7NTLTaNMg1osU0uZKmAAzMqBQ=,tag:sSGWUPKBtorF+xDGMsz6xw==,type:str]
+    jellyfin: ENC[AES256_GCM,data:UtB2IB1ZXGqvD//TTUeLaU/8n0wGgpHypOvw+5Vfrlk1kd1d,iv:CjiLEbMI4g+UPRr1H9y5JGl+Vywpk+bZwZxmLuANjGE=,tag:6vRbWTHQu8X8MVGvgDZxYw==,type:str]
 sops:
     age:
         - enc: |
@@ -47,7 +54,7 @@ sops:
             e9VeAl/f8g3FW4jR3qrYookJi6cbwi05U9lerZUu7IEGLsvkIu3cRw==
             -----END AGE ENCRYPTED FILE-----
           recipient: age14rtd2ct2zmz34mznk2grjqnjc5xpx4qj7jlzcz6gcttjz0zj6ygq4karew
-    lastmodified: "2026-10-13T18:22:40Z"
-    mac: ENC[AES256_GCM,data:mDhgYHtUaLMIrnQHTgkJu/u5gobqkS+DMnmfjfd5mkK9C7GJNlg2flyF197AyLvC/H5TOVXjAI3oYZ1Xbtyg2rVGapyrd2YHfvAPtVT9l1HWcXrKwGqfFlbYRoCQ6C/YypdcOKgkualfq+IeYcHaPfLf5NI/HMWyxGhYseWY7NE=,iv:80RLzMHqKvsxmPykzYVk8JJsQumUpNFTfxzYM3OJH98=,tag:Axdo0YEa/mNckOUZKYzmyQ==,type:str]
+    lastmodified: "2026-10-26T19:14:03Z"
+    mac: ENC[AES256_GCM,data:OP4XHE+rnUwtlwIyvjjFLsidEOcwPKd3WfN2dxPusJRVnhaHE0amRnPc07tvrX0dr5gLoWfbFHcISuJXrYCv/At1+DrOVlA5am/6D1GtEoIX2WWO1A31OnS+L4ff25W1htylHfPm1I0DLIDHm4hR4H8CyK9tcRQfyYjgxmuu+aw=,iv:1v4x1K/pyrsk/unFOUqn84diMKnhjUKED1GUoYtOjJk=,tag:TiWsfLQyauQksJSz9ddM8g==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.3

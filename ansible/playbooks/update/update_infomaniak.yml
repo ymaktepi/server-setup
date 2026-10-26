@@ -8,7 +8,15 @@
     - update_cts
     - install_docker_debian
     - install_teamspeak
-    - role: install_tailscale_exit_node
-      routes_flag: ""
+    - role: install_traefik_cts
+      config_file: vps-config.yml
+      docker_compose_file: vps-docker-compose.yml
+      traefik_file: vps-traefik.yml
+    # SSO for *.sso.courgettes.club and OIDC for NetBird; also lldap, which
+    # Jellyfin (at home) reaches over the mesh
+    - install_authelia
+    - install_netbird_server
+    - role: install_netbird_client
+      netbird_setup_key_name: vps
     #- role: install_rathole
     #  rathole_mode: server

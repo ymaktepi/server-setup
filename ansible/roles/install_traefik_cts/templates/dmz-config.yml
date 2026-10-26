@@ -34,15 +34,6 @@ http:
       tls:
         certresolver: letsencrypt
       service: websites-nico
-    #headscale:
-    #  entryPoints:
-    #    - "https"
-    #  rule: "Host(`headscale.courgettes.club`)"
-    #  middlewares:
-    #    - default-headers
-    #  tls:
-    #    certresolver: letsencrypt
-    #  service: websites-nico
     egj:
       entryPoints:
         - "https"
@@ -132,39 +123,7 @@ http:
       tls:
         certresolver: infomaniak
       service: gpu
-    # Public portal: password reset/change for users, login for *.sso apps.
-    authelia:
-      rule: "Host(`sso.courgettes.club`)"
-      entryPoints:
-        - "https"
-      service: authelia
-      middlewares:
-        - default-headers
-      tls:
-        certResolver: letsencrypt
-    # Internal portal for *.local-dmz apps (its own cookie scope).
-    authelia-internal:
-      rule: "Host(`auth.local-dmz.courgettes.club`)"
-      entryPoints:
-        - "https"
-      service: authelia
-      middlewares:
-        - admin-lan-only
-        - default-headers
-      tls:
-        certResolver: infomaniak
-    lldap:
-      rule: "Host(`lldap.local-dmz.courgettes.club`)"
-      entryPoints:
-        - "https"
-      middlewares:
-        - admin-lan-only
-        - default-headers
-        - authelia@file
-      service: lldap
-      tls:
-        certResolver: infomaniak
-    # Public: login is LDAP (lldap, jellyfin_users only) inside Jellyfin
+    # Public: login is LDAP (lldap on the VPS, jellyfin_users only) inside Jellyfin
     # itself; no Authelia in front, the TV/mobile apps can't do it.
     jellyfin:
       rule: "Host(`jellyfin.courgettes.club`)"
@@ -218,16 +177,6 @@ http:
         servers:
           - url: "https://{{hostvars['host_pocket']['ansible_host']}}"
         passHostHeader: true
-    authelia:
-      loadBalancer:
-        servers:
-          # assumes "authelia" is a valid domain (i.e. inside the same docker network)
-          - url: http://authelia:9091
-    lldap:
-      loadBalancer:
-        servers:
-          # assumes "lldap" is a valid domain (i.e. inside the same docker network)
-          - url: http://lldap:17170
     # minix's nginx, which knows jellyfin.courgettes.club as a server_name.
     # Reachable from here thanks to a UniFi policy (tofu: network-bole/firewall_policies.tofu).
     jellyfin:
@@ -280,17 +229,8 @@ http:
         regex: "^https:?://airhorn.courgettes.club"
         replacement: "https://airhorn.wav.courgettes.club"
 
-    # Admin UIs: Bole's Main LAN, plus the laptop when at Salon (arrives
-    # un-NATed over site-to-site; same IPs as network-bole's vpn_inbound_allow).
-    admin-lan-only:
-      ipAllowList:
-        sourceRange:
-          - "10.10.0.0/23"
-          - "10.20.0.20/32"
-          - "10.20.0.21/32"
-
     # Bole Default, Entertainment, DMZ, plus the laptop at Salon (arrives
-    # un-NATed over site-to-site; same IPs as admin-lan-only)
+    # un-NATed over site-to-site)
     local-only:
       ipAllowList:
         sourceRange:
@@ -311,39 +251,3 @@ http:
         customFrameOptionsValue: SAMEORIGIN
         customRequestHeaders:
           "X-Forwarded-Proto": https
-
-    authelia:
-      forwardAuth:
-        # assumes "authelia" is a valid domain (i.e. inside the same docker network)
-        # the portal to redirect to comes from the matching session cookie
-        address: http://authelia:9091/api/authz/forward-auth
-        trustForwardHeader: true
-        authResponseHeaders:
-          - Remote-User
-          - Remote-Groups
-          - Remote-Email
-          - Remote-Name
-
-# LDAPS for Jellyfin's LDAP plugin: TLS ends here (wildcard cert), plain LDAP
-# to lldap over the traefik docker network. Only Jellyfin's host may connect.
-tcp:
-  routers:
-    lldap-ldaps:
-      entryPoints:
-        - "ldaps"
-      rule: "HostSNI(`ldap.local-dmz.courgettes.club`)"
-      middlewares:
-        - ldap-clients
-      service: lldap-ldap
-      tls:
-        certResolver: infomaniak
-  services:
-    lldap-ldap:
-      loadBalancer:
-        servers:
-          - address: "lldap:3890"
-  middlewares:
-    ldap-clients:
-      ipAllowList:
-        sourceRange:
-          - "{{hostvars['host_minix']['ansible_host']}}/32" # jellyfin

@@ -4,6 +4,14 @@ authelia_groups:
   # Jellyfin's LDAP plugin only lets in members of these (search/admin filters)
   - name: jellyfin_users
   - name: jellyfin_admins
+  # Authelia's OIDC policy for NetBird only lets in members of this
+  - name: netbird_users
+
+# Where Authelia may send NetBird logins back to: the embedded IdP's single
+# callback (the connector travels in `state`, not in the path, despite what
+# NetBird's docs say).
+netbird_oidc_redirect_uris:
+  - 'https://netbird.courgettes.club/oauth2/callback'
 
 # list of the users to be created in authelia
 #
@@ -42,6 +50,7 @@ lldap_users:
     groups:
       - jellyfin_users
       - jellyfin_admins
+      - netbird_users
   - id: lulu
     displayName: Lulu
     groups:

@@ -22,13 +22,10 @@ session:
   # every host under its domain, and most of those (nextcloud, websites...)
   # have no business seeing an Authelia session.
   cookies:
-    # public portal (users reset/change their password here) and any public
-    # protected app, as <app>.sso.courgettes.club
+    # public portal (users reset/change their password here) and any
+    # protected app, as <app>.sso.courgettes.club (LLDAP's UI included)
     - domain: sso.courgettes.club
       authelia_url: 'https://sso.courgettes.club'
-    # internal portal (LAN only) for *.local-dmz apps, e.g. LLDAP
-    - domain: local-dmz.courgettes.club
-      authelia_url: 'https://auth.local-dmz.courgettes.club'
 
 regulation:
   max_retries: 3
@@ -60,10 +57,10 @@ totp:
 access_control:
   default_policy: deny
   rules:
-    # LLDAP's UI is admin-only (and LAN-only, see Traefik's lldap router);
+    # LLDAP's UI is admin-only (and mesh-only, see Traefik's lldap router);
     # users manage their password through Authelia instead.
     - domain:
-        - 'lldap.local-dmz.courgettes.club'
+        - 'lldap.sso.courgettes.club'
       # TODO: back to two_factor once admin has an email (2FA enrolment
       # sends a one-time code to it)
       policy: one_factor
@@ -85,3 +82,52 @@ notifier:
 identity_validation:
   reset_password:
     jwt_secret: !file /secrets/jwt_secret
+
+# OIDC provider for NetBird. NetBird keeps its own embedded IdP (its owner
+# account is the way in if this breaks); Authelia is added to it as a
+# "Generic OIDC" connector in the NetBird dashboard, see install_netbird_server.
+identity_providers:
+  oidc:
+    # both generated on the host and read back by the role (see tasks/main.yml)
+    hmac_secret: '{{ authelia_oidc_hmac_secret }}'
+    jwks:
+      - key_id: 'main'
+        algorithm: 'RS256'
+        use: 'sig'
+        key: |
+          {{ authelia_oidc_jwks_key | indent(10) }}
+    authorization_policies:
+      netbird:
+        default_policy: 'deny'
+        rules:
+          - policy: 'two_factor'
+            subject: 'group:netbird_users'
+    # NetBird's embedded IdP (Dex) fails on an ID token without `name`, and
+    # Authelia only puts the bare minimum in it unless told otherwise.
+    claims_policies:
+      netbird:
+        id_token:
+          - 'email'
+          - 'email_verified'
+          - 'name'
+          - 'preferred_username'
+    clients:
+      - client_id: 'netbird'
+        client_name: 'NetBird'
+        # pbkdf2 digest of the secret pasted into NetBird's connector form
+        client_secret: '{{ authelia_oidc_netbird_client_secret_digest }}'
+        public: false
+        authorization_policy: 'netbird'
+        claims_policy: 'netbird'
+        redirect_uris: {{ netbird_oidc_redirect_uris | to_json }}
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        grant_types:
+          - 'authorization_code'
+        response_types:
+          - 'code'
+        # what Dex sends
+        token_endpoint_auth_method: 'client_secret_basic'

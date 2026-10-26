@@ -1,0 +1,32 @@
+accessLog:
+  format: json
+entryPoints:
+  http:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+  https:
+    address: ":443"
+  ldaps:
+    address: ":636"
+providers:
+  file:
+    filename: /config.yml
+    watch: true
+certificatesResolvers:
+  # DNS challenge only: certs can be issued before the public records point
+  # here, so the VPS can be tested (e.g. via /etc/hosts) ahead of the cutover.
+  infomaniak:
+    acme:
+      email: courgettesmaster@courgettes.club
+      storage: acme.json
+      dnsChallenge:
+        provider: infomaniak
+        disablePropagationCheck: true
+        delayBeforeCheck: 60
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"

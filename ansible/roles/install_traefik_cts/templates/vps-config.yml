@@ -1,0 +1,136 @@
+http:
+  #region routers
+  routers:
+    # Public portal: login for *.sso apps, password reset/change for users,
+    # and the OIDC provider NetBird's embedded IdP delegates to.
+    authelia:
+      rule: "Host(`sso.courgettes.club`)"
+      entryPoints:
+        - "https"
+      service: authelia
+      middlewares:
+        - default-headers
+      tls:
+        certResolver: infomaniak
+        domains:
+          - main: sso.courgettes.club
+            sans:
+              - "*.sso.courgettes.club"
+    lldap:
+      rule: "Host(`lldap.sso.courgettes.club`)"
+      entryPoints:
+        - "https"
+      middlewares:
+        - mesh-only
+        - default-headers
+        - authelia@file
+      service: lldap
+      tls:
+        certResolver: infomaniak
+    # NetBird (management, signal, relay and the embedded IdP all live in
+    # netbird-server). No default-headers: the dashboard's silent auth runs in
+    # an iframe, which frameDeny would block.
+    netbird-grpc:
+      rule: "Host(`netbird.courgettes.club`) && (PathPrefix(`/signalexchange.SignalExchange/`) || PathPrefix(`/management.ManagementService/`))"
+      entryPoints:
+        - "https"
+      service: netbird-server-h2c
+      tls:
+        certResolver: infomaniak
+    netbird-backend:
+      rule: "Host(`netbird.courgettes.club`) && (PathPrefix(`/relay`) || PathPrefix(`/ws-proxy/`) || PathPrefix(`/api`) || PathPrefix(`/oauth2`))"
+      entryPoints:
+        - "https"
+      service: netbird-server
+      tls:
+        certResolver: infomaniak
+    netbird-dashboard:
+      rule: "Host(`netbird.courgettes.club`)"
+      priority: 1
+      entryPoints:
+        - "https"
+      service: netbird-dashboard
+      tls:
+        certResolver: infomaniak
+  #endregion
+  #region services
+  services:
+    authelia:
+      loadBalancer:
+        servers:
+          # assumes "authelia" is a valid domain (i.e. inside the same docker network)
+          - url: http://authelia:9091
+    lldap:
+      loadBalancer:
+        servers:
+          # assumes "lldap" is a valid domain (i.e. inside the same docker network)
+          - url: http://lldap:17170
+    netbird-server:
+      loadBalancer:
+        servers:
+          - url: http://netbird-server:80
+    netbird-server-h2c:
+      loadBalancer:
+        servers:
+          # gRPC: HTTP/2 cleartext to the same port
+          - url: h2c://netbird-server:80
+    netbird-dashboard:
+      loadBalancer:
+        servers:
+          - url: http://netbird-dashboard:80
+  #endregion
+  middlewares:
+    # Tailscale and NetBird both hand out addresses from 100.64.0.0/10
+    mesh-only:
+      ipAllowList:
+        sourceRange:
+          - "100.64.0.0/10"
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          "X-Forwarded-Proto": https
+
+    authelia:
+      forwardAuth:
+        # assumes "authelia" is a valid domain (i.e. inside the same docker network)
+        # the portal to redirect to comes from the matching session cookie
+        address: http://authelia:9091/api/authz/forward-auth
+        trustForwardHeader: true
+        authResponseHeaders:
+          - Remote-User
+          - Remote-Groups
+          - Remote-Email
+          - Remote-Name
+
+# LDAPS for Jellyfin's LDAP plugin, over the mesh: TLS ends here (wildcard
+# cert), plain LDAP to lldap over the traefik docker network.
+tcp:
+  routers:
+    lldap-ldaps:
+      entryPoints:
+        - "ldaps"
+      rule: "HostSNI(`ldap.sso.courgettes.club`)"
+      middlewares:
+        - ldap-clients
+      service: lldap-ldap
+      tls:
+        certResolver: infomaniak
+  services:
+    lldap-ldap:
+      loadBalancer:
+        servers:
+          - address: "lldap:3890"
+  middlewares:
+    ldap-clients:
+      ipAllowList:
+        sourceRange:
+          - "100.64.0.0/10"

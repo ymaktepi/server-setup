@@ -1,0 +1,9 @@
+# Pinned, bump together (dashboard releases track the server's).
+netbird_server_image: netbirdio/netbird-server:0.80.0
+netbird_dashboard_image: netbirdio/dashboard:v2.94.0
+
+netbird_domain: netbird.courgettes.club
+# must match the traefik container's fixed address (install_traefik_cts,
+# vps-docker-compose.yml): X-Forwarded-For is only trusted from there
+netbird_trusted_proxy: 172.30.0.10/32
+netbird_stun_port: 3478

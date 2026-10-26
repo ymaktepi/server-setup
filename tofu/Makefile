@@ -1,4 +1,4 @@
-.PHONY: plan apply core-plan core-apply compute-plan compute-apply network-bole-plan network-bole-apply network-salon-plan network-salon-apply install bootstrap-apply bootstrap-plan bootstrap-destroy format
+.PHONY: plan apply core-plan core-apply compute-plan compute-apply network-bole-plan network-bole-apply network-salon-plan network-salon-apply netbird-plan netbird-apply install bootstrap-apply bootstrap-plan bootstrap-destroy format
 
 SOPS_SECRETS := secrets.enc.yaml
 SOPS_EXEC    := sops exec-env $(SOPS_SECRETS)
@@ -19,6 +19,7 @@ install:
 	$(SOPS_EXEC) "tofu -chdir=bootstrap init -upgrade"
 	$(SOPS_EXEC) "tofu -chdir=network-bole init -upgrade"
 	$(SOPS_EXEC) "tofu -chdir=network-salon init -upgrade"
+	$(SOPS_EXEC) "tofu -chdir=netbird init -upgrade"
 
 plan:
 	$(MAKE) bootstrap-plan
@@ -36,6 +37,7 @@ format:
 	tofu -chdir=compute fmt
 	tofu -chdir=network-bole fmt
 	tofu -chdir=network-salon fmt
+	tofu -chdir=netbird fmt
 	tofu fmt -recursive modules
 
 bootstrap-plan:
@@ -73,3 +75,11 @@ network-salon-plan:
 
 network-salon-apply:
 	$(SOPS_EXEC) "tofu -chdir=network-salon apply"
+
+# NetBird (self-hosted on the VPS): groups, policies, routes, setup keys.
+# Out of the top-level plan/apply too: needs the VPS's management server up.
+netbird-plan:
+	$(SOPS_EXEC) "tofu -chdir=netbird plan"
+
+netbird-apply:
+	$(SOPS_EXEC) "tofu -chdir=netbird apply"

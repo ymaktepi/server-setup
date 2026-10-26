@@ -10,8 +10,8 @@ services:
       - ./bootstrap:/bootstrap
     networks:
       # LDAP (3890): Authelia over the private `auth` network; Jellyfin via
-      # Traefik's LDAPS router (`traefik` network, restricted to its host).
-      # The web UI (17170) is also routed through Traefik, LAN-only.
+      # Traefik's LDAPS router (`traefik` network, mesh addresses only).
+      # The web UI (17170) is also routed through Traefik, mesh-only.
       - auth
       - traefik
     environment:

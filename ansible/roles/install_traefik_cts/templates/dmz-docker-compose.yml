@@ -15,7 +15,6 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 636:636 # LDAPS -> lldap, see the tcp section of config.yml
     environment:
       - INFOMANIAK_ACCESS_TOKEN={{infomaniak_api_token}}
     volumes:
@@ -28,7 +27,7 @@ services:
       - "traefik.enable=true"
 
 
-# explicit network since authelia/ldap is bound to traefik for simpler use of hostnames
+# explicit network, so its name is stable
 networks:
   traefik:
     name: traefik

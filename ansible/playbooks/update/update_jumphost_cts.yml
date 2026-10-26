@@ -5,6 +5,8 @@
     - role: update_cts
     - role: install_tailscale_exit_node
       routes_flag: "--advertise-routes=10.10.0.0/24,10.10.1.0/24,10.10.2.0/24,10.10.3.0/24,10.10.4.0/24,10.10.5.0/24"
+    - role: install_netbird_client
+      netbird_setup_key_name: home_router
 
 - hosts: localhost
   gather_facts: false

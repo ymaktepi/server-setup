@@ -79,6 +79,10 @@ variable "containers" {
       backup = optional(bool, false)
     }))
 
+    # host device nodes passed into the container, e.g. "/dev/net/tun" for a
+    # VPN client that needs a real interface (root@pam only, like bind mounts)
+    devices = optional(list(string), [])
+
     # Proxmox firewall for this container (enforced on the host's bridge, so
     # the container can't turn it off). null = no firewall, as before.
     # Rules apply in order; replies to allowed traffic are let back in

@@ -132,15 +132,6 @@
     group: root
     mode: 0644
 
-- name: Create Config for authelia
-  template:
-    src: "authelia_config.yml.j2"
-    dest: '/opt/authelia/data/configuration.yml'
-    owner: root
-    group: root
-    # holds the LDAP bind and SMTP passwords
-    mode: 0600
-
 - name: Ensure Authelia secrets directory exists
   file:
     path: /opt/authelia/secrets
@@ -162,6 +153,16 @@
   args:
     creates: /opt/authelia/secrets/storage_key
 
+- name: Generate OIDC HMAC secret if missing
+  shell: "openssl rand -hex 64 > /opt/authelia/secrets/oidc_hmac_secret"
+  args:
+    creates: /opt/authelia/secrets/oidc_hmac_secret
+
+- name: Generate OIDC signing key if missing
+  shell: "openssl genrsa -out /opt/authelia/secrets/oidc_jwks_rsa.pem 4096"
+  args:
+    creates: /opt/authelia/secrets/oidc_jwks_rsa.pem
+
 - name: Ensure secrets have correct permissions
   file:
     path: "/opt/authelia/secrets/{{ item }}"
@@ -170,6 +171,31 @@
     - jwt_secret
     - session_secret
     - storage_key
+    - oidc_hmac_secret
+    - oidc_jwks_rsa.pem
+
+# Inlined into the config rather than referenced: the key is multi-line PEM.
+- name: Read OIDC secrets
+  no_log: true
+  slurp:
+    src: "/opt/authelia/secrets/{{ item }}"
+  loop:
+    - oidc_hmac_secret
+    - oidc_jwks_rsa.pem
+  register: oidc_secrets
+
+- name: Create Config for authelia
+  no_log: true
+  template:
+    src: "authelia_config.yml.j2"
+    dest: '/opt/authelia/data/configuration.yml'
+    owner: root
+    group: root
+    # holds the LDAP bind and SMTP passwords, and the OIDC secrets
+    mode: 0600
+  vars:
+    authelia_oidc_hmac_secret: "{{ oidc_secrets.results[0].content | b64decode | trim }}"
+    authelia_oidc_jwks_key: "{{ oidc_secrets.results[1].content | b64decode | trim }}"
 
 - name: Refresh docker for authelia
   include_tasks: refresh_docker_compose.yml

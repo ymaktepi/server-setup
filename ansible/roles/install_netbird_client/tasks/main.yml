@@ -1,0 +1,85 @@
+# kept armored (.asc): apt reads it as is, no gpg needed on the host
+- name: Install netbird apt key
+  ansible.builtin.get_url:
+    url: https://pkgs.netbird.io/debian/public.key
+    dest: /usr/share/keyrings/netbird-archive-keyring.asc
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install netbird apt source
+  copy:
+    content: "deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.asc] https://pkgs.netbird.io/debian stable main\n"
+    dest: /etc/apt/sources.list.d/netbird.list
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install netbird package
+  apt:
+    name:
+      - netbird
+    state: latest
+    update_cache: true
+
+# routing peers and exit nodes forward traffic for other peers
+- name: Create netbird sysctl conf
+  copy:
+    content: |
+      net.ipv4.ip_forward = 1
+      net.ipv6.conf.all.forwarding = 1
+    dest: /etc/sysctl.d/99-netbird.conf
+    owner: root
+    group: root
+    mode: 0644
+  register: netbird_sysctl
+
+# only this file: in an unprivileged LXC, `sysctl --system` also hits the
+# distro's non-namespaced keys (kernel.pid_max, fs.protected_*) and fails
+- name: Apply sysctl
+  ansible.builtin.command: sysctl -p /etc/sysctl.d/99-netbird.conf
+  when: netbird_sysctl.changed
+
+- name: Check if the netbird service is installed
+  ansible.builtin.stat:
+    path: /etc/systemd/system/netbird.service
+  register: netbird_unit
+
+- name: Install netbird service
+  ansible.builtin.command: netbird service install
+  when: not netbird_unit.stat.exists
+
+- name: Enable and run netbird
+  ansible.builtin.systemd_service:
+    name: netbird
+    state: started
+    enabled: true
+
+- name: Check netbird login state
+  ansible.builtin.command: netbird status
+  register: netbird_status
+  changed_when: false
+  failed_when: false
+
+# Only on a fresh peer: a setup key is single-use or expires, and re-running
+# `up` with it on an enrolled peer would fail. Routes, exit nodes and access
+# come from the management server (tofu/netbird), not from here.
+- name: Enrol peer
+  no_log: true
+  ansible.builtin.command: >
+    netbird up
+    --management-url {{ netbird_management_url }}
+    --setup-key {{ netbird_setup_keys[netbird_setup_key_name] }}
+  when:
+    - netbird_setup_key_name in (netbird_setup_keys | default({}))
+    - "'Management: Connected' not in netbird_status.stdout"
+
+- name: Remind about the setup key
+  ansible.builtin.debug:
+    msg: >
+      Not enrolled: no netbird_setup_keys.{{ netbird_setup_key_name }} in the
+      vault yet. Copy it from `tofu output -json setup_keys` (tofu/netbird)
+      with `sops edit`, then re-run.
+  when:
+    - netbird_setup_key_name not in (netbird_setup_keys | default({}))
+    - "'Management: Connected' not in netbird_status.stdout"

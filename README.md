@@ -135,6 +135,8 @@ Everything not done by ansible/tofu, in order. Secrets go in the ansible vault
   `openssl s_client -connect ldap.sso.courgettes.club:636` verifies.
 - From a device outside home, with Tailscale off: `10.10.0.x` is reachable; with an exit node selected,
   `curl ifconfig.me` gives the VPS's or home's public IP.
+- From the same device: `dig proxmox2.local.courgettes.club` gives `10.10.0.250`. The home zones go to dns1/dns2 over
+  the mesh, everything else to the device's own DNS. If Tailscale's MagicDNS is on too, they fight over the resolver.
 - A fresh Jellyfin login (private window) works with an lldap user.
 
 #### Things learnt the hard way

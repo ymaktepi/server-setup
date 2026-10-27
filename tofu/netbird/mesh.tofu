@@ -167,6 +167,24 @@ resource "netbird_policy" "jellyfin_ldap" {
 #endregion
 
 #region dns
+# Split DNS for the home zones: the zones and servers (dns1 first) of
+# bootstrap's Technitium, reached through the home network's router. Not
+# primary: everything else stays on each device's own DNS, which keeps working
+# when home is down.
+resource "netbird_nameserver_group" "home" {
+  name        = "home"
+  description = "Technitium (dns1, dns2) for the home zones"
+  nameservers = [
+    for ip in data.terraform_remote_state.bootstrap.outputs.dns.servers :
+    { ip = ip, ns_type = "udp", port = 53 }
+  ]
+  domains                = data.terraform_remote_state.bootstrap.outputs.dns.zones
+  primary                = false
+  search_domains_enabled = false
+  groups                 = [data.netbird_group.admins.id]
+  enabled                = true
+}
+
 # Jellyfin's LDAP server name, resolved to the VPS's mesh address for the
 # jellyfin peer only (publicly it's the VPS's public IP, where 636 is closed
 # to anything outside the mesh).

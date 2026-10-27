@@ -1,28 +1,35 @@
 resource "netbird_account_settings" "this" {
   network_range = var.network_range
 
-  # No JWT group sync: the embedded IdP only asks Authelia for
-  # `openid profile email`, never `groups`, so lldap groups don't reach
-  # NetBird. A user's auto groups (set in the dashboard) are propagated to
-  # their peers instead.
-  jwt_groups_enabled         = false
+  # lldap groups (Authelia's `groups` claim) become NetBird groups at each
+  # login, and are propagated to the user's peers.
+  jwt_groups_enabled         = true
+  jwt_groups_claim_name      = "groups"
   groups_propagation_enabled = true
 }
 
-# Authelia as a Generic OIDC connector of the embedded IdP. The owner's local
-# login stays available, as the way in when Authelia is down.
+# Authelia as an OIDC connector of the embedded IdP. The owner's local login
+# stays available, as the way in when Authelia is down.
+#
+# `pocketid`, not `oidc`: it's the same generic OIDC connector, except that it
+# also asks for the `groups` scope (`oidc` never does, and nothing else can
+# add it). The type can't change in place, and a new connector means new
+# NetBird users: everyone logging in through Authelia starts over.
 resource "netbird_identity_provider" "authelia" {
   name          = "Authelia"
-  type          = "oidc"
+  type          = "pocketid"
   client_id     = "netbird"
   client_secret = var.netbird_authelia_client_secret
   issuer        = "https://sso.courgettes.club"
 }
 
 #region groups
-# Full access. Assigned per user, as an auto group in the dashboard (Team →
-# Users), once they've logged in through Authelia once; their devices follow.
-resource "netbird_group" "admins" {
+# Full access: the lldap group of the same name, created by NetBird at the
+# first login of one of its members. Not a resource: NetBird only syncs users
+# into groups it created from the claim itself, never into one made through
+# the API, even with the same name. So it must exist before a full apply
+# (`make netbird-apply-idp`, then log in, see the README).
+data "netbird_group" "admins" {
   name = "netbird_admins"
 }
 
@@ -100,7 +107,7 @@ resource "netbird_route" "exit_vps" {
   description     = "Exit through the VPS"
   network         = "0.0.0.0/0"
   peer_groups     = [netbird_group.vps.id]
-  groups          = [netbird_group.admins.id]
+  groups          = [data.netbird_group.admins.id]
   masquerade      = true
   skip_auto_apply = true
   enabled         = true
@@ -111,7 +118,7 @@ resource "netbird_route" "exit_home" {
   description     = "Exit through home (vpn LXC)"
   network         = "0.0.0.0/0"
   peer_groups     = [netbird_group.home_router.id]
-  groups          = [netbird_group.admins.id]
+  groups          = [data.netbird_group.admins.id]
   masquerade      = true
   skip_auto_apply = true
   enabled         = true
@@ -131,9 +138,9 @@ resource "netbird_policy" "admins" {
     bidirectional = false
     enabled       = true
     protocol      = "all"
-    sources       = [netbird_group.admins.id]
+    sources       = [data.netbird_group.admins.id]
     destinations = [
-      netbird_group.admins.id,
+      data.netbird_group.admins.id,
       netbird_group.vps.id,
       netbird_group.home_router.id,
       netbird_group.jellyfin.id,

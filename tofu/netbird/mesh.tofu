@@ -206,4 +206,25 @@ resource "netbird_dns_record" "ldap" {
   content = var.vps_mesh_ip
   ttl     = 300
 }
+
+# lldap's web UI, for the admins: like LDAPS, it only accepts mesh addresses,
+# and publicly the name is the VPS's public IP.
+resource "netbird_dns_zone" "lldap" {
+  count = var.vps_mesh_ip == null ? 0 : 1
+
+  name                = "lldap"
+  domain              = "lldap.sso.courgettes.club"
+  enabled             = true
+  distribution_groups = [data.netbird_group.admins.id]
+}
+
+resource "netbird_dns_record" "lldap" {
+  count = var.vps_mesh_ip == null ? 0 : 1
+
+  zone_id = netbird_dns_zone.lldap[0].id
+  name    = "lldap.sso.courgettes.club"
+  type    = "A"
+  content = var.vps_mesh_ip
+  ttl     = 300
+}
 #endregion

@@ -10,6 +10,11 @@ entryPoints:
           scheme: https
   https:
     address: ":443"
+    transport:
+      respondingTimeouts:
+        # Traefik v3 defaults to 60s, which cuts NetBird's long-lived gRPC
+        # streams (signal, management) every minute
+        readTimeout: 0
   ldaps:
     address: ":636"
 providers:

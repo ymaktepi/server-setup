@@ -81,5 +81,11 @@ module "site" {
       dst_ips = ["10.20.0.11"]  # nico_pi
       ports   = "8123"
     }
+    bole_traefik_to_sarah_nas = {
+      name    = "Allow Bole Traefik to Sarah's NAS"
+      src_ips = ["10.10.0.250"] # Bole: traefik_default
+      dst_ips = ["10.20.0.200"] # sarah_nas
+      ports   = "5001"
+    }
   }
 }

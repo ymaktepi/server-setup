@@ -75,7 +75,27 @@ http:
     courgettes:
       entryPoints:
         - "https"
-      rule: "Host(`courgettes.club`) || Host(`www.courgettes.club`) || Host(`budget.courgettes.club`) || Host(`contra.courgettes.club`)"
+      rule: "Host(`courgettes.club`) || Host(`www.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - www-to-non-www-redirection
+      tls:
+        certresolver: letsencrypt
+      service: websites-nico
+    budget:
+      entryPoints:
+        - "https"
+      rule: "Host(`budget.courgettes.club`)"
+      middlewares:
+        - default-headers
+        - www-to-non-www-redirection
+      tls:
+        certresolver: letsencrypt
+      service: websites-nico
+    contra:
+      entryPoints:
+        - "https"
+      rule: "Host(`contra.courgettes.club`)"
       middlewares:
         - default-headers
         - www-to-non-www-redirection

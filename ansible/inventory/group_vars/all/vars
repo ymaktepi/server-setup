@@ -2,11 +2,5 @@ ansible_key_file: "{{lookup('env','HOME') + '/.ssh/id_ecdsa.pub'}}"
 default_domain_name: '.nico'
 timezone: 'Europe/Bern'
 locale: 'en_US.UTF-8'
-group_name: pvenodes
 root_domain: local.courgettes.club
 github_username: ymaktepi
-variable_files:
- - images
- - vms
- - cts_images
- - cts

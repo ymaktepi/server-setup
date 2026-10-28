@@ -203,7 +203,7 @@ http:
     synology2:
       loadBalancer:
         servers:
-          - url: "https://10.10.0.200:5001"
+          - url: "https://10.20.0.200:5001" # Salon: sarah_nas
         passHostHeader: true
     dns:
       loadBalancer:

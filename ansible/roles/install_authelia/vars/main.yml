@@ -6,6 +6,8 @@ authelia_groups:
   - name: jellyfin_admins
   # Authelia's OIDC policy for NetBird only lets in members of this
   - name: netbird_users
+  # Becomes NetBird's `netbird_admins` group at login: full access to the mesh
+  - name: netbird_admins
 
 # Where Authelia may send NetBird logins back to: the embedded IdP's single
 # callback (the connector travels in `state`, not in the path, despite what
@@ -51,6 +53,7 @@ lldap_users:
       - jellyfin_users
       - jellyfin_admins
       - netbird_users
+      - netbird_admins
   - id: lulu
     displayName: Lulu
     groups:

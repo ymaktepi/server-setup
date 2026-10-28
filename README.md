@@ -78,7 +78,7 @@ Peers:
 | VPS          | `vps`            | exit node                                             |
 | `vpn` LXC    | `home-router`    | routes `10.10.0-5.0/24`, exit node                    |
 | minix        | `jellyfin`       | reaches lldap on the VPS (`ldap.sso.courgettes.club`) |
-| your devices | `netbird_admins` | everything                                            |
+| your devices | `netbird_admins` | everything (the lldap group, synced at login)         |
 
 The mesh uses `100.120.0.0/16` so it doesn't collide with Tailscale. Jellyfin streaming doesn't go through any of this:
 `jellyfin.courgettes.club` stays on the home DMZ Traefik. Only Jellyfin's LDAP logins cross the mesh.
@@ -108,23 +108,26 @@ Everything not done by ansible/tofu, in order. Secrets go in the ansible vault
 4. **API token for tofu.** Log in to `netbird.courgettes.club` as the owner, create a service user (Team → Service
    Users, role Admin) and a token for it. In `tofu/secrets.enc.yaml`: `TF_VAR_netbird_token` (the token) and
    `TF_VAR_netbird_authelia_client_secret` (the plaintext secret from step 2).
-5. **Apply NetBird's config:** `cd tofu && make netbird-plan && make netbird-apply`. On a fresh checkout or worktree run
+5. **Authelia login and group sync:** `cd tofu && make netbird-apply-idp`. On a fresh checkout or worktree run
    `make install` first: the ansible inventory script also needs the other stacks initialised.
+6. **Log in with Authelia** on `netbird.courgettes.club` (needs `netbird_users` and `netbird_admins` in lldap, and 2FA).
+   NetBird creates a group for each of your lldap groups, `netbird_admins` among them, which the full apply needs. If
+   that user should also manage the dashboard, give them the Admin role as the owner (Team → Users): roles don't come
+   from groups.
+7. **Apply NetBird's config:** `make netbird-plan && make netbird-apply`.
     - Then delete NetBird's default **"All"** policy in the dashboard (Access Control). It isn't managed by tofu and
       lets every peer reach every other.
-6. **Setup keys.** `tofu -chdir=netbird output -json setup_keys` → vault, as `netbird_setup_keys` (keys `vps`,
+8. **Setup keys.** `tofu -chdir=netbird output -json setup_keys` → vault, as `netbird_setup_keys` (keys `vps`,
    `home_router`, `jellyfin`). They're one-off: once used, they're no longer needed; a re-installed peer needs a new
    one (`tofu taint` the key, apply again).
-7. **`vpn` LXC needs `/dev/net/tun`** to route (NetBird's userspace mode can't): `make core-plan`/`make core-apply`.
-8. **Enrol the peers:** `update_infomaniak.yml` again, `update_jumphost_cts.yml` (the Tailscale prompt can be skipped)
+9. **`vpn` LXC needs `/dev/net/tun`** to route (NetBird's userspace mode can't): `make core-plan`/`make core-apply`.
+10. **Enrol the peers:** `update_infomaniak.yml` again, `update_jumphost_cts.yml` (the Tailscale prompt can be skipped)
    and `update_minix.yml`.
-9. **LDAP name for Jellyfin.** Set `vps_mesh_ip` in [`tofu/netbird/variables.tofu`](tofu/netbird/variables.tofu) to the
+11. **LDAP name for Jellyfin.** Set `vps_mesh_ip` in [`tofu/netbird/variables.tofu`](tofu/netbird/variables.tofu) to the
    VPS's NetBird address (dashboard, or `netbird status` on it), then `make netbird-apply`. This makes
    `ldap.sso.courgettes.club` resolve to the VPS over the mesh on minix only.
-10. **Your devices.** Log in to `netbird.courgettes.club` **with Authelia** once (needs `netbird_users` in lldap, and
-    2FA). Then, as the owner, add `netbird_admins` to that user's auto groups (Team → Users). lldap groups don't
-    reach NetBird (its IdP never asks Authelia for `groups`), so admin rights are only set here. Enrol devices with
-    that user: they inherit the group. Devices enrolled with the owner account get no access.
+12. **Your devices.** Enrol them logged in with Authelia: they get your lldap groups, kept in sync at each login.
+    Devices enrolled with the owner account get no access.
 
 #### Checking it works
 
@@ -132,6 +135,8 @@ Everything not done by ansible/tofu, in order. Secrets go in the ansible vault
   `openssl s_client -connect ldap.sso.courgettes.club:636` verifies.
 - From a device outside home, with Tailscale off: `10.10.0.x` is reachable; with an exit node selected,
   `curl ifconfig.me` gives the VPS's or home's public IP.
+- From the same device: `dig proxmox2.local.courgettes.club` gives `10.10.0.250`. The home zones go to dns1/dns2 over
+  the mesh, everything else to the device's own DNS. If Tailscale's MagicDNS is on too, they fight over the resolver.
 - A fresh Jellyfin login (private window) works with an lldap user.
 
 #### Things learnt the hard way
@@ -139,6 +144,11 @@ Everything not done by ansible/tofu, in order. Secrets go in the ansible vault
 - Authelia's NetBird client must use `client_secret_basic` and put `name` in the ID token (`claims_policy`), or the
   login ends in "Internal Server Error" on NetBird's side.
 - The redirect URI is `https://netbird.courgettes.club/oauth2/callback`, without the connector id NetBird's docs show.
+- Authelia's connector is of type `pocketid`, not "Generic OIDC" (`oidc`): only the former asks Authelia for the
+  `groups` scope. `groups` must also be in the ID token (`claims_policy`). The type can't be changed in place, and a
+  new connector means new NetBird users for everyone logging in through Authelia.
+- NetBird only puts users into groups it created itself from the claim. A group of the same name created in the
+  dashboard or by tofu is never filled, so tofu only looks `netbird_admins` up.
 - Authelia answers a password-reset request with success even for an unknown user, without an error in its logs. If
   no email arrives, check the address in lldap first.
 

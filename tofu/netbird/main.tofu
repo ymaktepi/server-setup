@@ -16,6 +16,27 @@ terraform {
   }
 }
 
+# bootstrap's outputs (Technitium's servers and zones). Same bucket and
+# settings as the backend above, which can't be shared: a backend block takes
+# no variables. Credentials come from the same AWS_* environment.
+data "terraform_remote_state" "bootstrap" {
+  backend = "s3"
+  config = {
+    bucket = "opentofu-state"
+    key    = "homelab-bootstrap.tfstate"
+    region = "garage"
+
+    endpoints = {
+      s3 = "https://10.10.0.251:8443"
+    }
+
+    insecure                    = true
+    skip_region_validation      = true
+    skip_credentials_validation = true
+    use_path_style              = true
+  }
+}
+
 terraform {
   required_providers {
     netbird = {

@@ -36,21 +36,21 @@ provider "registry.opentofu.org/bpg/proxmox" {
 }
 
 provider "registry.opentofu.org/darkhonor/technitium" {
-  version     = "1.2.1"
+  version     = "1.3.0"
   constraints = "~> 1.2"
   hashes = [
-    "h1:/xk2w057EPxsOlJKQRmTQfLVSfKMSl4GzkxV81ADEoI=",
-    "h1:3G0EAqZNW5dcAOPwX2t41gFMixkVP15kZ80tDXDYMYs=",
-    "h1:FJR1fPKhN4GWSWnkvrNsb28nC3vbFr9QU7yj7n6/L2Q=",
-    "h1:j0h3quoSQeL5v8ZiTVxVacI3wTK2WYqUNu2Yd24SVOQ=",
-    "h1:nqaCQvJLlgGsRo8hq3M+XSePER1kTgUkc0LNtvGiQIA=",
-    "h1:oc1YWGf5sJdX0E8A1hFhdInoJdRpENmADAQa6UIndoQ=",
-    "zh:1330ff5fca6a1ded2728ff0ee8777b69ff3573d69754ca83a71a5e00f6d2fb02",
-    "zh:26933e30f6341a6ce38fb693fbcfeac92f83c88cae5b573282c66dfcdedec8a1",
-    "zh:6e552c0931289f0156fce6e29470fa58cda1ae32daba837599b2f1335b24ea41",
-    "zh:85c2c2fcb684a03ea03b03b744a17428961b8e3bccc722b3cd3806ddf6d74683",
-    "zh:94551d5725b0371d75f31deb3268e564f63badf8eb648f53a8e84bb6592c68ea",
-    "zh:9a86764bd4826a7955d3612a5bdc777fec38eebc4fd22da159e344c43482ef55",
+    "h1:DwGUAIor3/t72EHhP71/pBcN9+iJXNFrhKkNejez1qA=",
+    "h1:LNoA9KaGPYydGQfFzS5rJcYIV4+DjB4KDasj/LrO5jE=",
+    "h1:bHXJCRfnpyFrnvfu8q7sQIU48DzCtOPf5K3oJjjxB5w=",
+    "h1:eXCPgLH4fnTy/adV0J69g48k0k+PNfWo4/zfO4TzJPk=",
+    "h1:kv+m/r2E33CDLRHlBMOsMNpofCy5NwasWXsZdh1D+hM=",
+    "h1:ub4vxCWbRzgpDokJkwMiUAOrX6SFDlcO67e6vBvwDp0=",
+    "zh:23d292fc41b05031c9faf95cb52da3fe5690b17d29c7428539d312eb22ce7613",
+    "zh:68fd69d63d5ab529727f8e1150072968224ef5204a4addcca0655bacd855bb5d",
+    "zh:9142f899e4d5ee77d2fefc3679c0312e861b2d897fb6ff3f86f4f41cfd6cdb42",
+    "zh:a52db6f19799ffa47a57982f398f11fde70fe818f88ce723333e1648169170cc",
+    "zh:aa28d6caa879448f74106397a6de2464cc1dad8ca095ca37292a7622d61cae81",
+    "zh:e63e736170b0d87fa2a16a13e8965687dd37ab069a5b8109be98130088cf3e42",
   ]
 }
 

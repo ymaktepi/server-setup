@@ -291,8 +291,12 @@ module "containers" {
     }
 
     dns2 = {
-      ctid       = 419
-      node       = var.technitium_node
+      ctid = 419
+      # Not var.technitium_node: on another node than dns1, so one node going
+      # down doesn't take both. The provider can't follow a migration (the
+      # container then reads as deleted): after moving it, change this and
+      # re-import it (`tofu state rm` it, then `tofu import` it as <node>/419).
+      node       = "proxmox3"
       image_name = proxmox_virtual_environment_file.technitium_template.file_name
 
       cores  = 1

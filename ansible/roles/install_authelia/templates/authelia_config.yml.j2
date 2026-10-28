@@ -111,6 +111,8 @@ identity_providers:
           - 'email_verified'
           - 'name'
           - 'preferred_username'
+          # NetBird's embedded IdP only reads the ID token: lldap groups → NetBird groups
+          - 'groups'
     clients:
       - client_id: 'netbird'
         client_name: 'NetBird'

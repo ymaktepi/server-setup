@@ -1,4 +1,4 @@
-.PHONY: plan apply core-plan core-apply compute-plan compute-apply network-bole-plan network-bole-apply network-salon-plan network-salon-apply netbird-plan netbird-apply install bootstrap-apply bootstrap-plan bootstrap-destroy format
+.PHONY: plan apply core-plan core-apply compute-plan compute-apply network-bole-plan network-bole-apply network-salon-plan network-salon-apply netbird-plan netbird-apply netbird-apply-idp install bootstrap-apply bootstrap-plan bootstrap-destroy format
 
 SOPS_SECRETS := secrets.enc.yaml
 SOPS_EXEC    := sops exec-env $(SOPS_SECRETS)
@@ -83,3 +83,8 @@ netbird-plan:
 
 netbird-apply:
 	$(SOPS_EXEC) "tofu -chdir=netbird apply"
+
+# Only the Authelia login and group sync: a full apply needs the lldap groups
+# NetBird creates at the first login through Authelia (see netbird/mesh.tofu).
+netbird-apply-idp:
+	$(SOPS_EXEC) "tofu -chdir=netbird apply -target=netbird_identity_provider.authelia -target=netbird_account_settings.this"

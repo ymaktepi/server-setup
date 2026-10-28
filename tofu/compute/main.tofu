@@ -20,7 +20,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.113.1"
+      version = "~> 0.118.1"
     }
     technitium = {
       source  = "darkhonor/technitium"
@@ -152,6 +152,8 @@ module "containers" {
       ctid       = 417
       node       = "proxmox"
       image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
+      # stopped for now
+      started = false
 
       cores  = 4
       cpus   = 4

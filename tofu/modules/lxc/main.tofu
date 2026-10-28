@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.113.1"
+      version = "~> 0.118.1"
     }
     random = {
       source  = "opentofu/random"
@@ -143,7 +143,10 @@ resource "proxmox_virtual_environment_container" "this" {
   lifecycle {
     ignore_changes = [
       initialization,
-      operating_system
+      operating_system,
+      # `node` only places a new container: HA moves it afterwards, and the
+      # provider finds it wherever it is now
+      node_name,
     ]
   }
 }

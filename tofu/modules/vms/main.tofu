@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.113.1"
+      version = "~> 0.118.1"
     }
     technitium = {
       source  = "darkhonor/technitium"
@@ -136,7 +136,8 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   lifecycle {
     # cloud-init only matters at first boot; the disk source only at creation
-    ignore_changes = [initialization, disk[0].import_from]
+    # node_name: `node` only places a new VM, HA moves it afterwards
+    ignore_changes = [initialization, disk[0].import_from, node_name]
   }
 }
 

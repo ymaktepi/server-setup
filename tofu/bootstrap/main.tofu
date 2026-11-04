@@ -66,7 +66,7 @@ resource "terraform_data" "technitium_template" {
     # Bump this whenever the build script below changes, so a rebuild is
     # actually triggered - it's not otherwise reflected in any tracked
     # attribute.
-    "build-script-v4",
+    "build-script-v5",
   ]
 
   provisioner "local-exec" {
@@ -198,15 +198,30 @@ EOF
         mount --bind /sys "$DEBIAN_ROOT/sys"
         mount --bind /dev "$DEBIAN_ROOT/dev"
 
+        # debootstrap only writes "bookworm main": add security and updates,
+        # or upgrades never pick up security fixes.
+        cat > "$DEBIAN_ROOT/etc/apt/sources.list" <<EOF
+deb http://deb.debian.org/debian bookworm main
+deb http://deb.debian.org/debian bookworm-updates main
+deb http://deb.debian.org/debian-security bookworm-security main
+EOF
+
         chroot "$DEBIAN_ROOT" apt-get update
 
+        # python3: every Ansible module needs it on the target (minbase has
+        # none). locales: ssh clients forward LC_ALL=en_US.UTF-8.
         chroot "$DEBIAN_ROOT" apt-get install -y \
           systemd \
           systemd-sysv \
           ifupdown \
           openssh-server \
           libicu72 \
-          ca-certificates
+          ca-certificates \
+          python3 \
+          locales
+
+        echo "en_US.UTF-8 UTF-8" > "$DEBIAN_ROOT/etc/locale.gen"
+        chroot "$DEBIAN_ROOT" locale-gen
 
         rm -rf "$DEBIAN_ROOT"/var/lib/apt/lists/*
 

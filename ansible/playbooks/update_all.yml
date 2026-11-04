@@ -3,6 +3,7 @@
 - import_playbook: check_connectivity.yml
 
 - import_playbook: update/update_infomaniak.yml
+- import_playbook: update/update_dns.yml
 - import_playbook: update/update_jumphost_cts.yml
 - import_playbook: update/update_minix.yml
 - import_playbook: update/update_networkcheckers_cts.yml

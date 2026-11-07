@@ -16,12 +16,33 @@ scrape_configs:
         labels: { instance: "{{ host_name(h) }}" }
 {% endfor %}
 
-  # Proxmox nodes, guests and storage through the API
-  - job_name: pve
+  # Proxmox through the API (pve-exporter). Cluster-wide data (nodes,
+  # guests, storage) is the same whichever node answers: every node is asked,
+  # so it keeps coming while one is down, all under one `instance`, and
+  # VictoriaMetrics' dedup (-dedup.minScrapeInterval) keeps a single copy.
+  - job_name: pve_cluster
     metrics_path: /pve
     params:
       module: [default]
       cluster: ["1"]
+      node: ["0"]
+    static_configs:
+{% for h in groups['pvenodes'] | sort %}
+      - targets: ["{{ hostvars[h]['ansible_host'] }}"]
+        labels: { instance: "cluster" }
+{% endfor %}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: 127.0.0.1:9221
+
+  # each node's own data (version, subscription, guest config)
+  - job_name: pve_node
+    metrics_path: /pve
+    params:
+      module: [default]
+      cluster: ["0"]
       node: ["1"]
     static_configs:
 {% for h in groups['pvenodes'] | sort %}

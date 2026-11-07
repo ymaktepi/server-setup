@@ -92,7 +92,7 @@ The Infomaniak VPS runs what must stay up when home is down (`playbooks/update/u
 
 The `monitoring` CT (core, `10.10.0.247`) runs VictoriaMetrics + Grafana + prometheus-pve-exporter (`install_monitoring`, `playbooks/update/update_monitoring_cts.yml`). Grafana is at `grafana.local.courgettes.club`; VictoriaMetrics listens on localhost only. `templates/scrape.yml.j2` is generated from the inventory:
 - every host in `debian` gets node_exporter (`install_node_exporter`, `update_node_exporter.yml`) on :9100;
-- the Proxmox API is read with the `monitoring@pam` token (`pve_monitoring.yml`);
+- the Proxmox API is read with the `monitoring@pam` token (`pve_monitoring.yml`). Cluster-wide data (`pve_cluster` job) is asked of all 4 nodes under one `instance: cluster` and deduplicated by VictoriaMetrics (`-dedup.minScrapeInterval`), so it survives a node being down without being stored 4×. `pve_node` holds each node's own data;
 - Traefik exposes metrics on :8082 (a `metrics` entrypoint);
 - the gpu VM runs `nvidia_gpu_exporter` (:9835, `install_gpu`).
 

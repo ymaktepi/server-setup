@@ -152,12 +152,17 @@ resource "proxmox_virtual_environment_container" "this" {
 }
 
 resource "technitium_record" "containers" {
-  for_each = var.technitium_register_records ? proxmox_virtual_environment_container.this : {}
+  # only the address, not the whole container: passing the resource object
+  # drags its deprecated attributes (timeout_start...) along and warns
+  for_each = var.technitium_register_records ? {
+    for k, c in proxmox_virtual_environment_container.this :
+    k => split("/", c.initialization[0].ip_config[0].ipv4[0].address)[0]
+  } : {}
 
   zone  = var.technitium_zone
   name  = "${replace(each.key, "_", "-")}.${var.technitium_zone}"
   type  = "A"
-  value = split("/", each.value.initialization[0].ip_config[0].ipv4[0].address)[0]
+  value = each.value
   ttl   = 3600
 }
 
@@ -165,7 +170,11 @@ resource "technitium_record" "containers" {
 
 locals {
   firewalled = {
-    for k, c in proxmox_virtual_environment_container.this : k => c
+    # only what the firewall resources need (see technitium_record)
+    for k, c in proxmox_virtual_environment_container.this : k => {
+      node_name = c.node_name
+      vm_id     = c.vm_id
+    }
     if var.containers[k].firewall != null
   }
 }

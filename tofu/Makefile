@@ -41,7 +41,7 @@ format:
 	tofu fmt -recursive modules
 
 bootstrap-plan:
-	$(SOPS_EXEC) "tofu -chdir=bootstrap plan"
+	$(SOPS_EXEC) ./scripts/bootstrap-plan.sh
 
 bootstrap-apply:
 	$(SOPS_EXEC) ./scripts/bootstrap-apply.sh

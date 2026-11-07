@@ -39,6 +39,8 @@ locals {
   # laptop at Salon (same IPs as network-bole's vpn_inbound_allow)
   fw_admin = "10.10.0.0/23,10.20.0.20,10.20.0.21"
   fw_dmz   = "10.10.5.0/24"
+  # the `monitoring` CT below, which scrapes every host's node_exporter
+  fw_monitoring = "10.10.0.247"
 }
 
 variable "network_testing_memory" {
@@ -216,6 +218,7 @@ module "containers" {
           { type = "in", proto = "tcp", dport = "80,443", comment = "web (port forward + LAN)" },
           { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+          { type = "in", proto = "tcp", dport = "8082,9100", source = local.fw_monitoring, comment = "metrics (traefik, node_exporter)" },
           # websites, arr_server, gpu, nextcloud, pocket
           { type = "out", proto = "tcp", dport = "443", dest = "10.10.5.249,10.10.5.247,10.10.5.102,10.10.5.246,10.10.5.100", comment = "backends" },
           { type = "out", action = "DROP", dest = local.fw_dmz, comment = "rest of the DMZ" },
@@ -245,6 +248,7 @@ module "containers" {
         rules = [
           { type = "in", macro = "SSH", comment = "SSH (port forward + LAN)" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+          { type = "in", proto = "tcp", dport = "9100", source = local.fw_monitoring, comment = "node_exporter" },
           { type = "out", macro = "SSH", dest = local.fw_dmz, comment = "jump targets" },
           { type = "out", action = "DROP", dest = local.fw_dmz, comment = "rest of the DMZ" },
         ]
@@ -274,6 +278,7 @@ module "containers" {
           { type = "in", proto = "tcp", dport = "443", source = "10.10.5.250", comment = "core: traefik_dmz" },
           { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+          { type = "in", proto = "tcp", dport = "9100", source = local.fw_monitoring, comment = "node_exporter" },
         ]
       }
 
@@ -317,6 +322,28 @@ module "containers" {
       ipv4_gateway = "10.10.0.1"
 
       ansible_groups = ["remote"]
+    }
+
+    # VictoriaMetrics + Grafana (install_monitoring). Scrapes every home
+    # host's node_exporter (firewalled CTs allow it via local.fw_monitoring).
+    # No /dev/net/tun (NetBird peer): device passthrough needs root@pam, which
+    # tofu's API token isn't, so the VPS isn't scraped for now.
+    monitoring = {
+      ctid       = 420
+      node       = "proxmox3"
+      image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
+
+      cores  = 2
+      cpus   = 2
+      memory = 2048
+      disk   = 40 # ~6 months of metrics, a few GB, plus docker images
+
+      vlan         = 1
+      ipv4mode     = "static"
+      ipv4_address = "10.10.0.247/23"
+      ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["monitoring"]
     }
 
 

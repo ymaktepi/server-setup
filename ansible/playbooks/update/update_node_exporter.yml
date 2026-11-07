@@ -1,0 +1,22 @@
+# node_exporter on every home host the monitoring CT scrapes
+# (install_monitoring's scrape.yml.j2 lists the same hosts). Not the VPS: the
+# monitoring CT can't reach it (no NetBird peer). Unreachable hosts (e.g. a
+# stopped CT) are skipped.
+
+# hosts with a non-root ansible user
+- hosts:
+    - pvenodes
+    - minix
+    - gpu
+  gather_facts: false
+  become: true
+  ignore_unreachable: true
+  roles:
+    - install_node_exporter
+
+# Terraform-managed CTs, reached as root
+- hosts: all:!pvenodes:!minix:!infomaniak:!gpu:!localhost
+  gather_facts: false
+  ignore_unreachable: true
+  roles:
+    - install_node_exporter

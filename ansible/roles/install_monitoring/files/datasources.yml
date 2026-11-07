@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+  # Prometheus-compatible query API; uid referenced by the dashboards
+  - name: VictoriaMetrics
+    uid: victoriametrics
+    type: prometheus
+    access: proxy
+    url: http://127.0.0.1:8428
+    isDefault: true
+    editable: false

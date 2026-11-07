@@ -11,6 +11,12 @@ entryPoints:
           scheme: https
   https:
     address: ":443"
+  # scraped by the monitoring CT (install_monitoring)
+  metrics:
+    address: ":8082"
+metrics:
+  prometheus:
+    entryPoint: metrics
 serversTransport:
   insecureSkipVerify: true
 providers:

@@ -1,0 +1,100 @@
+- name: Create monitoring directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    mode: '0755'
+  loop:
+    - { path: "{{ monitoring_dir }}" }
+    - { path: "{{ monitoring_dir }}/vmdata" }
+    - { path: "{{ monitoring_dir }}/grafana/provisioning/datasources" }
+    - { path: "{{ monitoring_dir }}/grafana/provisioning/dashboards" }
+    - { path: "{{ monitoring_dir }}/grafana/dashboards" }
+    # the grafana image runs as uid 472
+    - { path: "{{ monitoring_dir }}/grafana/data", owner: "472" }
+
+- name: Create Docker Compose
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ monitoring_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Create scrape config
+  template:
+    src: scrape.yml.j2
+    dest: "{{ monitoring_dir }}/scrape.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+# readable by the exporter's (non-root) user; only root logs into this CT
+- name: Create pve-exporter config
+  no_log: true
+  template:
+    src: pve.yml.j2
+    dest: "{{ monitoring_dir }}/pve.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Provision Grafana datasources
+  copy:
+    src: datasources.yml
+    dest: "{{ monitoring_dir }}/grafana/provisioning/datasources/datasources.yml"
+    mode: 0644
+
+- name: Provision Grafana dashboard provider
+  copy:
+    src: dashboards.yml
+    dest: "{{ monitoring_dir }}/grafana/provisioning/dashboards/dashboards.yml"
+    mode: 0644
+
+# once: delete the file to get a newer revision
+- name: Download Grafana dashboards
+  ansible.builtin.get_url:
+    url: "https://grafana.com/api/dashboards/{{ item.id }}/revisions/latest/download"
+    dest: "{{ monitoring_dir }}/grafana/dashboards/{{ item.name }}.json"
+    mode: 0644
+    force: false
+  loop: "{{ grafana_dashboards }}"
+
+# exported dashboards ask for their datasource on import (${DS_PROMETHEUS}
+# & co); file provisioning has no import step, so point them at ours
+- name: Point dashboards at VictoriaMetrics
+  ansible.builtin.replace:
+    path: "{{ monitoring_dir }}/grafana/dashboards/{{ item.name }}.json"
+    regexp: '\$\{DS_[A-Z0-9_]+\}'
+    replace: victoriametrics
+  loop: "{{ grafana_dashboards }}"
+
+- name: Refresh docker
+  include_tasks: refresh_docker_compose.yml
+  vars:
+    compose_project_dir: "{{ monitoring_dir }}"
+
+- name: Create nginx conf
+  template:
+    src: grafana-nginx.conf
+    dest: /etc/nginx/sites-available/grafana-nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable nginx conf
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/grafana-nginx.conf
+    dest: /etc/nginx/sites-enabled/grafana-nginx.conf
+    state: link
+
+- name: Restart nginx
+  service: name=nginx state=restarted
+
+- name: Remind about the Grafana password
+  ansible.builtin.debug:
+    msg: >
+      No grafana_admin_password in the vault: Grafana starts with admin/admin
+      and asks for a new one at the first login. Add it with `sops edit` to
+      pin it.
+  when: grafana_admin_password is not defined

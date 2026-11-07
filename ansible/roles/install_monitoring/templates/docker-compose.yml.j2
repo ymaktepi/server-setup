@@ -1,0 +1,62 @@
+# Host networking: VictoriaMetrics scrapes the VPS over the CT's NetBird
+# interface. Everything listens on localhost only; Grafana is reached through
+# nginx (install_nginx) and the default Traefik.
+services:
+  victoriametrics:
+    image: {{ victoriametrics_image }}
+    container_name: victoriametrics
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - "-httpListenAddr=127.0.0.1:8428"
+      - "-storageDataPath=/storage"
+      - "-retentionPeriod={{ victoriametrics_retention }}"
+      - "-promscrape.config=/etc/victoriametrics/scrape.yml"
+    volumes:
+      - ./vmdata:/storage
+      - ./scrape.yml:/etc/victoriametrics/scrape.yml:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "2"
+
+  # Proxmox API (monitoring@pam, PVEAuditor: playbooks/pve/pve_monitoring.yml)
+  pve-exporter:
+    image: {{ pve_exporter_image }}
+    container_name: pve-exporter
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - "--web.listen-address=127.0.0.1:9221"
+      - "--config.file=/etc/prometheus/pve.yml"
+    volumes:
+      - ./pve.yml:/etc/prometheus/pve.yml:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "2"
+
+  grafana:
+    image: {{ grafana_image }}
+    container_name: grafana
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      GF_SERVER_HTTP_ADDR: "127.0.0.1"
+      GF_SERVER_HTTP_PORT: "3000"
+      GF_SERVER_ROOT_URL: "https://grafana.{{ root_domain }}"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+{% if grafana_admin_password is defined %}
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+{% endif %}
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana-dashboards:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "2"

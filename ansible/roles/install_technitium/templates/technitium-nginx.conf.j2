@@ -7,6 +7,13 @@ server {
   include snippets/self-signed.conf;
   include snippets/ssl-params.conf;
 
+  # only allow traffic from the internal traefik (dns*.local.courgettes.club)
+  # and Bole's Default network: tofu bootstrap (technitium provider, curl calls)
+  # talks to dns1/dns2 directly
+  allow {{hostvars['host_traefik_default']['ansible_host']}};
+  allow 10.10.0.0/23;
+  deny all;
+
   location / {
     proxy_set_header   X-Real-IP $remote_addr;
     proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;

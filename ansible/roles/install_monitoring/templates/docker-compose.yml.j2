@@ -12,6 +12,9 @@ services:
       - "-storageDataPath=/storage"
       - "-retentionPeriod={{ victoriametrics_retention }}"
       - "-promscrape.config=/etc/victoriametrics/scrape.yml"
+      # one sample per series per interval: collapses the 4 identical copies
+      # of pve_cluster's data (scrape.yml)
+      - "-dedup.minScrapeInterval={{ scrape_interval }}"
     volumes:
       - ./vmdata:/storage
       - ./scrape.yml:/etc/victoriametrics/scrape.yml:ro

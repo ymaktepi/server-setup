@@ -1,2 +1,5 @@
 # Strata's image is built on CUDA 13.0, which needs driver 580 or newer
 nvidia_driver_min_major: 580
+
+# GPU metrics for the monitoring CT (port 9835); wraps nvidia-smi
+nvidia_gpu_exporter_version: "1.17.0"

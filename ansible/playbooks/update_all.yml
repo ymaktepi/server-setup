@@ -10,6 +10,8 @@
 - import_playbook: update/update_other_cts.yml
 - import_playbook: update/update_traefik_cts.yml
 - import_playbook: update/update_uptimekuma_cts.yml
+- import_playbook: update/update_node_exporter.yml
+- import_playbook: update/update_monitoring_cts.yml
 - import_playbook: pve/update_pve.yml
 - import_playbook: update/update_rsync_backup_cts.yml
 - import_playbook: update/update_arr.yml

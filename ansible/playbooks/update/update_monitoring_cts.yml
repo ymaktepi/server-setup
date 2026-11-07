@@ -1,0 +1,12 @@
+# VictoriaMetrics + Grafana on the monitoring CT (tofu/core). The hosts it
+# scrapes need install_node_exporter (update_node_exporter.yml).
+- hosts: monitoring
+  gather_facts: false
+
+  roles:
+    - update_cts
+    - install_docker_debian
+    - role: install_nginx
+      courgettes_subdomain: "grafana"
+    - install_node_exporter
+    - install_monitoring

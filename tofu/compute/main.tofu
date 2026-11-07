@@ -36,6 +36,8 @@ terraform {
 locals {
   fw_admin = "10.10.0.0/23,10.20.0.20,10.20.0.21" # Bole Default + laptop at Salon
   fw_dmz   = "10.10.5.0/24"
+  # core's `monitoring` CT, which scrapes every host's node_exporter
+  fw_monitoring = "10.10.0.247"
 }
 
 module "containers" {
@@ -96,6 +98,7 @@ module "containers" {
           { type = "in", proto = "udp", dport = "7777", comment = "satisfactory" },
           { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
+          { type = "in", proto = "tcp", dport = "9100", source = local.fw_monitoring, comment = "node_exporter" },
           { type = "out", action = "DROP", dest = local.fw_dmz, comment = "rest of the DMZ" },
         ]
       }

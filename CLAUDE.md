@@ -88,6 +88,18 @@ The Infomaniak VPS runs what must stay up when home is down (`playbooks/update/u
 - **Tailscale** still runs on the `vpn` LXC alongside NetBird, until NetBird has been tested enough to replace it.
 - The home DMZ Traefik no longer runs Authelia/lldap; it only serves public sites.
 
+## Monitoring
+
+The `monitoring` CT (core, `10.10.0.247`) runs VictoriaMetrics + Grafana + prometheus-pve-exporter (`install_monitoring`, `playbooks/update/update_monitoring_cts.yml`). Grafana is at `grafana.local.courgettes.club`; VictoriaMetrics listens on localhost only. `templates/scrape.yml.j2` is generated from the inventory:
+- every host in `debian` gets node_exporter (`install_node_exporter`, `update_node_exporter.yml`) on :9100;
+- the Proxmox API is read with the `monitoring@pam` token (`pve_monitoring.yml`);
+- Traefik exposes metrics on :8082 (a `metrics` entrypoint);
+- the gpu VM runs `nvidia_gpu_exporter` (:9835, `install_gpu`).
+
+The VPS isn't monitored. Reaching it would make the CT a NetBird peer, which needs `/dev/net/tun`, and Proxmox only lets root@pam pass devices through (tofu's API token gets a 403).
+
+Firewalled CTs let the CT in through `local.fw_monitoring` rules. Add one to any new firewalled CT. Grafana dashboards are downloaded from grafana.com by ID (`grafana_dashboards`) and provisioned read-only. No alerting yet; logs (VictoriaLogs) are the planned next step.
+
 ## Network conventions
 
 - `local.courgettes.club` — pre-existing convention used by Traefik/nginx configs and each service's own `*_DOMAIN` env var.

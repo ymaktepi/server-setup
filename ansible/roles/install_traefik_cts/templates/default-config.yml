@@ -90,6 +90,16 @@ http:
         - default-headers
       tls: {}
       service: uptime-status
+{% if 'host_monitoring' in hostvars %}
+    grafana:
+      entryPoints:
+        - "https"
+      rule: "Host(`grafana.local.courgettes.club`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: grafana
+{% endif %}
     jellyfin:
       entryPoints:
         - "https"
@@ -231,6 +241,13 @@ http:
         servers:
           - url: "https://{{hostvars['host_uptime_kuma']['ansible_host']}}"
         passHostHeader: true
+{% if 'host_monitoring' in hostvars %}
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "https://{{hostvars['host_monitoring']['ansible_host']}}"
+        passHostHeader: true
+{% endif %}
     jellyfin:
       loadBalancer:
         servers:

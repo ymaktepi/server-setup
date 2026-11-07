@@ -1,0 +1,17 @@
+monitoring_dir: /opt/monitoring
+
+victoriametrics_image: victoriametrics/victoria-metrics:latest
+victoriametrics_retention: 180d
+grafana_image: grafana/grafana:latest
+pve_exporter_image: prompve/prometheus-pve-exporter:latest
+
+scrape_interval: 30s
+
+# grafana.com dashboards, downloaded once onto the CT and provisioned
+# read-only; their datasource inputs (${DS_...}) are pointed at VictoriaMetrics.
+grafana_dashboards:
+  - { name: node-exporter-full, id: 1860 }
+  - { name: proxmox, id: 10347 }
+  - { name: traefik, id: 17346 }
+  - { name: victoriametrics, id: 10229 }
+  - { name: nvidia-gpu, id: 14574 }

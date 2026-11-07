@@ -1,0 +1,3 @@
+# Scraped by the monitoring CT (install_monitoring). Every interface: the
+# firewalled CTs only let the monitoring CT in (tofu, local.fw_monitoring).
+node_exporter_listen_address: ":9100"

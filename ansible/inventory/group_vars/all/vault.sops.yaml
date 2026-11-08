@@ -44,6 +44,9 @@ netbird_setup_keys:
     vps: ENC[AES256_GCM,data:AgNCQ6kXeA+HzmM6lSUeq/kU5FFuL/a1/QEJspzCXWZpI3my,iv:FLAQ2Vhti4PaVK3GsL6l4KRG7DTLNBX0n52t+/FJaKg=,tag:J9MB5waOjrH05kRHxCbqhA==,type:str]
     home_router: ENC[AES256_GCM,data:C/MMbRyEyT8htTR3oiNznMgBJFHkJsG29tHsbeklm2CvO+vL,iv:HylVmQ/7oR5beg2FKF7NTLTaNMg1osU0uZKmAAzMqBQ=,tag:sSGWUPKBtorF+xDGMsz6xw==,type:str]
     jellyfin: ENC[AES256_GCM,data:UtB2IB1ZXGqvD//TTUeLaU/8n0wGgpHypOvw+5Vfrlk1kd1d,iv:CjiLEbMI4g+UPRr1H9y5JGl+Vywpk+bZwZxmLuANjGE=,tag:6vRbWTHQu8X8MVGvgDZxYw==,type:str]
+gatus_telegram_token: ENC[AES256_GCM,data:AtBDZqQldMymJ2rInG2Tub7NFO8Xwl7JYHMvSmQ/U25spnLjSpNIud+wj8is,iv:cmcfJKs9IxCijem1C9p85zqUk1HJjDuDNEv1ZyIUByw=,tag:UBLkx4KaC+LtYQkMtFZy+Q==,type:str]
+gatus_telegram_chat_id: ENC[AES256_GCM,data:TYJbKX5Obkc=,iv:Tkslz4Uw0xyxNG/BHOHChby1l1sTTt34DwaUWAB8etA=,tag:9y1sLl0Et/zXAQya7CD8XA==,type:str]
+gatus_healthchecks_url: ENC[AES256_GCM,data:RzboiLxsRQEkjfp5qjBWggOZR8TKyq4NHTLkY2+rCqzy8xhkwAXgMPeIs194kLemjxyvbtpdCZ4=,iv:LlKUba+wcKg+03fKrp5PdSoN38z3NqpJkEamfyqsHkg=,tag:NGVcFmwXHFEZGVpqpDI/+w==,type:str]
 sops:
     age:
         - enc: |
@@ -55,7 +58,7 @@ sops:
             e9VeAl/f8g3FW4jR3qrYookJi6cbwi05U9lerZUu7IEGLsvkIu3cRw==
             -----END AGE ENCRYPTED FILE-----
           recipient: age14rtd2ct2zmz34mznk2grjqnjc5xpx4qj7jlzcz6gcttjz0zj6ygq4karew
-    lastmodified: "2026-11-07T01:13:53Z"
-    mac: ENC[AES256_GCM,data:9VmXS0Fm44SwwbPTXz4YEUupUvcEVrRM/sRKeRK38Mtfmp37pO1xNSOWfD5uaeb4T04IqS6Z3xmvtBi3wLqsz4o9RhsY6baJuxcbwvbsJ/4OWw6rg1iTiJzm9fsz9KNjy2RO0nrhCZWHW8w/os1+HVjbnfRUNHMD5L9rGRJ/+Rg=,iv:1lzXQIvdJRNxH47gfMvXnedcgDqpsxrTEHJEPQ45COs=,tag:sKZ6jfaXTZWoVWztk1oyGg==,type:str]
+    lastmodified: "2026-11-08T16:57:54Z"
+    mac: ENC[AES256_GCM,data:Rr17QpP+DxWs4m4CeiFPD/2+vpVxP+BUlOh4iljjrhntmxq9Su3ZDE26IJJHiN8gLlg9oiCu3XQQlTI3Pho/TfbA3khmSNPS8/9nTCoWmcZ7/umv2C7TEzng9QIKObldHtVrWyvvpWnUf56FsdfKTtO+nwfbywanWsRfb/fcpr4=,iv:Wm5e1dC9VtJs4ENpygWAbCWYMKZDTbcjW/p4zgpuQCw=,tag:Bm51YcEYCIOhVTt7K3jl5A==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.3

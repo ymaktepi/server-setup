@@ -1,0 +1,117 @@
+{#- Internal instance (status.local.courgettes.club): every machine and
+    guest, every Traefik route, DNS and the healthchecks.io heartbeat. Every
+    endpoint alerts on Telegram. -#}
+{%- macro host_name(h) -%}
+{{ hostvars[h]['proxmox_node_name'] | default(h | regex_replace('^host_', '')) }}
+{%- endmacro -%}
+{%- macro alert() %}
+    alerts:
+      - type: telegram
+{%- endmacro -%}
+metrics: true
+
+storage:
+  type: sqlite
+  path: /data/data.db
+
+ui:
+  title: Courgettes Cloud
+  header: Courgettes Cloud
+
+alerting:
+  telegram:
+    token: "{{ gatus_telegram_token }}"
+    id: "{{ gatus_telegram_chat_id }}"
+    default-alert:
+      failure-threshold: 3
+      success-threshold: 2
+      send-on-resolved: true
+
+{# Groups: machines (physical boxes + the VPS), guests (CTs/VMs from tofu),
+    sites (public websites), services (internal web UIs, DNS), heartbeat. -#}
+{%- macro ping(name, group, host) %}
+  - name: "{{ name }}"
+    group: {{ group }}
+    url: "icmp://{{ host }}"
+    interval: {{ gatus_interval }}
+    conditions:
+      - "[CONNECTED] == true"
+{{ alert() }}
+{%- endmacro -%}
+{%- macro web(name, group, url, cert=false) %}
+  - name: "{{ name }}"
+    group: {{ group }}
+    url: "{{ url }}"
+    interval: {{ gatus_interval }}
+    client:
+      timeout: 10s
+    conditions:
+      - "[STATUS] < 500"
+{% if cert %}
+      - "[CERTIFICATE_EXPIRATION] > 168h"
+{% endif %}
+{{ alert() }}
+{%- endmacro -%}
+{%- set machines = groups['pvenodes'] + groups['minix'] | default([]) -%}
+{%- set not_guests = machines + groups['infomaniak'] | default([]) -%}
+endpoints:
+  # Proxmox nodes, minix, the Synology, the VPS
+{% for h in machines | sort %}
+{{ ping(host_name(h), 'machines', hostvars[h]['ansible_host']) }}
+{% endfor %}
+{% for m in gatus_extra_machines %}
+{{ ping(m.name, 'machines', m.host) }}
+{% endfor %}
+{{ ping('vps', 'machines', gatus_vps_host) }}
+
+  # every CT/VM from tofu (firewalled CTs accept ping from 10.10.0.0/23)
+{% for h in groups['all'] | difference(not_guests) | sort if hostvars[h]['ansible_host'] is defined %}
+{{ ping(host_name(h), 'guests', hostvars[h]['ansible_host']) }}
+{% endfor %}
+
+  # public websites: the DMZ Traefik's routers that aren't *.local-dmz
+{% for c in gatus_web_checks['dmz'] | default([]) if not c.host.endswith('.local-dmz.courgettes.club') %}
+{{ web(c.host, 'sites', 'https://' ~ c.host, cert=true) }}
+{% endfor %}
+{% for e in gatus_public_extra %}
+{{ web(e.name, 'sites', e.url) }}
+{% endfor %}
+
+  # internal web UIs (both Traefiks; 401/403/redirects count as up) and DNS
+{% for site, checks in gatus_web_checks.items() %}
+{% for c in checks if site != 'dmz' or c.host.endswith('.local-dmz.courgettes.club') %}
+{{ web(c.host, 'services', 'https://' ~ c.host) }}
+{% endfor %}
+{% endfor %}
+  - name: teamspeak
+    group: services
+    url: "udp://{{ gatus_teamspeak.host }}:{{ gatus_teamspeak.port }}"
+    interval: {{ gatus_interval }}
+    # TS3 Init1 packet (header + step 0, zero timestamp/random), base64:
+    # YAML string escapes are code points, they can't carry raw bytes
+    body: !!binary VFMzSU5JVDEAZQAAiF1lNjAAAAAAAAAAAAAAAAAAAAAAAA==
+    conditions:
+      - "[CONNECTED] == true"
+      - "[BODY] == pat(TS3INIT1*)"
+{{ alert() }}
+{% for h in ['host_dns1', 'host_dns2'] if h in hostvars %}
+  - name: "{{ host_name(h) }} (dns)"
+    group: services
+    url: "{{ hostvars[h]['ansible_host'] }}"
+    interval: {{ gatus_interval }}
+    dns:
+      query-name: "{{ gatus_dns_query }}"
+      query-type: A
+    conditions:
+      - "[DNS_RCODE] == NOERROR"
+{{ alert() }}
+{% endfor %}
+
+  # dead-man switch: healthchecks.io alerts when these pings stop coming
+  - name: healthchecks.io
+    group: heartbeat
+    url: "{{ gatus_healthchecks_url }}"
+    interval: {{ gatus_heartbeat_interval }}
+    conditions:
+      - "[STATUS] == 200"
+{{ alert() }}

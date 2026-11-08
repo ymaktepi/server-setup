@@ -1,0 +1,17 @@
+# Every Traefik router's first Host(`...`), rendered from install_traefik_cts'
+# own templates so the checks follow the routes. web_checks: {default: [...],
+# dmz: [...]}, each item {router, host}.
+- name: Collect Traefik hosts
+  ansible.builtin.set_fact:
+    gatus_web_checks: >-
+      {%- set out = {} -%}
+      {%- for name, file in gatus_traefik_configs.items() -%}
+      {%- set routers = (lookup('template', role_path ~ '/../install_traefik_cts/templates/' ~ file) | from_yaml).http.routers -%}
+      {%- set items = [] -%}
+      {%- for router, conf in routers.items() | sort if router not in gatus_skip_routers -%}
+      {%- set host = conf.rule | regex_search('Host\\(`([^`]+)`\\)', '\\1') -%}
+      {%- if host -%}{%- set _ = items.append({'router': router, 'host': host | first}) -%}{%- endif -%}
+      {%- endfor -%}
+      {%- set _ = out.update({name: items}) -%}
+      {%- endfor -%}
+      {{ out }}

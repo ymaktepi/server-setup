@@ -1,0 +1,13 @@
+# Gatus on the gatus CT (tofu/core): internal status.local + the public
+# status.courgettes.club. Needs gatus_telegram_token, gatus_telegram_chat_id
+# and gatus_healthchecks_url in the vault.
+- hosts: gatus
+  gather_facts: false
+
+  roles:
+    - update_cts
+    - install_docker_debian
+    - role: install_nginx
+      courgettes_subdomain: "status"
+    - install_node_exporter
+    - install_gatus

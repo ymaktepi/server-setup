@@ -1,0 +1,33 @@
+# Two instances of the same image: `gatus` checks everything and alerts,
+# `gatus-public` only shows the public sites (status.courgettes.club). Both
+# listen on localhost; nginx (gatus-nginx.conf) picks one by Host.
+services:
+  gatus:
+    image: {{ gatus_image }}
+    container_name: gatus
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - ./internal/config:/config:ro
+      - ./internal/data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "2"
+
+  gatus-public:
+    image: {{ gatus_image }}
+    container_name: gatus-public
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:8081:8080
+    volumes:
+      - ./public/config:/config:ro
+      - ./public/data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "2"

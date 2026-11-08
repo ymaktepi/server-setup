@@ -9,7 +9,7 @@
 - import_playbook: update/update_networkcheckers_cts.yml
 - import_playbook: update/update_other_cts.yml
 - import_playbook: update/update_traefik_cts.yml
-- import_playbook: update/update_uptimekuma_cts.yml
+- import_playbook: update/update_gatus_cts.yml
 - import_playbook: update/update_node_exporter.yml
 - import_playbook: update/update_monitoring_cts.yml
 - import_playbook: pve/update_pve.yml

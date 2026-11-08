@@ -98,7 +98,13 @@ The `monitoring` CT (core, `10.10.0.247`) runs VictoriaMetrics + Grafana + prome
 
 The VPS isn't monitored. Reaching it would make the CT a NetBird peer, which needs `/dev/net/tun`, and Proxmox only lets root@pam pass devices through (tofu's API token gets a 403).
 
-Firewalled CTs let the CT in through `local.fw_monitoring` rules. Add one to any new firewalled CT. Grafana dashboards are downloaded from grafana.com by ID (`grafana_dashboards`) and provisioned read-only. No alerting yet; logs (VictoriaLogs) are the planned next step.
+Firewalled CTs let the CT in through `local.fw_monitoring` rules. Add one to any new firewalled CT. Grafana dashboards are downloaded from grafana.com by ID (`grafana_dashboards`) and provisioned read-only. No metric-based alerting yet; logs (VictoriaLogs) are the planned next step.
+
+Up/down checks and alerting are Gatus, on its own CT (core `gatus`, `10.10.0.243`; `install_gatus`, `playbooks/update/update_gatus_cts.yml`), which replaced Uptime Kuma. Nothing is configured by hand: the checks are generated from the inventory and from `install_traefik_cts`'s own templates (every router's first `Host()`), so a new CT or Traefik route gets a check on the next run. Two instances on the CT, picked by Host in its nginx:
+- internal, `status.local.courgettes.club` (groups machines/guests/sites/services/heartbeat): Telegram alerts on every endpoint, `/metrics` scraped by VictoriaMetrics, and a healthchecks.io ping every 30 min as a dead-man switch (`gatus_healthchecks_url`; healthchecks.io alerts if Gatus or home goes silent);
+- public, `status.courgettes.club` through the DMZ Traefik (UniFi rule `dmz_allow_traefik_forward`): only public sites, TeamSpeak and the hand-picked `gatus_public_machines`/`gatus_public_guests` under public names, with internal addresses hidden. No alerting.
+
+TeamSpeak is checked over UDP: a bare `udp://` check always passes, so it sends a TS3 Init1 packet (YAML `!!binary`, since string escapes can't carry raw bytes) and expects `TS3INIT1` back. Vault: `gatus_telegram_token`, `gatus_telegram_chat_id`, `gatus_healthchecks_url`. Static IPs on the Main VLAN: also check `network-bole/site.tofu`'s reservations (`.251`/`.252` are the Synology).
 
 ## Network conventions
 

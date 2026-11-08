@@ -1,0 +1,55 @@
+- name: Create Gatus directories
+  ansible.builtin.file:
+    path: "{{ gatus_dir }}/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - internal/config
+    - internal/data
+    - public/config
+    - public/data
+
+- name: Collect Traefik hosts
+  include_tasks: traefik_hosts.yml
+
+- name: Create Gatus configs
+  no_log: true
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ gatus_dir }}/{{ item.dest }}/config/config.yaml"
+    owner: root
+    group: root
+    mode: 0600
+  loop:
+    - { src: config-internal.yml.j2, dest: internal }
+    - { src: config-public.yml.j2, dest: public }
+
+- name: Create Docker Compose
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ gatus_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Refresh docker
+  include_tasks: refresh_docker_compose.yml
+  vars:
+    compose_project_dir: "{{ gatus_dir }}"
+
+- name: Create nginx conf
+  template:
+    src: gatus-nginx.conf
+    dest: /etc/nginx/sites-available/gatus-nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable nginx conf
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/gatus-nginx.conf
+    dest: /etc/nginx/sites-enabled/gatus-nginx.conf
+    state: link
+
+- name: Restart nginx
+  service: name=nginx state=restarted

@@ -1,0 +1,53 @@
+gatus_dir: /opt/gatus
+gatus_image: twinproduction/gatus:v5.38.0
+
+gatus_interval: 60s
+# dead-man switch: healthchecks.io alerts when these pings stop (set the
+# check's period to match, plus some grace, on healthchecks.io)
+gatus_heartbeat_interval: 1800s
+
+# pinged as "the VPS" (resolves to its public address)
+gatus_vps_host: vps.courgettes.club
+
+# TeamSpeak's voice port, over UDP: a plain UDP "connection" always works,
+# so the check sends the first packet of a client handshake (TS3INIT1, step 0)
+# and expects the server's TS3INIT1 answer.
+gatus_teamspeak: { host: ts.courgettes.club, port: 9987 }
+
+# physical machines that aren't in the inventory, pinged with the Proxmox
+# nodes, minix and the VPS (addresses: network-bole's reservations)
+gatus_extra_machines:
+  - { name: synology (nic1), host: 10.10.0.252 }
+  - { name: synology (nic2), host: 10.10.0.251 } # Garage S3, tofu state
+
+# DNS checks ask dns1/dns2 for this record (one of modules/lxc's)
+gatus_dns_query: gatus.actual.courgettes.club
+
+# Traefik routers whose hosts get an HTTPS check, read from these templates
+# of install_traefik_cts. dmz routers that aren't *.local-dmz are public and
+# also go on the public status page.
+gatus_traefik_configs:
+  default: default-config.yml
+  dmz: dmz-config.yml
+gatus_skip_routers: []
+
+# extra public sites (not Traefik routers) for both instances: [{name, url}]
+gatus_public_extra: []
+
+# Public page (status.courgettes.club), besides the public sites, TeamSpeak
+# and the VPS: physical machines under public names, and the guests worth
+# showing. Inventory names (host_*), or a fixed address with `ip`.
+gatus_public_machines:
+  - { name: compute 1, host: host_main_node }
+  - { name: compute 2, host: host_node_2 }
+  - { name: compute 3, host: host_node_3 }
+  - { name: compute 4, host: host_node_4 }
+  - { name: storage, ip: 10.10.0.252 } # synology (nic1)
+gatus_public_guests:
+  - { name: gpu, host: host_gpu }
+  - { name: game server, host: host_game_server }
+  - { name: jumphost, host: host_jumphost }
+  - { name: bear, host: host_bear }
+  - { name: pocket, host: host_pocket }
+  - { name: traefik dmz, host: host_traefik_dmz }
+  - { name: websites, host: host_websites }

@@ -162,23 +162,6 @@ module "containers" {
       ]
     }
 
-    uptime_kuma = {
-      ctid       = 406
-      node       = "proxmox2"
-      image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
-
-      cores  = 1
-      cpus   = 1
-      memory = 512
-
-      vlan         = 1
-      ipv4mode     = "static"
-      ipv4_address = "10.10.0.253/23"
-      ipv4_gateway = "10.10.0.1"
-
-      ansible_groups = ["uptimekuma"]
-    }
-
     traefik_default = {
       ctid       = 407
       node       = "proxmox2"
@@ -344,6 +327,27 @@ module "containers" {
       ipv4_gateway = "10.10.0.1"
 
       ansible_groups = ["monitoring"]
+    }
+
+    # Gatus (install_gatus): uptime checks generated from the inventory and
+    # the Traefik configs, Telegram alerts. Two instances: the internal one
+    # (status.local) and a public-only one the DMZ Traefik serves as
+    # status.courgettes.club (firewall rule in network-bole).
+    gatus = {
+      ctid       = 421
+      node       = "proxmox2"
+      image_name = "debian-12-standard_12.12-1_amd64.tar.zst"
+
+      cores  = 1
+      cpus   = 1
+      memory = 512
+
+      vlan         = 1
+      ipv4mode     = "static"
+      ipv4_address = "10.10.0.243/23" # .251/.252 are the Synology (network-bole reservations)
+      ipv4_gateway = "10.10.0.1"
+
+      ansible_groups = ["gatus"]
     }
 
 

@@ -69,7 +69,7 @@ Containers and VMs themselves are created by OpenTofu (`../tofu/`, modules
 - `update/update_other_cts.yml` - Update other miscellaneous containers
 - `update/update_rsync_backup_cts.yml` - Update Rsync backup container
 - `update/update_traefik_cts.yml` - Update Traefik container
-- `update/update_uptimekuma_cts.yml` - Update Uptime Kuma container
+- `update/update_gatus_cts.yml` - Update Gatus container (status pages, uptime checks)
 
 ## Preparing Proxmox
 
@@ -152,8 +152,7 @@ ansible-playbook playbooks/pve/pve_mounts.yml
 ### Update Containers: `update/update_*_cts.yml`
 
 ```bash
-ansible-playbook playbooks/update/update_uptimekuma_cts.yml
-## you then need to import the backup json file to have all the uptime checkers up.
+ansible-playbook playbooks/update/update_gatus_cts.yml
 ```
 
 ```bash
@@ -197,5 +196,5 @@ Host jumphost
 Put pub key in `files` folder then:
 
 ```bash
-ansible-playbook playbooks/provisioning/add_ssh_key_to_host.yml -e '{"ssh_copy_hosts": "traefik_default:networkcheckers:uptimekuma", "ssh_copy_user": "root", "ssh_copy_filename": "key-name.pub"}'
+ansible-playbook playbooks/provisioning/add_ssh_key_to_host.yml -e '{"ssh_copy_hosts": "traefik_default:networkcheckers:gatus", "ssh_copy_user": "root", "ssh_copy_filename": "key-name.pub"}'
 ```

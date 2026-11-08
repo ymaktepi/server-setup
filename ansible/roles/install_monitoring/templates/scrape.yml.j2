@@ -71,6 +71,17 @@ scrape_configs:
         labels: { instance: "{{ host_name(h) }}" }
 {% endfor %}
 
+{% if 'host_gatus' in hostvars %}
+  # Gatus' /metrics (internal instance), behind the CT's nginx (self-signed)
+  - job_name: gatus
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ["{{ hostvars['host_gatus']['ansible_host'] }}:443"]
+        labels: { instance: "gatus" }
+
+{% endif %}
   - job_name: victoriametrics
     static_configs:
       - targets: ["127.0.0.1:8428"]

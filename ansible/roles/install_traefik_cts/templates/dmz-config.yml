@@ -160,7 +160,6 @@ http:
         - "https"
       middlewares:
         - default-headers
-        - uptime-kuma-host
       service: status
       tls:
         certResolver: letsencrypt
@@ -204,23 +203,18 @@ http:
         servers:
           - url: "https://{{hostvars['host_minix']['ansible_host']}}"
         passHostHeader: true
-    # Straight to Uptime Kuma's nginx, not via traefik_default: the firewall
+    # Straight to the gatus CT's nginx, not via traefik_default: the firewall
     # only lets this Traefik reach that one container (tofu:
     # network-bole/firewall_policies.tofu), since traefik_default fronts every
-    # internal UI. Host is set to what Kuma saw when this went through
-    # traefik_default (uptime-kuma-host), in case a status page is mapped to it.
+    # internal UI. nginx hands Host status.courgettes.club to the public-only
+    # Gatus instance (install_gatus).
     status:
       loadBalancer:
         servers:
-          - url: "https://{{hostvars['host_uptime_kuma']['ansible_host']}}"
+          - url: "https://{{hostvars['host_gatus']['ansible_host']}}"
         passHostHeader: true
   #endregion
   middlewares:
-    uptime-kuma-host:
-      headers:
-        customRequestHeaders:
-          Host: "uptime-status.local.courgettes.club"
-
     traefik-auth:
       basicAuth:
         users:

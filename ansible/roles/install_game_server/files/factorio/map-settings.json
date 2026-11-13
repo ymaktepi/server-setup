@@ -1,10 +1,8 @@
 {
   "difficulty_settings":
   {
-    "recipe_difficulty": 0,
-    "technology_difficulty": 0,
     "technology_price_multiplier": 1,
-    "research_queue_setting": "after-victory"
+    "spoil_time_modifier" : 1
   },
   "pollution":
   {
@@ -20,7 +18,6 @@
     "pollution_with_max_forest_damage": 150,
     "pollution_per_tree_damage": 50,
     "pollution_restored_per_tree_damage": 10,
-    "max_pollution_to_restore_trees": 20,
     "enemy_attack_pollution_consumption_modifier": 1
   },
   "enemy_evolution":
@@ -33,17 +30,19 @@
   "enemy_expansion":
   {
     "enabled": true,
-    "min_base_spacing": 3,
-    "max_expansion_distance": 7,
-    "friendly_base_influence_radius": 2,
-    "enemy_building_influence_radius": 2,
-    "building_coefficient": 0.1,
-    "other_base_coefficient": 2.0,
+    "max_expansion_distance": 5,
+    "min_expansion_distance": 3,
+    "friendly_base_influence_radius": 6,
+    "enemy_building_influence_radius": 3,
+    "building_coefficient": 0.5,
+    "other_base_coefficient": 3.0,
     "neighbouring_chunk_coefficient": 0.5,
-    "neighbouring_base_chunk_coefficient": 0.4,
-    "max_colliding_tiles_coefficient": 0.9,
+    "neighbouring_base_chunk_coefficient": 0.5,
+    "max_colliding_tiles_coefficient": 0.8,
     "settler_group_min_size": 5,
-    "settler_group_max_size": 20,
+    "settler_group_max_size": 10,
+    "evolution_group_size_factor": 8.0,
+    "build_base_unit_dispatch_cooldown": 1800,
     "min_expansion_cooldown": 14400,
     "max_expansion_cooldown": 216000
   },
@@ -63,28 +62,11 @@
     "max_gathering_unit_groups": 30,
     "max_unit_group_size": 200
   },
-  "steering":
-  {
-    "default":
-    {
-      "radius": 1.2,
-      "separation_force": 0.005,
-      "separation_factor": 1.2,
-      "force_unit_fuzzy_goto_behavior": false
-    },
-    "moving":
-    {
-      "radius": 3,
-      "separation_force": 0.01,
-      "separation_factor": 3,
-      "force_unit_fuzzy_goto_behavior": false
-    }
-  },
   "path_finder":
   {
     "fwd2bwd_ratio": 5,
     "goal_pressure_ratio": 2,
-    "max_steps_worked_per_tick": 100,
+    "max_steps_worked_per_tick": 1000,
     "max_work_done_per_tick": 8000,
     "use_path_cache": true,
     "short_cache_size": 5,
@@ -111,10 +93,15 @@
     "short_request_max_steps": 1000,
     "short_request_ratio": 0.5,
     "min_steps_to_check_path_find_termination": 2000,
-    "start_to_goal_cost_multiplier_to_terminate_path_find": 500.0,
+    "start_to_goal_cost_multiplier_to_terminate_path_find": 2000.0,
     "overload_levels": [0, 100, 500],
     "overload_multipliers": [2, 3, 4],
     "negative_path_cache_delay_interval": 20
+  },
+  "asteroids":
+  {
+    "spawning_rate" : 1,
+    "max_ray_portals_expanded_per_tick" : 100
   },
   "max_failed_behavior_count": 3
 }

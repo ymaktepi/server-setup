@@ -22,7 +22,7 @@
   roles:
     - role: install_game_server
       install_factorio: true
-      install_satisfactory: true
+      install_satisfactory: false
 
 # disabled for now
 #- hosts: home_assistant

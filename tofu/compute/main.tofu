@@ -76,7 +76,7 @@ module "containers" {
       node       = "proxmox"
       image_name = "debian-12-standard_12.2-1_amd64.tar.zst"
       # stopped for now: node `proxmox` can't hold it next to the 48 GB gpu VM
-      started = false
+      started = true
 
       cores  = 6
       cpus   = 4
@@ -230,7 +230,7 @@ module "vms" {
       datastore_id = "m2-noraid"
       image        = "debian12"
 
-      started = true
+      started = false
       on_boot = false
 
       machine = "q35"

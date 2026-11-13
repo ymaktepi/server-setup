@@ -4,6 +4,9 @@ services:
     ports:
       - "34197:34197/udp"
       - "27015:27015/tcp"
+    environment:
+      # vanilla 2.0 only, so friends without the DLC can join
+      DLC_SPACE_AGE: "false"
     volumes:
       # for bigger games, go to the mounted HDD space
       - ./data:/factorio

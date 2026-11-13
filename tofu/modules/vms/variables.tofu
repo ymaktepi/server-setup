@@ -1,3 +1,9 @@
+variable "started" {
+  description = "Is the vm started"
+  type        = bool
+  default     = true
+}
+
 variable "linux_bridge" {
   description = "Default linux bridge"
   type        = string

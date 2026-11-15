@@ -99,6 +99,7 @@ module "containers" {
           { type = "in", proto = "udp", dport = "7778", comment = "ark" },
           { type = "in", proto = "tcp", dport = "27020", source = "10.10.0.0/23", comment = "ark RCON" },
           { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
+          { type = "in", macro = "SSH", source = "10.10.5.252", comment = "core: jumphost" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
           { type = "in", proto = "tcp", dport = "9100", source = local.fw_monitoring, comment = "node_exporter" },
           { type = "out", action = "DROP", dest = local.fw_dmz, comment = "rest of the DMZ" },

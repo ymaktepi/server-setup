@@ -3,3 +3,6 @@
 
 - include_tasks: install_satisfactory.yml
   when: install_satisfactory
+
+- include_tasks: install_arksurvivalascended.yml
+  when: install_arksurvivalascended

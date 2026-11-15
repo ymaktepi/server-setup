@@ -80,22 +80,24 @@ module "containers" {
 
       cores  = 6
       cpus   = 4
-      memory = 16384
-      disk   = 8
+      memory = 24576
+      disk   = 24
 
       vlan         = 5
       ipv4mode     = "static"
       ipv4_address = "10.10.5.248/24"
       ipv4_gateway = "10.10.5.1"
 
-      # Game ports from anywhere; Factorio's RCON (27015/tcp) from Default
-      # only, even though the port forward exposes it. Nothing into the DMZ.
+      # Game ports from anywhere; RCON (Factorio 27015/tcp, ARK 27020/tcp) from Default
+      # only, even though Factorio's port forward exposes 27015. Nothing into the DMZ.
       firewall = {
         rules = [
           { type = "in", proto = "udp", dport = "34197", comment = "factorio" },
           { type = "in", proto = "tcp", dport = "27015", source = "10.10.0.0/23", comment = "factorio RCON" },
           { type = "in", proto = "tcp", dport = "7777", comment = "satisfactory" },
           { type = "in", proto = "udp", dport = "7777", comment = "satisfactory" },
+          { type = "in", proto = "udp", dport = "7778", comment = "ark" },
+          { type = "in", proto = "tcp", dport = "27020", source = "10.10.0.0/23", comment = "ark RCON" },
           { type = "in", macro = "SSH", source = local.fw_admin, comment = "admin SSH" },
           { type = "in", macro = "Ping", source = "10.10.0.0/23", comment = "ping from Default" },
           { type = "in", proto = "tcp", dport = "9100", source = local.fw_monitoring, comment = "node_exporter" },

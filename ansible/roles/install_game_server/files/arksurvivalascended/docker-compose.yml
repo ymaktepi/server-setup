@@ -7,7 +7,6 @@ services:
     container_name: asa-server
     restart: unless-stopped
     stop_grace_period: 210s
-    env_file: .env
     ports:
       - "${ASA_PORT:-7777}:${ASA_PORT:-7777}/tcp"
       - "${ASA_PORT:-7777}:${ASA_PORT:-7777}/udp"

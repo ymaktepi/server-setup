@@ -15,19 +15,19 @@
     - saves/Config
     - saves/Config/WindowsServer
 
-- name: Create Docker Compose for Satisfactory
-  copy:
-    src: satisfactory/docker-compose.yml
+- name: Create Docker Compose for ARK
+  ansible.builtin.copy:
+    src: arksurvivalascended/docker-compose.yml
     dest: '/opt/arksurvivalascended/docker-compose.yml'
     mode: '0644'
 
 - name: Create .env
-  ansible.builtin.copy:
-    src: env
+  ansible.builtin.template:
+    src: arksurvivalascended/env.j2
     dest: /opt/arksurvivalascended/.env
     mode: "0600"
 
-- name: Run `docker-compose up` for satisfactory
+- name: Run `docker-compose up` for ARK
   community.docker.docker_compose_v2:
     project_src: /opt/arksurvivalascended
 

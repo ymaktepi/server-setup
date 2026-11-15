@@ -9,6 +9,8 @@
     path: "/mnt/mounted-raid/arksurvivalascended/data/{{ item }}"
     state: directory
     mode: "0755"
+    owner: "7777"
+    group: "7777"
   loop:
     - server
     - saves

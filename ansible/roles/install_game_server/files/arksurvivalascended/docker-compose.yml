@@ -17,6 +17,10 @@ services:
       - /mnt/mounted-raid/arksurvivalascended/data/server:/home/pok/arkserver
       # save games + GameUserSettings.ini / Game.ini live here
       - /mnt/mounted-raid/arksurvivalascended/data/saves:/home/pok/arkserver/ShooterGame/Saved
+    env_file:
+      - .env
+      - path: .env.local # create it manually to manage mods
+        required: false
     security_opt:
       - seccomp=unconfined
     mem_limit: 16G

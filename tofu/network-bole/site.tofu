@@ -116,5 +116,6 @@ module "site" {
     http_https_traefik = { name = "http-https-traefik", wan_port = "80,443", fwd_ip = "10.10.5.250", fwd_port = "80,443", logging = true } # core: traefik_dmz
     factorio           = { name = "factorio", wan_port = "34197,27015", fwd_ip = "10.10.5.248", fwd_port = "34197,27015" }                 # compute: game_server
     satisfactory       = { name = "satisfactory", wan_port = "7777", fwd_ip = "10.10.5.248", fwd_port = "7777" }                           # compute: game_server
+    ark                = { name = "ark", wan_port = "7778", fwd_ip = "10.10.5.248", fwd_port = "7778" }                                    # compute: game_server (RCON 27020 stays LAN-only)
   }
 }

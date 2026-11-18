@@ -47,6 +47,8 @@ netbird_setup_keys:
 gatus_telegram_token: ENC[AES256_GCM,data:AtBDZqQldMymJ2rInG2Tub7NFO8Xwl7JYHMvSmQ/U25spnLjSpNIud+wj8is,iv:cmcfJKs9IxCijem1C9p85zqUk1HJjDuDNEv1ZyIUByw=,tag:UBLkx4KaC+LtYQkMtFZy+Q==,type:str]
 gatus_telegram_chat_id: ENC[AES256_GCM,data:TYJbKX5Obkc=,iv:Tkslz4Uw0xyxNG/BHOHChby1l1sTTt34DwaUWAB8etA=,tag:9y1sLl0Et/zXAQya7CD8XA==,type:str]
 gatus_healthchecks_url: ENC[AES256_GCM,data:RzboiLxsRQEkjfp5qjBWggOZR8TKyq4NHTLkY2+rCqzy8xhkwAXgMPeIs194kLemjxyvbtpdCZ4=,iv:LlKUba+wcKg+03fKrp5PdSoN38z3NqpJkEamfyqsHkg=,tag:NGVcFmwXHFEZGVpqpDI/+w==,type:str]
+ark_server_password: ENC[AES256_GCM,data:MBv88nF+lAAKpD68TzVm3AKGHmBlJvdG,iv:hP3WlvcdXj1yUZ4yet0fBuU3IUaJqEp8JM4IooONYxM=,tag:H4syhxRAuFpXfkbtRz4puw==,type:str]
+ark_admin_password: ENC[AES256_GCM,data:rdGNUIGnG8kF7o+NKXijiOef/NITvH49,iv:4VFDNlyctT6POaRJi+a5QxBSEMQPwBGMh4Si+EA82GQ=,tag:+YOL5hECSl9pxAvTNpfPAA==,type:str]
 sops:
     age:
         - enc: |
@@ -58,7 +60,7 @@ sops:
             e9VeAl/f8g3FW4jR3qrYookJi6cbwi05U9lerZUu7IEGLsvkIu3cRw==
             -----END AGE ENCRYPTED FILE-----
           recipient: age14rtd2ct2zmz34mznk2grjqnjc5xpx4qj7jlzcz6gcttjz0zj6ygq4karew
-    lastmodified: "2026-11-08T16:57:54Z"
-    mac: ENC[AES256_GCM,data:Rr17QpP+DxWs4m4CeiFPD/2+vpVxP+BUlOh4iljjrhntmxq9Su3ZDE26IJJHiN8gLlg9oiCu3XQQlTI3Pho/TfbA3khmSNPS8/9nTCoWmcZ7/umv2C7TEzng9QIKObldHtVrWyvvpWnUf56FsdfKTtO+nwfbywanWsRfb/fcpr4=,iv:Wm5e1dC9VtJs4ENpygWAbCWYMKZDTbcjW/p4zgpuQCw=,tag:Bm51YcEYCIOhVTt7K3jl5A==,type:str]
+    lastmodified: "2026-11-15T12:12:19Z"
+    mac: ENC[AES256_GCM,data:ERmaiFY/HqUhLX7b+tQICRxiGU5d5dGs+hcJQ374IAsBiP37IpTBEgVg35Pbw/U1kOVOQedFsITlQ+qZfvIHRZSaR2bZZe84W+7dC3ZJwcZUiqDpb+FFu6ElxJPghKZaJOE4jKdjIEHwrdJnog2cpUNjC7/ZpI+zyEhN3mqkk00=,iv:PZCYXWCZG4m7EPWcdJad6jMUiGAgioBuVCxwUsZVybA=,tag:KBXDj4UtBAymNekNabez+A==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.3

@@ -1,0 +1,35 @@
+- name: Create /opt/arksurvivalascended
+  ansible.builtin.file:
+    path: /opt/arksurvivalascended
+    state: directory
+    mode: '0755'
+
+- name: Create server directories
+  ansible.builtin.file:
+    path: "/mnt/mounted-raid/arksurvivalascended/data/{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: "7777"
+    group: "7777"
+  loop:
+    - server
+    - saves
+    - saves/Config
+    - saves/Config/WindowsServer
+
+- name: Create Docker Compose for ARK
+  ansible.builtin.copy:
+    src: arksurvivalascended/docker-compose.yml
+    dest: '/opt/arksurvivalascended/docker-compose.yml'
+    mode: '0644'
+
+- name: Create .env
+  ansible.builtin.template:
+    src: arksurvivalascended/env.j2
+    dest: /opt/arksurvivalascended/.env
+    mode: "0600"
+
+- name: Run `docker-compose up` for ARK
+  community.docker.docker_compose_v2:
+    project_src: /opt/arksurvivalascended
+

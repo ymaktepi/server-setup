@@ -4,8 +4,8 @@ services:
     hostname: 'satisfactory-server'
     image: 'wolveix/satisfactory-server:latest'
     ports:
-      - '7777:7777/udp'
-      - '7777:7777/tcp'
+      - '7778:7777/udp' # 7777 taken by Ark
+      - '7778:7777/tcp'
     restart: unless-stopped
     volumes:
       - '/mnt/mounted-raid/satisfactory/data:/config'
